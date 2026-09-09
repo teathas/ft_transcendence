@@ -3,3 +3,13 @@
 !.env.example
 
 .DS_Store
+# dependencies / build output
+node_modules/
+.next/
+out/
+build/
+coverage/
+
+# logs
+*.log
+npm-debug.log*
