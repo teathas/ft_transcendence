@@ -3,6 +3,7 @@ import type { z } from "zod";
 import type {
   authResponseSchema,
   loginSchema,
+  registerFormSchema,
   registerSchema,
   userSchema,
   userStatusSchema,
@@ -14,3 +15,4 @@ export type User = z.infer<typeof userSchema>;
 export type AuthResponse = z.infer<typeof authResponseSchema>;
 export type LoginPayload = z.infer<typeof loginSchema>;
 export type RegisterPayload = z.infer<typeof registerSchema>;
+export type RegisterFormValues = z.infer<typeof registerFormSchema>;

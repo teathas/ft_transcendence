@@ -103,3 +103,53 @@
     @apply outline-2 outline-offset-2 outline-ring;
   }
 }
+
+/* Motion tokens. Keyframes live in @theme so Tailwind only emits the ones used. */
+@theme {
+  --animate-fade-up: fade-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-drift: drift 7s ease-in-out infinite;
+  --animate-drift-slow: drift-slow 9s ease-in-out infinite;
+
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes drift {
+    0%,
+    100% {
+      transform: translate(0, 0);
+    }
+    50% {
+      transform: translate(14px, -10px);
+    }
+  }
+
+  @keyframes drift-slow {
+    0%,
+    100% {
+      transform: translate(0, 0);
+    }
+    50% {
+      transform: translate(-12px, 12px);
+    }
+  }
+}
+
+/* Decoration is never worth making someone motion-sick. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
