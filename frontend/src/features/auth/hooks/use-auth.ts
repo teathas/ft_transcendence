@@ -47,12 +47,14 @@ export function useLogin() {
 
 export function useRegister() {
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   return useMutation({
     mutationFn: authApi.register,
     onSuccess: (result: AuthResponse) => {
       tokenStore.set(result.accessToken);
       queryClient.setQueryData(queryKeys.auth.session(), result.user);
+      router.replace("/");
     },
   });
 }

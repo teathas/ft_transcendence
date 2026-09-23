@@ -3,6 +3,7 @@ export { useLogin, useLogout, useRegister, useSession } from "./hooks/use-auth";
 export {
   authResponseSchema,
   loginSchema,
+  registerFormSchema,
   registerSchema,
   userSchema,
   userStatusSchema,
