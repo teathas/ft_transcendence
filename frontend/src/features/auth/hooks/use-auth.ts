@@ -41,7 +41,7 @@ export function useLogin() {
     onSuccess: (result: AuthResponse) => {
       tokenStore.set(result.accessToken);
       queryClient.setQueryData(queryKeys.auth.session(), result.user);
-      router.replace(routes.rooms);
+      router.replace(routes.dashboard);
     },
   });
 }

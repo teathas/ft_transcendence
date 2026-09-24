@@ -11,6 +11,7 @@ export const routes = {
   login: "/login" as Route,
   register: "/register" as Route,
   onboarding: "/onboarding" as Route,
+  dashboard: "/dashboard" as Route,
   rooms: "/rooms" as Route,
   profile: "/profile" as Route,
   room: (code: string) => `/rooms/${code}` as Route,

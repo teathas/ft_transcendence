@@ -74,7 +74,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           >
             <Menu className="size-5" aria-hidden="true" />
           </Button>
-          <Link href={routes.rooms} className="rounded-md" key={pathname}>
+          <Link href={routes.dashboard} className="rounded-md" key={pathname}>
             <BrandWordmark />
           </Link>
         </header>

@@ -1,6 +1,6 @@
 "use client";
 
-import { LayoutGrid, LogOut, Plus, UserRound } from "lucide-react";
+import { Gauge, LayoutGrid, LogOut, Plus, UserRound } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -11,7 +11,7 @@ import { Button, buttonStyles } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { routes } from "@/config/routes";
 import { useLogout, useSession } from "@/features/auth/hooks/use-auth";
-import { useRooms } from "@/features/rooms/hooks/use-rooms";
+import { useRecentRooms } from "@/features/rooms/hooks/use-rooms";
 import { cn } from "@/lib/utils";
 
 function NavLink({
@@ -46,12 +46,12 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
   const { user } = useSession();
   const logout = useLogout();
-  const { data: rooms, isPending } = useRooms();
+  const { data: rooms, isPending } = useRecentRooms();
 
   return (
     <div className="flex h-full flex-col gap-6 p-4">
       <Link
-        href={routes.rooms}
+        href={routes.dashboard}
         onClick={onNavigate}
         className="rounded-md px-1 py-1"
       >
@@ -68,6 +68,15 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
       </Link>
 
       <nav className="flex flex-col gap-1" aria-label="Main">
+        <NavLink
+          href={routes.dashboard}
+          active={pathname === routes.dashboard}
+          onNavigate={onNavigate}
+        >
+          <Gauge className="size-4" aria-hidden="true" />
+          Dashboard
+        </NavLink>
+
         <NavLink
           href={routes.rooms}
           active={pathname === routes.rooms}
@@ -98,7 +107,7 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
               <Skeleton key={index} className="mx-1 h-8" />
             ))}
 
-          {rooms?.slice(0, 6).map((room) => (
+          {rooms?.map((room) => (
             <NavLink
               key={room.id}
               href={routes.room(room.code)}

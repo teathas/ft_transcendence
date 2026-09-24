@@ -11,7 +11,11 @@ export const queryKeys = {
   },
   rooms: {
     all: ["rooms"] as const,
-    list: () => [...queryKeys.rooms.all, "list"] as const,
+    list: (query?: Record<string, unknown>) =>
+      [...queryKeys.rooms.all, "list", query ?? {}] as const,
+    stats: () => [...queryKeys.rooms.all, "stats"] as const,
+    recent: (limit: number) =>
+      [...queryKeys.rooms.all, "recent", limit] as const,
     detail: (code: string) => [...queryKeys.rooms.all, "detail", code] as const,
   },
   users: {

@@ -44,14 +44,26 @@ export function RoomCard({ room }: { room: Room }) {
           <Presentation className="size-5" aria-hidden="true" />
         </span>
 
-        <span className="shrink-0 rounded-md bg-muted px-2 py-0.5 font-mono text-[11px] text-muted-foreground">
-          {room.code}
+        <span className="flex shrink-0 items-center gap-2">
+          {room.status === "archived" && (
+            <span className="rounded-md bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
+              Archived
+            </span>
+          )}
+          <span className="rounded-md bg-muted px-2 py-0.5 font-mono text-[11px] text-muted-foreground">
+            {room.code}
+          </span>
         </span>
       </div>
 
-      <h3 className="leading-snug font-medium text-pretty transition-colors group-hover:text-primary">
-        {room.name}
-      </h3>
+      <div className="flex flex-col gap-1.5">
+        <h3 className="leading-snug font-medium text-pretty transition-colors group-hover:text-primary">
+          {room.name}
+        </h3>
+        <p className="text-xs text-muted-foreground">
+          {room.subject} · @{room.ownerUsername}
+        </p>
+      </div>
 
       <div className="mt-auto flex items-center gap-4 text-xs text-muted-foreground">
         <span className="inline-flex items-center gap-1.5">
