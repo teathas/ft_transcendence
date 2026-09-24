@@ -7,6 +7,8 @@ import { authResponseSchema, userSchema } from "../schemas";
 import type {
   AuthResponse,
   LoginPayload,
+  PasswordChangePayload,
+  ProfilePatch,
   RegisterPayload,
   User,
 } from "../types";
@@ -47,11 +49,23 @@ export const authApi = {
     return parseResponse(userSchema, data, "POST /users/me/avatar");
   },
 
-  async updateProfile(payload: { avatarUrl: string | null }): Promise<User> {
-    if (env.enableMocks) return authMocks.updateProfile(payload.avatarUrl);
+  async updateProfile(payload: ProfilePatch): Promise<User> {
+    if (env.enableMocks) return authMocks.updateProfile(payload);
 
     const { data } = await api.patch("/users/me", payload);
     return parseResponse(userSchema, data, "PATCH /users/me");
+  },
+
+  async changePassword(payload: PasswordChangePayload): Promise<void> {
+    if (env.enableMocks) return authMocks.changePassword(payload);
+
+    await api.patch("/users/me/password", payload);
+  },
+
+  async deleteAccount(): Promise<void> {
+    if (env.enableMocks) return authMocks.deleteAccount();
+
+    await api.delete("/users/me", { skipAuthRefresh: true });
   },
 
   async session(): Promise<User> {

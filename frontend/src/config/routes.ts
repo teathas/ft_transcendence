@@ -12,6 +12,7 @@ export const routes = {
   register: "/register" as Route,
   onboarding: "/onboarding" as Route,
   rooms: "/rooms" as Route,
+  profile: "/profile" as Route,
   room: (code: string) => `/rooms/${code}` as Route,
 
   createRoom: "/register" as Route,

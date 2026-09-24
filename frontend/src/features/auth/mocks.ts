@@ -1,4 +1,11 @@
-import type { AuthResponse, User } from "./types";
+import { ApiError } from "@/lib/api";
+
+import type {
+  AuthResponse,
+  PasswordChangePayload,
+  ProfilePatch,
+  User,
+} from "./types";
 
 /**
  * Stand-in session used while the backend has no auth endpoints.
@@ -30,8 +37,22 @@ export const authMocks = {
       user: { ...MOCK_USER, username },
     }),
 
-  updateProfile: (avatarUrl: string | null) =>
-    settle({ ...MOCK_USER, avatarUrl }),
+  updateProfile: (patch: ProfilePatch) => settle({ ...MOCK_USER, ...patch }),
+
+  changePassword: async ({ currentPassword }: PasswordChangePayload) => {
+    await settle(null, 600);
+    // Gives the error path something to exercise without a backend.
+    if (currentPassword !== "password") {
+      throw new ApiError("Your current password is not correct.", {
+        status: 422,
+        fieldErrors: {
+          currentPassword: ["Your current password is not correct."],
+        },
+      });
+    }
+  },
+
+  deleteAccount: () => settle(undefined, 600),
 
   uploadAvatar: (file: Blob) =>
     settle({ ...MOCK_USER, avatarUrl: URL.createObjectURL(file) }),

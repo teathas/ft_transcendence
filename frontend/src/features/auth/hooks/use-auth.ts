@@ -83,6 +83,24 @@ export function useUploadAvatar() {
   });
 }
 
+export function useChangePassword() {
+  return useMutation({ mutationFn: authApi.changePassword });
+}
+
+export function useDeleteAccount() {
+  const queryClient = useQueryClient();
+  const router = useRouter();
+
+  return useMutation({
+    mutationFn: authApi.deleteAccount,
+    onSuccess: () => {
+      tokenStore.clear();
+      queryClient.clear();
+      router.replace(routes.register);
+    },
+  });
+}
+
 export function useLogout() {
   const queryClient = useQueryClient();
   const router = useRouter();

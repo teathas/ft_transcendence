@@ -31,3 +31,10 @@ export function formatRelativeTime(iso: string, now = Date.now()) {
 
   return formatter.format(Math.round(duration), "year");
 }
+
+/** "12 September 2026". Pinned to "en" for the same reason as above. */
+export function formatDate(iso: string) {
+  return new Intl.DateTimeFormat("en", { dateStyle: "long" }).format(
+    new Date(iso),
+  );
+}

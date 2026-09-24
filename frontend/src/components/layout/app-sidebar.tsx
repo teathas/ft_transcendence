@@ -1,6 +1,6 @@
 "use client";
 
-import { LayoutGrid, LogOut, Plus } from "lucide-react";
+import { LayoutGrid, LogOut, Plus, UserRound } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -76,6 +76,15 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
           <LayoutGrid className="size-4" aria-hidden="true" />
           All rooms
         </NavLink>
+
+        <NavLink
+          href={routes.profile}
+          active={pathname === routes.profile}
+          onNavigate={onNavigate}
+        >
+          <UserRound className="size-4" aria-hidden="true" />
+          Profile
+        </NavLink>
       </nav>
 
       <div className="flex min-h-0 flex-1 flex-col gap-2">
@@ -107,7 +116,11 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
       </div>
 
       <div className="flex flex-col gap-3 border-t pt-4">
-        <div className="flex items-center gap-2.5 px-1">
+        <Link
+          href={routes.profile}
+          onClick={onNavigate}
+          className="flex items-center gap-2.5 rounded-lg px-1 py-1 transition-colors hover:bg-accent"
+        >
           <Avatar
             src={user?.avatarUrl}
             name={user?.username ?? "?"}
@@ -121,7 +134,7 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
               {user?.email ?? "No session"}
             </span>
           </span>
-        </div>
+        </Link>
 
         <div className="flex items-center justify-between gap-2">
           <ThemeToggle />
