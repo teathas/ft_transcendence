@@ -9,6 +9,11 @@ export const queryKeys = {
     all: ["auth"] as const,
     session: () => [...queryKeys.auth.all, "session"] as const,
   },
+  rooms: {
+    all: ["rooms"] as const,
+    list: () => [...queryKeys.rooms.all, "list"] as const,
+    detail: (code: string) => [...queryKeys.rooms.all, "detail", code] as const,
+  },
   users: {
     all: ["users"] as const,
     list: (filters?: Record<string, unknown>) =>

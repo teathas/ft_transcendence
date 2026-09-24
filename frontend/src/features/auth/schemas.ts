@@ -1,16 +1,17 @@
 import { z } from "zod";
 
-export const userStatusSchema = z.enum(["online", "offline", "away"]);
+// Mirrors the Prisma `User` model and its `UserStatus` enum exactly.
+export const userStatusSchema = z.enum(["ONLINE", "OFFLINE"]);
 
 export const userSchema = z.object({
-  id: z.string(),
-  username: z.string(),
-  displayName: z.string(),
+  id: z.uuid(),
   email: z.email(),
+  username: z.string(),
   avatarUrl: z.url().nullable(),
   status: userStatusSchema,
-  twoFactorEnabled: z.boolean(),
+  lastSeenAt: z.iso.datetime().nullable(),
   createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
 });
 
 /** Shape returned by /auth/login and /auth/register. */

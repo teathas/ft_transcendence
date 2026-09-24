@@ -1,16 +1,19 @@
 import type { Route } from "next";
 
 /**
- * Product entry points.
+ * Every path the UI navigates to, in one place.
  *
- * Rooms have no routes of their own yet, so both room CTAs funnel through
- * auth. When `/rooms/new` and `/rooms/join` land, change them here only —
- * nothing else in the UI hardcodes these paths.
+ * The landing CTAs still point at auth because you need an account before you
+ * can open a room; once that changes, change it here only.
  */
 export const routes = {
   home: "/" as Route,
   login: "/login" as Route,
   register: "/register" as Route,
+  onboarding: "/onboarding" as Route,
+  rooms: "/rooms" as Route,
+  room: (code: string) => `/rooms/${code}` as Route,
+
   createRoom: "/register" as Route,
   joinRoom: "/login" as Route,
 } as const;
