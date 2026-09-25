@@ -135,7 +135,6 @@ export function useZodForm<S extends ZodType, V extends FieldValues>({
     (event: React.FormEvent<HTMLFormElement>) => {
       event.preventDefault();
       setSubmitAttempted(true);
-      setEditedSinceSubmit({});
 
       const result = schema.safeParse(values);
       if (!result.success) {
@@ -148,6 +147,9 @@ export function useZodForm<S extends ZodType, V extends FieldValues>({
         return;
       }
 
+      // Only once the request is actually going out: any server error still on
+      // screen belongs to the previous attempt and is about to be replaced.
+      setEditedSinceSubmit({});
       onSubmit(result.data);
     },
     [schema, values, onSubmit, schemaErrors, fieldNames, fieldId],

@@ -18,6 +18,10 @@ const envSchema = z.object({
       error: "NEXT_PUBLIC_WS_URL must be a ws(s) URL",
     })
     .default("ws://localhost:8000"),
+
+  // Serves rooms from `src/features/rooms/mocks.ts` instead of the API, so the
+  // UI is usable before the backend exists. Unset in production.
+  NEXT_PUBLIC_ENABLE_MOCKS: z.stringbool().default(false),
 });
 
 // Next inlines `NEXT_PUBLIC_*` at build time, so each variable has to be read
@@ -25,6 +29,7 @@ const envSchema = z.object({
 const parsed = envSchema.safeParse({
   NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
   NEXT_PUBLIC_WS_URL: process.env.NEXT_PUBLIC_WS_URL,
+  NEXT_PUBLIC_ENABLE_MOCKS: process.env.NEXT_PUBLIC_ENABLE_MOCKS,
 });
 
 if (!parsed.success) {
@@ -38,6 +43,8 @@ export const env = {
   apiUrl: parsed.data.NEXT_PUBLIC_API_URL,
   /** Base URL of the realtime gateway. */
   wsUrl: parsed.data.NEXT_PUBLIC_WS_URL,
+  /** True while the frontend serves its own mock rooms. */
+  enableMocks: parsed.data.NEXT_PUBLIC_ENABLE_MOCKS,
   isProduction: process.env.NODE_ENV === "production",
   isDevelopment: process.env.NODE_ENV === "development",
 } as const;

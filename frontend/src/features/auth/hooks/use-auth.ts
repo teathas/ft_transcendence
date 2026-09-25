@@ -3,6 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 
+import { routes } from "@/config/routes";
 import { isApiError, tokenStore } from "@/lib/api";
 import { queryKeys } from "@/lib/query/keys";
 
@@ -40,7 +41,7 @@ export function useLogin() {
     onSuccess: (result: AuthResponse) => {
       tokenStore.set(result.accessToken);
       queryClient.setQueryData(queryKeys.auth.session(), result.user);
-      router.replace("/");
+      router.replace(routes.dashboard);
     },
   });
 }
@@ -54,7 +55,48 @@ export function useRegister() {
     onSuccess: (result: AuthResponse) => {
       tokenStore.set(result.accessToken);
       queryClient.setQueryData(queryKeys.auth.session(), result.user);
-      router.replace("/");
+      router.replace(routes.onboarding);
+    },
+  });
+}
+
+export function useUpdateProfile() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: authApi.updateProfile,
+    onSuccess: (user) => {
+      queryClient.setQueryData(queryKeys.auth.session(), user);
+    },
+  });
+}
+
+export function useUploadAvatar() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ file, filename }: { file: Blob; filename: string }) =>
+      authApi.uploadAvatar(file, filename),
+    onSuccess: (user) => {
+      queryClient.setQueryData(queryKeys.auth.session(), user);
+    },
+  });
+}
+
+export function useChangePassword() {
+  return useMutation({ mutationFn: authApi.changePassword });
+}
+
+export function useDeleteAccount() {
+  const queryClient = useQueryClient();
+  const router = useRouter();
+
+  return useMutation({
+    mutationFn: authApi.deleteAccount,
+    onSuccess: () => {
+      tokenStore.clear();
+      queryClient.clear();
+      router.replace(routes.register);
     },
   });
 }
@@ -69,7 +111,7 @@ export function useLogout() {
     onSettled: () => {
       tokenStore.clear();
       queryClient.clear();
-      router.replace("/login");
+      router.replace(routes.login);
     },
   });
 }
