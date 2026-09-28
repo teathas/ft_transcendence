@@ -26,6 +26,8 @@ services:
       PORT: ${BACKEND_PORT}
       DATABASE_URL: ${DATABASE_URL}
       UPLOAD_DIR: ${UPLOAD_DIR}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN}
     ports:
       - "${BACKEND_PORT}:${BACKEND_PORT}"
     depends_on:
