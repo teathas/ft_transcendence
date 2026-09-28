@@ -1,20 +1,32 @@
-import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, HttpStatus, Req, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { Request } from 'express';
+import { extractBearerToken } from './utils/extract-token.uitl';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+	constructor(private authService: AuthService) { }
 
-  @Post('register')
-  async register(@Body() dto: RegisterDto) {
-    return this.authService.register(dto);
-  }
+	@Post('register')
+	async register(@Body() dto: RegisterDto) {
+		return this.authService.register(dto);
+	}
 
-  @Post('login')
-  @HttpCode(HttpStatus.OK)
-  async login(@Body() dto: LoginDto) {
-	return this.authService.login(dto);
-  }
+	@Post('login')
+	@HttpCode(HttpStatus.OK)
+	async login(@Body() dto: LoginDto) {
+		return this.authService.login(dto);
+	}
+
+	@Post('logout')
+	@HttpCode(HttpStatus.OK)
+	async logout(@Req() request: any) {
+		const token = extractBearerToken(request);
+		if (!token) {
+			throw new UnauthorizedException('No token provided');
+		}
+		return this.authService.logout(token);
+	}
 }
