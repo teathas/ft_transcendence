@@ -28,3 +28,9 @@ enum UserStatus {
   ONLINE
   OFFLINE
 }
+
+model RevokedToken {
+	jti			String		@id
+	expiresAt	DateTime
+	createdAt	DateTime	@default(now())
+}
