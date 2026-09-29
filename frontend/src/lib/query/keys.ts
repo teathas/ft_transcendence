@@ -9,6 +9,15 @@ export const queryKeys = {
     all: ["auth"] as const,
     session: () => [...queryKeys.auth.all, "session"] as const,
   },
+  rooms: {
+    all: ["rooms"] as const,
+    list: (query?: Record<string, unknown>) =>
+      [...queryKeys.rooms.all, "list", query ?? {}] as const,
+    stats: () => [...queryKeys.rooms.all, "stats"] as const,
+    recent: (limit: number) =>
+      [...queryKeys.rooms.all, "recent", limit] as const,
+    detail: (code: string) => [...queryKeys.rooms.all, "detail", code] as const,
+  },
   users: {
     all: ["users"] as const,
     list: (filters?: Record<string, unknown>) =>

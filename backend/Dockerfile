@@ -21,7 +21,8 @@ RUN npm ci --omit=dev
 COPY --from=builder --chown=node:node /app/dist ./dist
 
 ARG UPLOAD_DIR=/app/uploads
-RUN mkdir -p /app/uploads && chown node:node /app/uploads
+ENV UPLOAD_DIR=${UPLOAD_DIR}
+RUN mkdir -p "${UPLOAD_DIR}" && chown node:node "${UPLOAD_DIR}"
 
 USER node
 EXPOSE 3001
