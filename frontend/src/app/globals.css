@@ -34,6 +34,9 @@
   --border: oklch(0.929 0.013 256);
   --input: oklch(0.929 0.013 256);
   --ring: oklch(0.585 0.2 277);
+
+  /* Chart hue, validated against the light surface (OKLCH L band 0.43–0.77). */
+  --chart-1: oklch(0.585 0.2 277);
 }
 
 .dark {
@@ -58,6 +61,9 @@
   --border: oklch(1 0 0 / 12%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.68 0.16 277);
+
+  /* Stepped down from --primary: the dark band tops out at L 0.67. */
+  --chart-1: oklch(0.655 0.17 277);
 }
 
 @theme inline {
@@ -79,6 +85,7 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);

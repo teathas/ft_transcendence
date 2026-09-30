@@ -21,6 +21,7 @@ model Room {
   name       String
   subject    String
   visibility Visibility  @default(PUBLIC)
+  inviteCode String    @unique
 
   ownerId    String
   owner       User       @relation(fields: [ownerId], references: [id])
@@ -33,6 +34,7 @@ model User {
   username     String   @unique
   passwordHash String
   avatarUrl    String?
+  bio          String?
   status       UserStatus @default(OFFLINE)
   lastSeenAt   DateTime?
   createdAt    DateTime @default(now())

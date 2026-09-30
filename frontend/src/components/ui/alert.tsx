@@ -4,7 +4,9 @@ export function Alert({
   className,
   variant = "default",
   ...props
-}: React.ComponentProps<"div"> & { variant?: "default" | "destructive" }) {
+}: React.ComponentProps<"div"> & {
+  variant?: "default" | "destructive" | "success";
+}) {
   return (
     <div
       role="alert"

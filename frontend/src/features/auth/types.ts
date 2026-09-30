@@ -16,3 +16,15 @@ export type AuthResponse = z.infer<typeof authResponseSchema>;
 export type LoginPayload = z.infer<typeof loginSchema>;
 export type RegisterPayload = z.infer<typeof registerSchema>;
 export type RegisterFormValues = z.infer<typeof registerFormSchema>;
+
+/** Any subset of the fields `PATCH /users/me` accepts. */
+export type ProfilePatch = {
+  username?: string;
+  email?: string;
+  avatarUrl?: string | null;
+};
+
+export type PasswordChangePayload = {
+  currentPassword: string;
+  newPassword: string;
+};

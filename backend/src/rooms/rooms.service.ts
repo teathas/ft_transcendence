@@ -6,7 +6,7 @@ import { randomBytes } from 'crypto';
 @Injectable()
 export class RoomsService {
     constructor(private prisma: PrismaService) {}
-    async create(dto: CreateRoomDto, ownerId: number) {
+    async create(dto: CreateRoomDto, ownerId: string) {
     const inviteCode = randomBytes(4).toString('hex'); 
     return this.prisma.room.create({
         data: {
