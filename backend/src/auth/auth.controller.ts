@@ -4,16 +4,19 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { Request } from 'express';
 import { extractBearerToken } from './utils/extract-token.uitl';
+import { Public } from './decorators/public.decorator'
 
 @Controller('auth')
 export class AuthController {
 	constructor(private authService: AuthService) { }
 
+	@Public()
 	@Post('register')
 	async register(@Body() dto: RegisterDto) {
 		return this.authService.register(dto);
 	}
 
+	@Public()
 	@Post('login')
 	@HttpCode(HttpStatus.OK)
 	async login(@Body() dto: LoginDto) {
