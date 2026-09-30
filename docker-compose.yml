@@ -16,6 +16,23 @@ services:
       timeout: 5s
       retries: 10
 
+
+
+  migrate:
+    build:
+      context: ./backend
+      target: builder
+    command: ["npx", "prisma", "migrate", "deploy"]
+    restart: "no"
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+    depends_on:
+      pgdb:
+        condition: service_healthy
+
+
+
+
   backend:
     build:
       context: ./backend
@@ -31,6 +48,8 @@ services:
     depends_on:
       pgdb:
         condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:$${PORT}/ > /dev/null"]
       interval: 10s
@@ -39,6 +58,8 @@ services:
       start_period: 10s
     volumes:
       - uploads:${UPLOAD_DIR}
+
+
 
   frontend:
     build:
@@ -60,6 +81,8 @@ services:
       timeout: 5s
       retries: 5
       start_period: 10s
+
+
 
 volumes:
   pgdata:
