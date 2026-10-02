@@ -57,4 +57,13 @@ export class UsersService {
 		return safeUser;
 	}
 
+	async updateAvatar(id: string, avatarUrl: string) {
+		const updated = await this.prisma.user.update({
+			where: { id },
+			data: { avatarUrl },
+		});
+
+		const { passwordHash: _, ...safeUser } = updated;
+		return safeUser;
+	}
 }
