@@ -1,7 +1,12 @@
 import { MOCK_USER } from "@/features/auth/mocks";
+import { ApiError } from "@/lib/api";
+
+import { MOCK_FILES, MOCK_MESSAGES, MOCK_PARTICIPANTS } from "./room-mocks";
 
 import type {
   CreateRoomPayload,
+  Message,
+  RoomFile,
   JoinRoomPayload,
   Room,
   RoomPage,
@@ -260,6 +265,14 @@ export function selectRooms(rooms: Room[], query: RoomQuery): RoomPage {
 }
 
 export const roomsMocks = {
+  get: (code: string) => {
+    const room = MOCK_ROOMS.find((candidate) => candidate.code === code);
+    if (!room) {
+      throw new ApiError(`No room with the code ${code}.`, { status: 404 });
+    }
+    return settle(room);
+  },
+
   stats: () =>
     settle({
       total: MOCK_ROOMS.length,
@@ -303,5 +316,55 @@ export const roomsMocks = {
         createdAt: new Date().toISOString(),
       },
     );
+  },
+};
+
+/** Room-detail panels. Chat is in-memory, so a sent message sticks per tab. */
+const sentMessages: Message[] = [];
+const uploadedFiles: RoomFile[] = [];
+
+export const roomDetailMocks = {
+  participants: () => settle(MOCK_PARTICIPANTS, 300),
+  files: () => settle([...MOCK_FILES, ...uploadedFiles], 300),
+  messages: () => settle([...MOCK_MESSAGES, ...sentMessages], 300),
+
+  uploadFile: (file: File) => {
+    const extension = file.name.split(".").pop()?.toLowerCase() ?? "";
+    const kind: RoomFile["kind"] = [
+      "png",
+      "jpg",
+      "jpeg",
+      "gif",
+      "webp",
+      "svg",
+    ].includes(extension)
+      ? "image"
+      : extension === "pdf"
+        ? "pdf"
+        : "document";
+
+    const uploaded: RoomFile = {
+      id: crypto.randomUUID(),
+      name: file.name,
+      sizeBytes: file.size,
+      kind,
+      uploadedBy: MOCK_USER.username,
+      uploadedAt: new Date().toISOString(),
+    };
+    uploadedFiles.push(uploaded);
+    return settle(uploaded, 500);
+  },
+
+  sendMessage: (body: string) => {
+    const message: Message = {
+      id: crypto.randomUUID(),
+      authorId: MOCK_USER.id,
+      authorUsername: MOCK_USER.username,
+      authorColor: MOCK_PARTICIPANTS[0].color,
+      body,
+      sentAt: new Date().toISOString(),
+    };
+    sentMessages.push(message);
+    return settle(message, 200);
   },
 };
