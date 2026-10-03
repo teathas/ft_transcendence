@@ -1,9 +1,8 @@
 
-import { Controller, Post, Body, Req, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, Req, UseGuards,Param } from '@nestjs/common';
 import { RoomsService } from './rooms.service';
 import { CreateRoomDto } from './dto/create-room.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { Request } from 'express';
 
 @Controller('rooms')
 export class RoomsController {
@@ -14,5 +13,11 @@ export class RoomsController {
     {
         const ownerId = req.user.sub;
         return this.roomsService.create(dto, ownerId);
+    }
+    @Post(':roomId/join')
+    async join(@Param('roomId') roomId: string,@Req() req: any)
+    {
+        const userId = req.user.sub;
+        return this.roomsService.join(roomId, userId);
     }
 }
