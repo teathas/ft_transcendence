@@ -9,8 +9,8 @@ generator client {
 }
 
 datasource db {
-  provider = "po
-
+  provider = "postgresql"
+}
 enum Visibility {
   PUBLIC
   PRIVATE
@@ -62,10 +62,6 @@ model RoomMember {
 
   user User @relation(fields: [userId], references: [id])
   room Room @relation(fields: [roomId], references: [id])
-
-  @@id([userId, roomId])
-}
-fields: [roomId], references: [id])
 
   @@id([userId, roomId])
 }

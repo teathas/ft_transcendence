@@ -1,6 +1,6 @@
-import { Injectable,NotFoundException } from '@nestjs/common';
+import { Injectable,NotFoundException,ForbiddenException,ConflictException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateRoomDto } from './dto/create-room.dto';
+import { CreateRoomDto,Visibility  } from './dto/create-room.dto';
 import { randomBytes } from 'crypto';
 
 @Injectable()
@@ -26,8 +26,18 @@ export class RoomsService {
     if(!existing)
         throw new NotFoundException('test');
 
-    if(existing.visibility != Visibility.PUBLIC) 
+    if(existing.visibility !== Visibility.PUBLIC) 
+        throw new ForbiddenException('test');
+    const membership = await this.prisma.roomMember.findUnique({
+        where: {
+            userId_roomId: {
+                userId,
+                roomId,
+            },
+        },
+    });
+    if(membership)
+        throw new ConflictException('User is already a member of this room');
 
-    if()
   }
 }
