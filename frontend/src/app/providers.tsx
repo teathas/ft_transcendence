@@ -7,7 +7,9 @@ import { useRouter } from "next/navigation";
 
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { routes } from "@/config/routes";
-import { setUnauthorizedHandler } from "@/lib/api";
+import { sessionCache } from "@/features/auth/session-cache";
+import { setUnauthorizedHandler, tokenStore } from "@/lib/api";
+import { queryKeys } from "@/lib/query/keys";
 import { getQueryClient } from "@/lib/query/client";
 
 export function Providers({ children }: { children: React.ReactNode }) {
@@ -17,11 +19,24 @@ export function Providers({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Send the user to /login once a token refresh has definitively failed.
     setUnauthorizedHandler(() => {
+      tokenStore.clear();
+      sessionCache.clear();
       queryClient.clear();
       router.replace(routes.login);
     });
     return () => setUnauthorizedHandler(null);
   }, [queryClient, router]);
+
+  // Seeded after mount, not during render: the server has no localStorage, so
+  // priming the cache earlier would make the first client render disagree with
+  // the server's HTML.
+  useEffect(() => {
+    if (!tokenStore.get()) return;
+    const cached = sessionCache.read();
+    if (cached) {
+      queryClient.setQueryData(queryKeys.auth.session(), cached);
+    }
+  }, [queryClient]);
 
   return (
     <ThemeProvider>

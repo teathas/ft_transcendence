@@ -57,6 +57,17 @@ export const roomMemberSchema = z.object({
   joinedAt: z.iso.datetime(),
 });
 
+/** Mirrors the fields `PATCH /rooms/:id` is expected to accept. */
+export const updateRoomSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(3, "Room name must be at least 3 characters")
+    .max(60, "Room name must be at most 60 characters"),
+  subject: z.string().trim().min(1, "Pick a subject"),
+  visibility: visibilitySchema,
+});
+
 /**
  * The API joins by room id, not by invite code — there is no lookup-by-code
  * route — so the form has to ask for the id. The code is only required for a

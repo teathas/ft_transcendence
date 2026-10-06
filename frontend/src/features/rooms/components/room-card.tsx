@@ -4,6 +4,8 @@ import { Clock, Presentation, Users } from "lucide-react";
 import Link from "next/link";
 
 import { routes } from "@/config/routes";
+
+import { RoomActions } from "./room-actions";
 import { formatRelativeTime } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
@@ -26,15 +28,23 @@ function accentFor(code: string) {
 
 export function RoomCard({ room }: { room: Room }) {
   return (
-    <Link
-      href={routes.room(room.code)}
+    <div
       className={cn(
         "group relative flex flex-col gap-4 rounded-xl border bg-card p-5",
         "transition-all duration-200 hover:border-primary/40",
         "hover:shadow-md hover:shadow-black/[0.05] dark:hover:shadow-black/25",
       )}
     >
-      <div className="flex items-start justify-between gap-3">
+      {/* Covers the card so the whole surface is clickable, while leaving the
+          actions menu above it — a <button> inside an <a> is invalid. */}
+      <Link
+        href={routes.room(room.code)}
+        className="absolute inset-0 rounded-xl"
+      >
+        <span className="sr-only">Open {room.name}</span>
+      </Link>
+
+      <div className="pointer-events-none relative flex items-start justify-between gap-3">
         <span
           className={cn(
             "flex size-10 shrink-0 items-center justify-center rounded-lg",
@@ -44,7 +54,8 @@ export function RoomCard({ room }: { room: Room }) {
           <Presentation className="size-5" aria-hidden="true" />
         </span>
 
-        <span className="flex shrink-0 items-center gap-2">
+        <span className="pointer-events-auto flex shrink-0 items-center gap-2">
+          <RoomActions room={room} />
           {room.status === "archived" && (
             <span className="rounded-md bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
               Archived
@@ -56,7 +67,7 @@ export function RoomCard({ room }: { room: Room }) {
         </span>
       </div>
 
-      <div className="flex flex-col gap-1.5">
+      <div className="pointer-events-none relative flex flex-col gap-1.5">
         <h3 className="leading-snug font-medium text-pretty transition-colors group-hover:text-primary">
           {room.name}
         </h3>
@@ -65,7 +76,7 @@ export function RoomCard({ room }: { room: Room }) {
         </p>
       </div>
 
-      <div className="mt-auto flex items-center gap-4 text-xs text-muted-foreground">
+      <div className="pointer-events-none relative mt-auto flex items-center gap-4 text-xs text-muted-foreground">
         <span className="inline-flex items-center gap-1.5">
           <Users className="size-3.5" aria-hidden="true" />
           {room.participantCount}{" "}
@@ -78,6 +89,6 @@ export function RoomCard({ room }: { room: Room }) {
           </span>
         )}
       </div>
-    </Link>
+    </div>
   );
 }

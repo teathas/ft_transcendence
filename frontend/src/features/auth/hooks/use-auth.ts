@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 
@@ -8,6 +9,7 @@ import { isApiError, tokenStore } from "@/lib/api";
 import { queryKeys } from "@/lib/query/keys";
 
 import { authApi } from "../api/auth.api";
+import { sessionCache } from "../session-cache";
 import type { AuthResponse } from "../types";
 
 /** Current user, or `undefined` while loading / when signed out. */
@@ -19,6 +21,11 @@ export function useSession() {
     retry: false,
     staleTime: 5 * 60_000,
   });
+
+  // Keep the cached copy in step with the server's answer.
+  useEffect(() => {
+    if (query.data) sessionCache.write(query.data);
+  }, [query.data]);
 
   return {
     user: query.data,
@@ -38,6 +45,7 @@ function useAuthSuccess() {
 
   return (result: AuthResponse, destination: string) => {
     tokenStore.set(result.accessToken);
+    sessionCache.write(result.user);
     queryClient.setQueryData(queryKeys.auth.session(), result.user);
     router.replace(destination as Parameters<typeof router.replace>[0]);
   };
@@ -68,6 +76,7 @@ export function useUploadAvatar() {
     mutationFn: ({ file, filename }: { file: Blob; filename: string }) =>
       authApi.uploadAvatar(file, filename),
     onSuccess: (user) => {
+      sessionCache.write(user);
       queryClient.setQueryData(queryKeys.auth.session(), user);
     },
   });
@@ -79,6 +88,7 @@ export function useUpdateProfile() {
   return useMutation({
     mutationFn: authApi.updateProfile,
     onSuccess: (user) => {
+      sessionCache.write(user);
       queryClient.setQueryData(queryKeys.auth.session(), user);
     },
   });
@@ -93,6 +103,7 @@ export function useLogout() {
     // Drop local state whether or not the server call succeeded.
     onSettled: () => {
       tokenStore.clear();
+      sessionCache.clear();
       queryClient.clear();
       router.replace(routes.login);
     },

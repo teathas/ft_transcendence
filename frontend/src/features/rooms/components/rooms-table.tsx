@@ -15,6 +15,7 @@ import { formatRelativeTime } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 import type { Room } from "../types";
+import { RoomActions } from "./room-actions";
 
 export function RoomsTable({ rooms }: { rooms: Room[] }) {
   return (
@@ -33,6 +34,9 @@ export function RoomsTable({ rooms }: { rooms: Room[] }) {
             Last active
           </TableHeaderCell>
           <TableHeaderCell>Status</TableHeaderCell>
+          <TableHeaderCell>
+            <span className="sr-only">Actions</span>
+          </TableHeaderCell>
         </TableRow>
       </TableHead>
 
@@ -86,6 +90,10 @@ export function RoomsTable({ rooms }: { rooms: Room[] }) {
                 />
                 {room.status === "active" ? "Active" : "Archived"}
               </span>
+            </TableCell>
+
+            <TableCell className="text-right">
+              <RoomActions room={room} />
             </TableCell>
           </TableRow>
         ))}

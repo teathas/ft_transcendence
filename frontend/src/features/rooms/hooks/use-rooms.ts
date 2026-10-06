@@ -12,7 +12,7 @@ import { routes } from "@/config/routes";
 import { queryKeys } from "@/lib/query/keys";
 
 import { roomsApi } from "../api/rooms.api";
-import type { RoomQuery } from "../types";
+import type { RoomQuery, UpdateRoomPayload } from "../types";
 
 export const DEFAULT_ROOM_QUERY: RoomQuery = {
   search: "",
@@ -58,6 +58,29 @@ export function useCreateRoom() {
       void queryClient.invalidateQueries({ queryKey: queryKeys.rooms.all });
       // `inviteCode` is what people share, so it is what the URL carries.
       router.push(routes.room(room.inviteCode));
+    },
+  });
+}
+
+export function useUpdateRoom() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, patch }: { id: string; patch: UpdateRoomPayload }) =>
+      roomsApi.update(id, patch),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.rooms.all });
+    },
+  });
+}
+
+export function useDeleteRoom() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: roomsApi.remove,
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.rooms.all });
     },
   });
 }

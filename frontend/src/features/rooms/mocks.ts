@@ -5,6 +5,7 @@ import { MOCK_FILES, MOCK_MESSAGES, MOCK_PARTICIPANTS } from "./room-mocks";
 
 import type {
   CreateRoomPayload,
+  UpdateRoomPayload,
   Message,
   RoomFile,
   JoinRoomPayload,
@@ -210,7 +211,19 @@ const EXTRA_ROOMS: Room[] = VARIANTS.map(([name, subject, prefix], index) => {
   } satisfies Room;
 });
 
+/**
+ * Mutable on purpose: create, update and delete act on this array so the whole
+ * CRUD is exercisable before the backend exposes the routes.
+ */
 export const MOCK_ROOMS: Room[] = [...CURATED_ROOMS, ...EXTRA_ROOMS];
+
+function findRoom(id: string) {
+  const index = MOCK_ROOMS.findIndex((room) => room.id === id);
+  if (index === -1) {
+    throw new ApiError(`No room with the id ${id}.`, { status: 404 });
+  }
+  return index;
+}
 
 /** A touch of latency, so loading states are exercised rather than skipped. */
 function settle<T>(value: T, ms = 400): Promise<T> {
@@ -286,8 +299,8 @@ export const roomsMocks = {
 
   list: (query: RoomQuery) => settle(selectRooms(MOCK_ROOMS, query)),
 
-  create: ({ name, subject }: CreateRoomPayload) =>
-    settle<Room>({
+  create: ({ name, subject }: CreateRoomPayload) => {
+    const room: Room = {
       id: crypto.randomUUID(),
       code: codeFrom(name),
       name,
@@ -298,7 +311,21 @@ export const roomsMocks = {
       ownerUsername: MOCK_USER.username,
       lastActiveAt: new Date().toISOString(),
       createdAt: new Date().toISOString(),
-    }),
+    };
+    MOCK_ROOMS.unshift(room);
+    return settle(room);
+  },
+
+  update: (id: string, patch: UpdateRoomPayload) => {
+    const index = findRoom(id);
+    MOCK_ROOMS[index] = { ...MOCK_ROOMS[index], ...patch };
+    return settle(MOCK_ROOMS[index]);
+  },
+
+  remove: (id: string) => {
+    MOCK_ROOMS.splice(findRoom(id), 1);
+    return settle(undefined);
+  },
 
   join: ({ roomId }: JoinRoomPayload) => {
     const known = MOCK_ROOMS.find((room) => room.id === roomId);

@@ -27,6 +27,7 @@ import type {
   RoomMember,
   RoomQuery,
   RoomStats,
+  UpdateRoomPayload,
 } from "../types";
 
 /**
@@ -125,6 +126,19 @@ export const roomsApi = {
 
     const { data } = await api.post("/rooms", payload);
     return parseResponse(apiRoomSchema, data, "POST /rooms");
+  },
+
+  async update(id: string, payload: UpdateRoomPayload): Promise<Room> {
+    if (env.enableMocks) return roomsMocks.update(id, payload);
+
+    const { data } = await api.patch(`/rooms/${id}`, payload);
+    return parseResponse(roomSchema, data, "PATCH /rooms/:id");
+  },
+
+  async remove(id: string): Promise<void> {
+    if (env.enableMocks) return roomsMocks.remove(id);
+
+    await api.delete(`/rooms/${id}`);
   },
 
   async join(payload: JoinRoomPayload): Promise<RoomMember> {
