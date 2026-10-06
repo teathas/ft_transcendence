@@ -27,7 +27,7 @@ export function AccountForm({ user }: { user: User }) {
 
   const form = useZodForm({
     schema: accountSchema,
-    initialValues: { username: user.username, email: user.email },
+    initialValues: { username: user.username, bio: user.bio ?? "" },
     externalErrors: apiError?.fieldErrors,
     onSubmit: (values) => {
       if (isSubmitting) return;
@@ -37,7 +37,7 @@ export function AccountForm({ user }: { user: User }) {
 
   const isUnchanged =
     form.values.username.trim() === user.username &&
-    form.values.email.trim() === user.email;
+    form.values.bio.trim() === (user.bio ?? "");
 
   return (
     <SectionCard
@@ -68,22 +68,38 @@ export function AccountForm({ user }: { user: User }) {
               <Input
                 {...form.getFieldProps("username")}
                 autoComplete="username"
+                maxLength={20}
               />
+              <FieldDescription>Between 3 and 20 characters.</FieldDescription>
               <FieldError {...form.getErrorProps("username")} />
             </Field>
 
             <Field>
-              <FieldLabel {...form.getLabelProps("email")}>Email</FieldLabel>
+              <FieldLabel {...form.getLabelProps("bio")}>Bio</FieldLabel>
               <Input
-                {...form.getFieldProps("email")}
-                type="email"
-                inputMode="email"
+                {...form.getFieldProps("bio")}
+                maxLength={280}
+                placeholder="Maths teacher, fond of a well-drawn parabola."
+              />
+              <FieldDescription>
+                Optional, up to 280 characters.
+              </FieldDescription>
+              <FieldError {...form.getErrorProps("bio")} />
+            </Field>
+
+            {/* The API has no route to change an email address. */}
+            <Field>
+              <FieldLabel htmlFor="profile-email">Email</FieldLabel>
+              <Input
+                id="profile-email"
+                value={user.email}
+                readOnly
+                disabled
                 autoComplete="email"
               />
               <FieldDescription>
-                Used to sign in and to recover your account.
+                Used to sign in. Contact an administrator to change it.
               </FieldDescription>
-              <FieldError {...form.getErrorProps("email")} />
             </Field>
 
             <Button

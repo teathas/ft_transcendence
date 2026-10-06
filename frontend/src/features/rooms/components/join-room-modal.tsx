@@ -32,7 +32,7 @@ export function JoinRoomModal({
 
   const form = useZodForm({
     schema: joinRoomSchema,
-    initialValues: { code: "" },
+    initialValues: { roomId: "", inviteCode: "" },
     externalErrors: apiError?.fieldErrors,
     onSubmit: (values) => {
       if (isSubmitting) return;
@@ -45,7 +45,7 @@ export function JoinRoomModal({
       open={open}
       onClose={onClose}
       title="Join a room"
-      description="Enter the code someone shared with you."
+      description="Paste the room ID the host shared with you."
     >
       <form onSubmit={form.handleSubmit} noValidate>
         <fieldset disabled={isSubmitting}>
@@ -57,20 +57,36 @@ export function JoinRoomModal({
             )}
 
             <Field>
-              <FieldLabel {...form.getLabelProps("code")}>Room code</FieldLabel>
+              <FieldLabel {...form.getLabelProps("roomId")}>Room ID</FieldLabel>
               <Input
-                {...form.getFieldProps("code")}
-                placeholder="ALG-4271"
-                autoCapitalize="characters"
+                {...form.getFieldProps("roomId")}
+                placeholder="3f1c9a20-0001-4d7a-9f10-7c2b5e8a1d40"
                 autoComplete="off"
                 spellCheck={false}
-                className="font-mono tracking-wider uppercase"
+                className="font-mono text-xs"
                 autoFocus
               />
               <FieldDescription>
-                Codes look like three letters, a dash and four digits.
+                The API joins by room ID, not by code — ask the host for it.
               </FieldDescription>
-              <FieldError {...form.getErrorProps("code")} />
+              <FieldError {...form.getErrorProps("roomId")} />
+            </Field>
+
+            <Field>
+              <FieldLabel {...form.getLabelProps("inviteCode")}>
+                Invite code
+              </FieldLabel>
+              <Input
+                {...form.getFieldProps("inviteCode")}
+                placeholder="a1b2c3d4"
+                autoComplete="off"
+                spellCheck={false}
+                className="font-mono"
+              />
+              <FieldDescription>
+                Only needed for a private room.
+              </FieldDescription>
+              <FieldError {...form.getErrorProps("inviteCode")} />
             </Field>
 
             <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">

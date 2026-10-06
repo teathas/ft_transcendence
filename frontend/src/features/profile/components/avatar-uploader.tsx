@@ -1,13 +1,10 @@
 "use client";
 
 import { useId, useState } from "react";
-import { Camera, LoaderCircle, X } from "lucide-react";
+import { Camera, LoaderCircle } from "lucide-react";
 
 import { Avatar } from "@/components/ui/avatar";
-import {
-  useUpdateProfile,
-  useUploadAvatar,
-} from "@/features/auth/hooks/use-auth";
+import { useUploadAvatar } from "@/features/auth/hooks/use-auth";
 import { isApiError } from "@/lib/api";
 import { downscaleImage, validateImageFile } from "@/lib/image";
 import { cn } from "@/lib/utils";
@@ -25,18 +22,12 @@ export function AvatarUploader({
 }) {
   const inputId = useId();
   const uploadAvatar = useUploadAvatar();
-  const removeAvatar = useUpdateProfile();
   const [isPreparing, setIsPreparing] = useState(false);
   const [fileError, setFileError] = useState<string | null>(null);
 
-  const isBusy =
-    isPreparing || uploadAvatar.isPending || removeAvatar.isPending;
+  const isBusy = isPreparing || uploadAvatar.isPending;
 
-  const apiError = isApiError(uploadAvatar.error)
-    ? uploadAvatar.error
-    : isApiError(removeAvatar.error)
-      ? removeAvatar.error
-      : null;
+  const apiError = isApiError(uploadAvatar.error) ? uploadAvatar.error : null;
   const error = fileError ?? apiError?.message ?? null;
 
   async function handleFile(file: File | undefined) {
@@ -106,21 +97,6 @@ export function AvatarUploader({
 
           <span className="sr-only">Change profile photo</span>
         </label>
-
-        {avatarUrl && !isBusy && (
-          <button
-            type="button"
-            onClick={() => removeAvatar.mutate({ avatarUrl: null })}
-            aria-label="Remove profile photo"
-            title="Remove profile photo"
-            className={cn(
-              "absolute -top-0.5 -right-0.5 bg-card text-muted-foreground hover:text-destructive",
-              "flex size-7 items-center justify-center rounded-full border shadow-sm transition-colors",
-            )}
-          >
-            <X className="size-3.5" aria-hidden="true" />
-          </button>
-        )}
       </div>
 
       {error && (

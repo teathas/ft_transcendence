@@ -6,7 +6,9 @@ import { z } from "zod";
 
 import { roomDetailMocks, roomsMocks } from "../mocks";
 import {
+  apiRoomSchema,
   messageSchema,
+  roomMemberSchema,
   participantSchema,
   roomFileSchema,
   roomPageSchema,
@@ -14,6 +16,7 @@ import {
   roomStatsSchema,
 } from "../schemas";
 import type {
+  ApiRoom,
   CreateRoomPayload,
   JoinRoomPayload,
   Room,
@@ -21,6 +24,7 @@ import type {
   Message,
   Participant,
   RoomFile,
+  RoomMember,
   RoomQuery,
   RoomStats,
 } from "../types";
@@ -105,17 +109,38 @@ export const roomsApi = {
     return parseResponse(roomFileSchema, data, "POST /rooms/:code/files");
   },
 
-  async create(payload: CreateRoomPayload): Promise<Room> {
-    if (env.enableMocks) return roomsMocks.create(payload);
+  async create(payload: CreateRoomPayload): Promise<ApiRoom> {
+    if (env.enableMocks) {
+      const room = await roomsMocks.create(payload);
+      return {
+        id: room.id,
+        name: room.name,
+        subject: room.subject,
+        visibility: payload.visibility,
+        inviteCode: room.code,
+        ownerId: room.ownerId,
+        createdAt: room.createdAt,
+      };
+    }
 
     const { data } = await api.post("/rooms", payload);
-    return parseResponse(roomSchema, data, "POST /rooms");
+    return parseResponse(apiRoomSchema, data, "POST /rooms");
   },
 
-  async join(payload: JoinRoomPayload): Promise<Room> {
-    if (env.enableMocks) return roomsMocks.join(payload);
+  async join(payload: JoinRoomPayload): Promise<RoomMember> {
+    if (env.enableMocks) {
+      return {
+        userId: crypto.randomUUID(),
+        roomId: payload.roomId,
+        joinedAt: new Date().toISOString(),
+      };
+    }
 
-    const { data } = await api.post(`/rooms/${payload.code}/join`);
-    return parseResponse(roomSchema, data, "POST /rooms/:code/join");
+    // The invite code is only checked for private rooms, so it is omitted
+    // rather than sent empty.
+    const { data } = await api.post(`/rooms/${payload.roomId}/join`, {
+      ...(payload.inviteCode ? { inviteCode: payload.inviteCode } : {}),
+    });
+    return parseResponse(roomMemberSchema, data, "POST /rooms/:roomId/join");
   },
 };

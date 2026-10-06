@@ -6,6 +6,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Field,
+  FieldDescription,
   FieldError,
   FieldGroup,
   FieldLabel,
@@ -25,6 +26,11 @@ const SUBJECT_OPTIONS: SelectOption[] = SUBJECTS.map((subject) => ({
   label: subject,
 }));
 
+const VISIBILITY_OPTIONS: SelectOption[] = [
+  { value: "PUBLIC", label: "Public — anyone with the link can join" },
+  { value: "PRIVATE", label: "Private — invite code required" },
+];
+
 export function CreateRoomModal({
   open,
   onClose,
@@ -38,7 +44,7 @@ export function CreateRoomModal({
 
   const form = useZodForm({
     schema: createRoomSchema,
-    initialValues: { name: "", subject: "" },
+    initialValues: { name: "", subject: "", visibility: "PUBLIC" },
     externalErrors: apiError?.fieldErrors,
     onSubmit: (values) => {
       if (isSubmitting) return;
@@ -47,6 +53,7 @@ export function CreateRoomModal({
   });
 
   const subjectProps = form.getFieldProps("subject");
+  const visibilityProps = form.getFieldProps("visibility");
 
   return (
     <Modal
@@ -96,6 +103,33 @@ export function CreateRoomModal({
                 isDisabled={isSubmitting}
               />
               <FieldError {...form.getErrorProps("subject")} />
+            </Field>
+
+            <Field>
+              <FieldLabel {...form.getLabelProps("visibility")}>
+                Visibility
+              </FieldLabel>
+              <Select
+                inputId={visibilityProps.id}
+                options={VISIBILITY_OPTIONS}
+                value={
+                  VISIBILITY_OPTIONS.find(
+                    (option) => option.value === visibilityProps.value,
+                  ) ?? VISIBILITY_OPTIONS[0]
+                }
+                onChange={(option) =>
+                  visibilityProps.onChange({
+                    target: { value: option?.value ?? "PUBLIC" },
+                  } as React.ChangeEvent<HTMLInputElement>)
+                }
+                onBlur={visibilityProps.onBlur}
+                isDisabled={isSubmitting}
+                isSearchable={true}
+              />
+              <FieldDescription>
+                A private room can only be joined with its invite code.
+              </FieldDescription>
+              <FieldError {...form.getErrorProps("visibility")} />
             </Field>
 
             <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">

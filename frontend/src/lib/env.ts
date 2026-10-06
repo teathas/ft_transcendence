@@ -39,14 +39,24 @@ const envSchema = z.object({
     .optional(),
 });
 
+/**
+ * Docker build args that are not set expand to an empty string, which is not
+ * `undefined` and would therefore skip the schema defaults (or fail outright).
+ * Blank means "not provided".
+ */
+const blankAsUndefined = (value: string | undefined) =>
+  value === undefined || value.trim() === "" ? undefined : value;
+
 // Next inlines `NEXT_PUBLIC_*` at build time, so each variable has to be read
 // as a full literal property access — never `process.env[name]`.
 const parsed = envSchema.safeParse({
-  NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
-  NEXT_PUBLIC_WS_URL: process.env.NEXT_PUBLIC_WS_URL,
-  NEXT_PUBLIC_ENABLE_MOCKS: process.env.NEXT_PUBLIC_ENABLE_MOCKS,
-  NEXT_PUBLIC_SYNC_MODE: process.env.NEXT_PUBLIC_SYNC_MODE,
-  NEXT_PUBLIC_SYNC_URL: process.env.NEXT_PUBLIC_SYNC_URL,
+  NEXT_PUBLIC_API_URL: blankAsUndefined(process.env.NEXT_PUBLIC_API_URL),
+  NEXT_PUBLIC_WS_URL: blankAsUndefined(process.env.NEXT_PUBLIC_WS_URL),
+  NEXT_PUBLIC_ENABLE_MOCKS: blankAsUndefined(
+    process.env.NEXT_PUBLIC_ENABLE_MOCKS,
+  ),
+  NEXT_PUBLIC_SYNC_MODE: blankAsUndefined(process.env.NEXT_PUBLIC_SYNC_MODE),
+  NEXT_PUBLIC_SYNC_URL: blankAsUndefined(process.env.NEXT_PUBLIC_SYNC_URL),
 });
 
 if (!parsed.success) {

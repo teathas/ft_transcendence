@@ -32,42 +32,32 @@ export function useSession() {
   };
 }
 
-export function useLogin() {
+function useAuthSuccess() {
   const queryClient = useQueryClient();
   const router = useRouter();
 
+  return (result: AuthResponse, destination: string) => {
+    tokenStore.set(result.accessToken);
+    queryClient.setQueryData(queryKeys.auth.session(), result.user);
+    router.replace(destination as Parameters<typeof router.replace>[0]);
+  };
+}
+
+export function useLogin() {
+  const onSuccess = useAuthSuccess();
+
   return useMutation({
     mutationFn: authApi.login,
-    onSuccess: (result: AuthResponse) => {
-      tokenStore.set(result.accessToken);
-      queryClient.setQueryData(queryKeys.auth.session(), result.user);
-      router.replace(routes.dashboard);
-    },
+    onSuccess: (result) => onSuccess(result, routes.dashboard),
   });
 }
 
 export function useRegister() {
-  const queryClient = useQueryClient();
-  const router = useRouter();
+  const onSuccess = useAuthSuccess();
 
   return useMutation({
     mutationFn: authApi.register,
-    onSuccess: (result: AuthResponse) => {
-      tokenStore.set(result.accessToken);
-      queryClient.setQueryData(queryKeys.auth.session(), result.user);
-      router.replace(routes.onboarding);
-    },
-  });
-}
-
-export function useUpdateProfile() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: authApi.updateProfile,
-    onSuccess: (user) => {
-      queryClient.setQueryData(queryKeys.auth.session(), user);
-    },
+    onSuccess: (result) => onSuccess(result, routes.onboarding),
   });
 }
 
@@ -83,20 +73,13 @@ export function useUploadAvatar() {
   });
 }
 
-export function useChangePassword() {
-  return useMutation({ mutationFn: authApi.changePassword });
-}
-
-export function useDeleteAccount() {
+export function useUpdateProfile() {
   const queryClient = useQueryClient();
-  const router = useRouter();
 
   return useMutation({
-    mutationFn: authApi.deleteAccount,
-    onSuccess: () => {
-      tokenStore.clear();
-      queryClient.clear();
-      router.replace(routes.register);
+    mutationFn: authApi.updateProfile,
+    onSuccess: (user) => {
+      queryClient.setQueryData(queryKeys.auth.session(), user);
     },
   });
 }

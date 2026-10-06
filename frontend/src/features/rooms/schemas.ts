@@ -26,6 +26,9 @@ export const roomPageSchema = z.object({
   total: z.number().int().nonnegative(),
 });
 
+export const visibilitySchema = z.enum(["PUBLIC", "PRIVATE"]);
+
+/** Mirrors `CreateRoomDto`. */
 export const createRoomSchema = z.object({
   name: z
     .string()
@@ -33,17 +36,35 @@ export const createRoomSchema = z.object({
     .min(3, "Room name must be at least 3 characters")
     .max(60, "Room name must be at most 60 characters"),
   subject: z.string().trim().min(1, "Pick a subject"),
+  visibility: visibilitySchema,
 });
 
-/** Codes are shown as `ALG-4271`, but typed however people feel like typing. */
+/** What `POST /rooms` actually returns — the Prisma `Room` row. */
+export const apiRoomSchema = z.object({
+  id: z.uuid(),
+  name: z.string(),
+  subject: z.string(),
+  visibility: visibilitySchema,
+  inviteCode: z.string(),
+  ownerId: z.uuid(),
+  createdAt: z.iso.datetime(),
+});
+
+/** What `POST /rooms/:roomId/join` returns — a `RoomMember` row. */
+export const roomMemberSchema = z.object({
+  userId: z.uuid(),
+  roomId: z.uuid(),
+  joinedAt: z.iso.datetime(),
+});
+
+/**
+ * The API joins by room id, not by invite code — there is no lookup-by-code
+ * route — so the form has to ask for the id. The code is only required for a
+ * private room.
+ */
 export const joinRoomSchema = z.object({
-  code: z
-    .string()
-    .trim()
-    .toUpperCase()
-    .min(4, "Enter the room code")
-    .max(12, "That code looks too long")
-    .regex(/^[A-Z0-9-]+$/, "Codes use letters, numbers and dashes only"),
+  roomId: z.uuid("Paste the room ID the host shared with you"),
+  inviteCode: z.string().trim(),
 });
 
 /** Aggregates for the KPI row — computed over all rooms, not one page. */

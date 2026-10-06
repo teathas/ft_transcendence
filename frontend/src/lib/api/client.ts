@@ -27,8 +27,11 @@ type RetriableConfig = InternalAxiosRequestConfig & { _retried?: boolean };
 export const api: AxiosInstance = axios.create({
   baseURL: env.apiUrl,
   timeout: 15_000,
-  // Send the httpOnly refresh/session cookie to the backend.
-  withCredentials: true,
+  // The API is Bearer-only today and sets no cookie, so credentials are not
+  // sent: this is what keeps the CORS preflight passing against the current
+  // backend. Flip back to `true` the day /auth/refresh returns an httpOnly
+  // cookie, and have the backend send Access-Control-Allow-Credentials too.
+  withCredentials: false,
   headers: {
     Accept: "application/json",
     "Content-Type": "application/json",

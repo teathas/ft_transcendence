@@ -5,10 +5,7 @@ import { LoaderCircle } from "lucide-react";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import {
-  useUpdateProfile,
-  useUploadAvatar,
-} from "@/features/auth/hooks/use-auth";
+import { useUploadAvatar } from "@/features/auth/hooks/use-auth";
 import { AvatarPicker } from "@/features/profile/components/avatar-picker";
 import { useAvatarPicker } from "@/features/profile/hooks/use-avatar-picker";
 import { isApiError } from "@/lib/api";
@@ -27,17 +24,11 @@ export function AvatarStep({
 }) {
   const picker = useAvatarPicker(currentAvatarUrl);
   const uploadAvatar = useUploadAvatar();
-  const updateProfile = useUpdateProfile();
   const [isPreparing, setIsPreparing] = useState(false);
 
-  const isBusy =
-    isPreparing || uploadAvatar.isPending || updateProfile.isPending;
+  const isBusy = isPreparing || uploadAvatar.isPending;
 
-  const apiError = isApiError(uploadAvatar.error)
-    ? uploadAvatar.error
-    : isApiError(updateProfile.error)
-      ? updateProfile.error
-      : null;
+  const apiError = isApiError(uploadAvatar.error) ? uploadAvatar.error : null;
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -78,13 +69,7 @@ export function AvatarStep({
           </Alert>
         )}
 
-        <AvatarPicker
-          picker={picker}
-          username={username}
-          disabled={isBusy}
-          hasSavedAvatar={Boolean(currentAvatarUrl)}
-          onRemoveSaved={() => updateProfile.mutate({ avatarUrl: null })}
-        />
+        <AvatarPicker picker={picker} username={username} disabled={isBusy} />
 
         <div className="flex flex-col gap-3 sm:flex-row-reverse">
           <Button

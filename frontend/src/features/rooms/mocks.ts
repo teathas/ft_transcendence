@@ -300,13 +300,13 @@ export const roomsMocks = {
       createdAt: new Date().toISOString(),
     }),
 
-  join: ({ code }: JoinRoomPayload) => {
-    const known = MOCK_ROOMS.find((room) => room.code === code);
+  join: ({ roomId }: JoinRoomPayload) => {
+    const known = MOCK_ROOMS.find((room) => room.id === roomId);
     return settle<Room>(
       known ?? {
         id: crypto.randomUUID(),
-        code,
-        name: `Room ${code}`,
+        code: roomId.slice(0, 8).toUpperCase(),
+        name: `Room ${roomId.slice(0, 8)}`,
         subject: "Mathematics",
         status: "active",
         participantCount: 2,

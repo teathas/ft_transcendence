@@ -45,6 +45,7 @@ services:
       UPLOAD_DIR: ${UPLOAD_DIR}
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN}
+      CORS_ORIGIN: ${CORS_ORIGIN}
     ports:
       - "${BACKEND_PORT}:${BACKEND_PORT}"
     depends_on:
@@ -69,6 +70,10 @@ services:
       args:
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
         NEXT_PUBLIC_WS_URL: ${NEXT_PUBLIC_WS_URL}
+        # `:-` so an unset variable stays unset instead of becoming "".
+        NEXT_PUBLIC_ENABLE_MOCKS: ${NEXT_PUBLIC_ENABLE_MOCKS:-false}
+        NEXT_PUBLIC_SYNC_MODE: ${NEXT_PUBLIC_SYNC_MODE:-local}
+        NEXT_PUBLIC_SYNC_URL: ${NEXT_PUBLIC_SYNC_URL:-}
     restart: always
     environment:
       PORT: ${FRONTEND_PORT}

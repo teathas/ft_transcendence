@@ -6,8 +6,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useSession } from "@/features/auth/hooks/use-auth";
 
 import { AccountForm } from "./account-form";
-import { DangerZone } from "./danger-zone";
-import { PasswordForm } from "./password-form";
 import { ProfileHeader } from "./profile-header";
 
 export function ProfileView() {
@@ -44,8 +42,6 @@ export function ProfileView() {
     <div className="flex flex-col gap-6">
       <ProfileHeader user={user} />
       <AccountForm user={user} />
-      <PasswordForm />
-      <DangerZone username={user.username} />
     </div>
   );
 }

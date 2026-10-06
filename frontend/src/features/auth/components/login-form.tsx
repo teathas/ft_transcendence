@@ -18,7 +18,7 @@ import { isApiError } from "@/lib/api";
 import { useLogin } from "../hooks/use-auth";
 import { loginSchema } from "../schemas";
 
-const INITIAL_VALUES = { username: "", password: "" };
+const INITIAL_VALUES = { email: "", password: "" };
 
 export function LoginForm() {
   const login = useLogin();
@@ -53,16 +53,14 @@ export function LoginForm() {
           )}
 
           <Field>
-            <FieldLabel {...form.getLabelProps("username")}>
-              Username
-            </FieldLabel>
+            <FieldLabel {...form.getLabelProps("email")}>Email</FieldLabel>
             <Input
-              {...form.getFieldProps("username")}
-              autoComplete="username"
-              placeholder="Your username"
+              {...form.getFieldProps("email")}
+              autoComplete="email"
+              placeholder="Your email"
               autoFocus
             />
-            <FieldError {...form.getErrorProps("username")} />
+            <FieldError {...form.getErrorProps("email")} />
           </Field>
 
           <Field>

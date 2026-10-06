@@ -12,7 +12,7 @@ import { routes } from "@/config/routes";
 import { queryKeys } from "@/lib/query/keys";
 
 import { roomsApi } from "../api/rooms.api";
-import type { Room, RoomQuery } from "../types";
+import type { RoomQuery } from "../types";
 
 export const DEFAULT_ROOM_QUERY: RoomQuery = {
   search: "",
@@ -48,23 +48,27 @@ export function useRecentRooms(limit = 6) {
   });
 }
 
-function useEnterRoom() {
+export function useCreateRoom() {
   const queryClient = useQueryClient();
   const router = useRouter();
 
-  return (room: Room) => {
-    queryClient.setQueryData(queryKeys.rooms.detail(room.code), room);
-    void queryClient.invalidateQueries({ queryKey: queryKeys.rooms.all });
-    router.push(routes.room(room.code));
-  };
-}
-
-export function useCreateRoom() {
-  const enterRoom = useEnterRoom();
-  return useMutation({ mutationFn: roomsApi.create, onSuccess: enterRoom });
+  return useMutation({
+    mutationFn: roomsApi.create,
+    onSuccess: (room) => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.rooms.all });
+      // `inviteCode` is what people share, so it is what the URL carries.
+      router.push(routes.room(room.inviteCode));
+    },
+  });
 }
 
 export function useJoinRoom() {
-  const enterRoom = useEnterRoom();
-  return useMutation({ mutationFn: roomsApi.join, onSuccess: enterRoom });
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: roomsApi.join,
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.rooms.all });
+    },
+  });
 }
