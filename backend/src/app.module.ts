@@ -10,6 +10,7 @@ import { UsersModule } from './users/users.module';
 import { RoomsModule } from './rooms/rooms.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path'
+import { MessagesModule } from './messages/messages.module';
 
 @Module({
 	imports: [
@@ -22,6 +23,7 @@ import { join } from 'path'
 			rootPath: join(process.env.UPLOAD_DIR ?? '/app/uploads'),
 			serveRoot: '/uploads',
 		}),
+		MessagesModule,
 	],
 	controllers: [AppController],
 	providers: [
