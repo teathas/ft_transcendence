@@ -11,6 +11,7 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
 enum Visibility {
   PUBLIC
   PRIVATE
@@ -30,18 +31,20 @@ model Room {
 }
 
 model User {
-  id              String       @id @default(uuid())
-  email           String       @unique
-  username        String       @unique
-  passwordHash    String
-  avatarUrl       String?
-  bio             String?
-  status          UserStatus   @default(OFFLINE)
-  lastSeenAt      DateTime?
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
-  rooms           Room[]
-  roomMemberships RoomMember[]
+  id                     String       @id @default(uuid())
+  email                  String       @unique
+  username               String       @unique
+  passwordHash           String
+  avatarUrl              String?
+  bio                    String?
+  status                 UserStatus   @default(OFFLINE)
+  lastSeenAt             DateTime?
+  createdAt              DateTime     @default(now())
+  updatedAt              DateTime     @updatedAt
+  rooms                  Room[]
+  roomMemberships        RoomMember[]
+  sentFriendRequests     Friendship[] @relation("FriendshipRequester")
+  receivedFriendRequests Friendship[] @relation("FriendshipAddressee")
 }
 
 enum UserStatus {
@@ -53,6 +56,29 @@ model RevokedToken {
   jti       String   @id
   expiresAt DateTime
   createdAt DateTime @default(now())
+}
+
+model Friendship {
+  id          String           @id @default(uuid())
+  requesterId String
+  addresseeId String
+  lowId       String
+  highId      String
+  status      FriendshipStatus @default(PENDING)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  requester User @relation("FriendshipRequester", fields: [requesterId], references: [id], onDelete: Cascade)
+  addressee User @relation("FriendshipAddressee", fields: [addresseeId], references: [id], onDelete: Cascade)
+
+  @@unique([lowId, highId])
+  @@index([requesterId, status])
+  @@index([addresseeId, status])
+}
+
+enum FriendshipStatus {
+  PENDING
+  ACCEPTED
 }
 
 model RoomMember {
