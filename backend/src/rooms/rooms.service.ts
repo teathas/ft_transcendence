@@ -9,7 +9,7 @@ export class RoomsService {
     constructor(private prisma: PrismaService) {}
     async create(dto: CreateRoomDto, ownerId: string) {
     const inviteCode = randomBytes(4).toString('hex'); 
-    return this.prisma.room.create({
+    const room = this.prisma.room.create({
         data: {
             name: dto.name,
             subject: dto.subject,
@@ -18,6 +18,12 @@ export class RoomsService {
             ownerId,
         },
     });
+    return this.prisma.roomMember.create({
+    data:{
+        ownerId,
+        room.id,
+    }
+    })
   }
 
     async join(roomId: string, userId: string,dto:JoinRoomDto) {
@@ -51,4 +57,57 @@ export class RoomsService {
         }
     })
   }
+    async leave(roomId: string, userId: string)
+    {
+        const existing = await this.prisma.room.findUnique({
+            where: {id : roomId},
+        });
+        if(!existing)
+            throw new NotFoundException('Room not found');
+        const membership = await this.prisma.roomMember.findUnique({
+        where: {
+            userId_roomId: {
+                userId,
+                roomId,
+            },
+        },
+    });
+    if(!membership)
+        throw new NotFoundException('User is not a member of this room');
+    if(userId === existing.ownerId)
+    {
+        const nextOwner = await this.prisma.roomMember.findFirst({
+        where: {
+            roomId: roomId,
+            userId: {
+                not: userId,
+            },
+        },
+        orderBy: {
+            joinedAt: 'asc',
+        },
+    });
+        if(nextOwner)
+        {
+            await this.prisma.room.update({
+            where: {
+                id: roomId,
+            },
+            data: {
+                ownerId: nextOwner.userId,
+            },
+            });
+        }
+    }
+    return this.prisma.roomMember.delete({
+        where: {
+            userId_roomId: {
+                userId,
+                roomId,
+            },
+        },
+    })
+
+        
+    }
 }

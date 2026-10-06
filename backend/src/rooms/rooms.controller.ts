@@ -1,5 +1,5 @@
 
-import { Controller, Post, Body, Req, UseGuards,Param } from '@nestjs/common';
+import { Controller, Post, Body, Req, UseGuards,Param, Delete } from '@nestjs/common';
 import { RoomsService } from './rooms.service';
 import { CreateRoomDto  } from './dto/create-room.dto';
 import { JoinRoomDto  } from './dto/join-room.dto';
@@ -20,5 +20,11 @@ export class RoomsController {
     {
         const userId = req.user.sub;
         return this.roomsService.join(roomId, userId,dto);
+    }
+    @Delete(':roomId/leave')
+    async leave(@Param('roomId') roomId: string,@Req() req: any)
+    {
+        const userId = req.user.sub;
+        return this.roomsService.leave(roomId, userId);
     }
 }
