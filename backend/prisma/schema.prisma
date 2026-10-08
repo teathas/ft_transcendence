@@ -41,6 +41,7 @@ model User {
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
   rooms           Room[]
+  refreshTokens   RefreshToken[]
   roomMemberships RoomMember[]
 }
 
@@ -64,4 +65,21 @@ model RoomMember {
   room Room @relation(fields: [roomId], references: [id])
 
   @@id([userId, roomId])
+}
+
+/// One row per issued refresh token. The token itself is never stored, only a
+/// SHA-256 digest, so a database leak cannot be replayed against the API.
+model RefreshToken {
+  id        String    @id @default(uuid())
+  /// SHA-256 of the opaque token handed to the browser.
+  tokenHash String    @unique
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  /// Set when the token is rotated or revoked; a presented-but-revoked token
+  /// means the cookie leaked, which revokes the whole family.
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
 }

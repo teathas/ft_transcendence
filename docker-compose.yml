@@ -40,14 +40,15 @@ services:
         UPLOAD_DIR: ${UPLOAD_DIR}
     restart: always
     environment:
-      PORT: ${BACKEND_PORT}
+      PORT: ${BACKEND_PORT:-3001}
       DATABASE_URL: ${DATABASE_URL}
       UPLOAD_DIR: ${UPLOAD_DIR}
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN}
-      CORS_ORIGIN: ${CORS_ORIGIN}
-    ports:
-      - "${BACKEND_PORT}:${BACKEND_PORT}"
+      REFRESH_COOKIE_PATH: ${REFRESH_COOKIE_PATH:-/api/auth/refresh}
+      REFRESH_EXPIRES_IN_DAYS: ${REFRESH_EXPIRES_IN_DAYS:-30}
+      REFRESH_COOKIE_SECURE: ${REFRESH_COOKIE_SECURE:-false}
+      NODE_ENV: ${NODE_ENV:-production}
     depends_on:
       pgdb:
         condition: service_healthy
@@ -68,7 +69,9 @@ services:
     build:
       context: ./frontend
       args:
-        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+        # Same origin through nginx: no CORS, and the refresh cookie can stay
+        # SameSite=Lax.
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-/api}
         NEXT_PUBLIC_WS_URL: ${NEXT_PUBLIC_WS_URL}
         # `:-` so an unset variable stays unset instead of becoming "".
         NEXT_PUBLIC_ENABLE_MOCKS: ${NEXT_PUBLIC_ENABLE_MOCKS:-false}
@@ -76,9 +79,7 @@ services:
         NEXT_PUBLIC_SYNC_URL: ${NEXT_PUBLIC_SYNC_URL:-}
     restart: always
     environment:
-      PORT: ${FRONTEND_PORT}
-    ports:
-      - "${FRONTEND_PORT}:${FRONTEND_PORT}"
+      PORT: ${FRONTEND_PORT:-3000}
     depends_on:
       backend:
         condition: service_healthy
@@ -89,6 +90,31 @@ services:
       retries: 5
       start_period: 10s
 
+
+
+  proxy:
+    image: nginx:1.27-alpine
+    restart: always
+    ports:
+      - "${PROXY_PORT:-8080}:80"
+    environment:
+      FRONTEND_PORT: ${FRONTEND_PORT:-3000}
+      BACKEND_PORT: ${BACKEND_PORT:-3001}
+      NGINX_ENVSUBST_FILTER: "^(FRONTEND|BACKEND)_PORT$$"
+    volumes:
+      - ./nginx/upgrade.conf:/etc/nginx/conf.d/00-upgrade.conf:ro
+      - ./nginx/templates:/etc/nginx/templates:ro
+    depends_on:
+      frontend:
+        condition: service_healthy
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1/ > /dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
 
 volumes:

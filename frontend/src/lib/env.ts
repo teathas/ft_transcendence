@@ -5,11 +5,16 @@ import { z } from "zod";
  * `.env.local` fails immediately instead of surfacing as a confusing 404.
  */
 const envSchema = z.object({
+  /**
+   * Absolute URL in development, or a path such as `/api` once nginx serves
+   * the frontend and the API from one origin — which removes CORS entirely.
+   */
   NEXT_PUBLIC_API_URL: z
-    .url({
-      protocol: /^https?$/,
-      error: "NEXT_PUBLIC_API_URL must be an http(s) URL",
-    })
+    .string()
+    .refine(
+      (value) => /^https?:\/\//.test(value) || value.startsWith("/"),
+      "NEXT_PUBLIC_API_URL must be an http(s) URL, or a path like /api when the frontend and the API share an origin",
+    )
     .default("http://localhost:8000/api"),
 
   NEXT_PUBLIC_WS_URL: z

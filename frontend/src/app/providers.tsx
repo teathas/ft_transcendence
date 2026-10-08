@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { routes } from "@/config/routes";
+import { resetSessionRestore } from "@/features/auth/api/auth.api";
 import { sessionCache } from "@/features/auth/session-cache";
 import { setUnauthorizedHandler, tokenStore } from "@/lib/api";
 import { queryKeys } from "@/lib/query/keys";
@@ -21,6 +22,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
     setUnauthorizedHandler(() => {
       tokenStore.clear();
       sessionCache.clear();
+      resetSessionRestore();
       queryClient.clear();
       router.replace(routes.login);
     });

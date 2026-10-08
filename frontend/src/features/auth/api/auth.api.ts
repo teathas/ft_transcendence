@@ -1,4 +1,4 @@
-import { api } from "@/lib/api";
+import { api, tokenStore } from "@/lib/api";
 import { parseResponse } from "@/lib/api/parse";
 import { env } from "@/lib/env";
 
@@ -11,6 +11,43 @@ import type {
   RegisterPayload,
   User,
 } from "../types";
+
+/**
+ * One boot-time exchange of the refresh cookie for an access token.
+ *
+ * Serialised rather than fired from an effect: if `GET /users/me` left first it
+ * would take a 401, and the interceptor would sign the user out before the
+ * refresh ever landed. Every caller awaits the same promise.
+ */
+let restore: Promise<void> | null = null;
+
+export function ensureSessionRestored(): Promise<void> {
+  if (env.enableMocks) return Promise.resolve();
+
+  restore ??= (async () => {
+    if (tokenStore.get()) return;
+    try {
+      const { data } = await api.post("/auth/refresh", undefined, {
+        skipAuthRefresh: true,
+      });
+      const { accessToken } = parseResponse(
+        loginResponseSchema,
+        data,
+        "POST /auth/refresh",
+      );
+      tokenStore.set(accessToken);
+    } catch {
+      // No usable cookie: the visitor is simply signed out.
+    }
+  })();
+
+  return restore;
+}
+
+/** Only for tests and for signing out, where the next boot must try again. */
+export function resetSessionRestore() {
+  restore = null;
+}
 
 export const authApi = {
   /**
@@ -84,6 +121,9 @@ export const authApi = {
 
   async session(): Promise<User> {
     if (env.enableMocks) return authMocks.session();
+
+    // Waits for the boot refresh, so the first call already carries a token.
+    await ensureSessionRestored();
 
     const { data } = await api.get("/users/me");
     return parseResponse(userSchema, data, "GET /users/me");

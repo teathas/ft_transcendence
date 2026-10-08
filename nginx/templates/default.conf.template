@@ -1,0 +1,69 @@
+# Single entry point for the whole stack.
+#
+# Rendered at container start: the nginx image runs envsubst over
+# /etc/nginx/templates. NGINX_ENVSUBST_FILTER restricts that to our own
+# variables, otherwise nginx's $host, $http_upgrade and friends would be
+# replaced by empty strings.
+#
+# Serving the frontend and the API from one origin removes CORS entirely and,
+# more importantly, lets the refresh cookie be SameSite=Lax instead of the
+# SameSite=None a cross-site setup would force.
+
+upstream frontend_upstream {
+    server frontend:${FRONTEND_PORT};
+}
+
+upstream backend_upstream {
+    server backend:${BACKEND_PORT};
+}
+
+server {
+    listen 80;
+    server_name _;
+
+    # Avatars and room files are large; the default 1m is too tight.
+    client_max_body_size 10m;
+
+    # Do not advertise the version on error pages.
+    server_tokens off;
+
+    # The API. The trailing slash on proxy_pass strips the /api prefix, so
+    # /api/auth/login reaches the backend as /auth/login.
+    location /api/ {
+        proxy_pass http://backend_upstream/;
+
+        proxy_http_version 1.1;
+        proxy_set_header Host              $host;
+        proxy_set_header X-Real-IP         $remote_addr;
+        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # Websockets, for the whiteboard sync when it lands.
+        proxy_set_header Upgrade    $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+        proxy_read_timeout 3600s;
+    }
+
+    # Uploaded avatars are served by the backend, under their own prefix.
+    location /uploads/ {
+        proxy_pass http://backend_upstream/uploads/;
+
+        proxy_http_version 1.1;
+        proxy_set_header Host            $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+
+    # Everything else is the Next.js app.
+    location / {
+        proxy_pass http://frontend_upstream;
+
+        proxy_http_version 1.1;
+        proxy_set_header Host              $host;
+        proxy_set_header X-Real-IP         $remote_addr;
+        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        proxy_set_header Upgrade    $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+    }
+}

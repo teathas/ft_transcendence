@@ -8,7 +8,7 @@ import { routes } from "@/config/routes";
 import { isApiError, tokenStore } from "@/lib/api";
 import { queryKeys } from "@/lib/query/keys";
 
-import { authApi } from "../api/auth.api";
+import { authApi, resetSessionRestore } from "../api/auth.api";
 import { sessionCache } from "../session-cache";
 import type { AuthResponse } from "../types";
 
@@ -104,6 +104,7 @@ export function useLogout() {
     onSettled: () => {
       tokenStore.clear();
       sessionCache.clear();
+      resetSessionRestore();
       queryClient.clear();
       router.replace(routes.login);
     },
