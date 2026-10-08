@@ -1,11 +1,26 @@
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { sendFriendRequestDto } from './dto/send-friend-request.dto';
 import { FriendsService } from './friends.service';
-import { Body, Controller, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post } from '@nestjs/common';
 
 @Controller('friends')
 export class FriendsController {
 	constructor(private friendsService: FriendsService) {}
+
+	@Get()
+	getFriends(@CurrentUser() user: { sub: string }) {
+		return this.friendsService.getFriends(user.sub);
+	}
+
+	@Get('requests/received')
+	getReceived(@CurrentUser() user: { sub: string }) {
+		return this.friendsService.getReceivedRequests(user.sub);
+	}
+
+	@Get('requests/sent')
+	getSent(@CurrentUser() user: { sub: string }) {
+		return this.friendsService.getSentRequests(user.sub);
+	}
 
 	@Post('requests')
 	async sendRequest(

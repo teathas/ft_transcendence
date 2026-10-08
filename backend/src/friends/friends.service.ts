@@ -3,6 +3,7 @@ import { BadRequestException, ConflictException, Injectable, NotFoundException }
 import { PrismaService } from '../prisma/prisma.service';
 import { toFriendPair } from './utils/friend-pair';
 import { Prisma } from '../generated/prisma/client';
+import { PUBLIC_USER_SELECT } from '../users/users.service';
 
 @Injectable()
 export class FriendsService {
@@ -66,5 +67,46 @@ export class FriendsService {
 		if (result.count === 0) {
 			throw new NotFoundException('Friend request not found');
 		}
+	}
+
+	async getFriends(meId: string) {
+		const rows = await this.prisma.friendship.findMany({
+			where: {
+				status: 'ACCEPTED',
+				OR: [{ requesterId: meId }, { addresseeId: meId }],
+			},
+			select: {
+				id: true,
+				requesterId: true,
+				requester: { select: PUBLIC_USER_SELECT },
+				addressee: { select: PUBLIC_USER_SELECT },
+			},
+			orderBy: { createdAt: 'desc' },
+		});
+
+		return rows.map((f) => ({
+			friendshipId: f.id,
+			user: f.requesterId == meId ? f.addressee : f.requester,
+		}));
+	}
+
+	async getReceivedRequests(meId: string) {
+		const rows = await this.prisma.friendship.findMany({
+			where: { status: 'PENDING', addresseeId: meId },
+			select: { id: true, createdAt: true, requester: { select: PUBLIC_USER_SELECT }},
+			orderBy: { createdAt: 'desc' },
+		});
+
+		return rows.map((r) => ({ requestId: r.id, createdAt: r.createdAt, user: r.requester }));
+	}
+
+	async getSentRequests(meId: string) {
+		const rows = await this.prisma.friendship.findMany({
+			where: { status: 'PENDING', requesterId: meId },
+			select: { id: true, createdAt: true, addressee: { select: PUBLIC_USER_SELECT }},
+			orderBy: { createdAt: 'desc' },
+		});
+
+		return rows.map((r) => ({ requestId: r.id, createdAt: r.createdAt, user: r.addressee }));
 	}
 }

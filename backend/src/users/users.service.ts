@@ -2,7 +2,7 @@ import { ConflictException, Injectable, NotFoundException } from '@nestjs/common
 import { PrismaService } from '../prisma/prisma.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 
-const PUBLIC_USER_SELECT = {
+export const PUBLIC_USER_SELECT = {
 	id: true,
 	username: true,
 	avatarUrl: true,
