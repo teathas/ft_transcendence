@@ -48,4 +48,23 @@ export class FriendsService {
 		}
 	}
 
+	async acceptRequest(meId: string, id: string) {
+		const result = await this.prisma.friendship.updateMany({
+			where: { id, addresseeId: meId, status: 'PENDING' },
+			data: { status: 'ACCEPTED' },
+		});
+		if (result.count === 0) {
+			throw new NotFoundException('Friend request not found');
+		}
+		return { id, status: 'ACCEPTED' };
+	}
+
+	async rejectRequest(meId: string, id: string) {
+		const result = await this.prisma.friendship.deleteMany({
+			where: { id, addresseeId: meId, status: 'PENDING' },
+		});
+		if (result.count === 0) {
+			throw new NotFoundException('Friend request not found');
+		}
+	}
 }
