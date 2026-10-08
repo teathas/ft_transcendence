@@ -19,12 +19,13 @@ export class RoomsService {
                 ownerId,
             },
         });
-        return this.prisma.roomMember.create({
+        await this.prisma.roomMember.create({
         data:{
             userId:ownerId,
             roomId:room.id,
         }
         })
+        return room;
     }
 
     //join_romm
@@ -101,22 +102,6 @@ export class RoomsService {
                     ownerId: nextOwner.userId,
                 },
                 });
-            }
-            else   
-            {
-                await this.prisma.roomMember.delete({
-                where: {
-                    userId_roomId: {
-                        userId,
-                        roomId,
-                    },
-                },
-                })
-                return this.prisma.room.delete({
-                where:{
-                    id:roomId,
-                },
-            })
             }
         }
         return this.prisma.roomMember.delete({
