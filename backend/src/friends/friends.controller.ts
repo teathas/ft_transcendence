@@ -24,7 +24,7 @@ export class FriendsController {
 		return this.friendsService.acceptRequest(user.sub, id);
 	}
 
-	@Post('request/:id/reject')
+	@Post('requests/:id/reject')
 	@HttpCode(HttpStatus.NO_CONTENT)
 	async reject(
 		@CurrentUser() user: any,
