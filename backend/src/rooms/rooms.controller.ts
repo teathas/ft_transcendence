@@ -20,15 +20,14 @@ export class RoomsController {
         return this.roomsService.join(roomId, userId,dto);
     }
     @Get('public')
-    async findPublicRooms()
+    async findPublicRooms(
+        @Query('name') name?: string,
+        @Query('subject') subject?: string
+    )
     {
-        return this.roomsService.findPublicRooms();
+        return this.roomsService.findPublicRooms({name,subject});
     }
-    @Get('search')
-    async searchByName(@Query('name') name: string)
-    {
-        return this.roomsService.searchByName(name);
-    }
+
     @Delete(':roomId/leave')
     async leave(@Param('roomId') roomId: string,@Req() req: any)
     {

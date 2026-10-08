@@ -60,50 +60,24 @@ export class RoomsService {
             }
         })
     }
+    async findPublicRooms(filters: { name?: string; subject?: string } = {}) {
+        const name = filters.name?.trim();
+        const subject = filters.subject?.trim();
 
-    async searchByName(name:string)
-    {
-        if (!name || !name.trim()) {
-            return [];
-        }
         return this.prisma.room.findMany({
-            where:{
-                visibility :Visibility.PUBLIC,
-                name:{contains:name.trim() , mode:"insensitive"}
-            },
-            orderBy: {
-            createdAt: 'desc',
-            },
-            select: {
-                id: true,
-                name: true,
-                subject: true,
-                visibility: true,
-                ownerId:true,
-                createdAt: true,
-            }
-        })
-    }
-
-    async findPublicRooms()
-    {
-        return this.prisma.room.findMany({
-        where:{
-            visibility :Visibility.PUBLIC,
+        where: {
+            visibility: Visibility.PUBLIC,
+            ...(name && { name: { contains: name, mode: 'insensitive' } }),
+            ...(subject && { subject: { contains: subject, mode: 'insensitive' } }),
         },
-        orderBy: {
-        createdAt: 'desc',
-        },
+        orderBy: { createdAt: 'desc' },
         select: {
-            id: true,
-            name: true,
-            subject: true,
-            visibility: true,
-            ownerId:true,
-            createdAt: true,
-        }
-    })  
+            id: true, name: true, subject: true,
+            visibility: true, ownerId: true, createdAt: true,
+        },
+        });
     }
+
 
 
 
