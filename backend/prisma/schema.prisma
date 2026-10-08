@@ -11,6 +11,7 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
 enum Visibility {
   PUBLIC
   PRIVATE
@@ -26,6 +27,7 @@ model Room {
   ownerId   String
   owner     User         @relation(fields: [ownerId], references: [id])
   members   RoomMember[]
+  messages  Message[]
   createdAt DateTime     @default(now())
 }
 
@@ -42,6 +44,7 @@ model User {
   updatedAt       DateTime     @updatedAt
   rooms           Room[]
   roomMemberships RoomMember[]
+  messages        Message[]
 }
 
 enum UserStatus {
@@ -64,4 +67,15 @@ model RoomMember {
   room Room @relation(fields: [roomId], references: [id])
 
   @@id([userId, roomId])
+}
+
+model Message {
+  id        String   @id @default(uuid())
+  content   String
+  userId    String
+  roomId    String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+  room Room @relation(fields: [roomId], references: [id])
 }
