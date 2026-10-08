@@ -28,7 +28,7 @@ export class RoomsService {
         return room;
     }
 
-    //join_romm
+    //join_room
     async join(roomId: string, userId: string,dto:JoinRoomDto) {
         const existing = await this.prisma.room.findUnique({
             where: {id : roomId},
@@ -61,11 +61,15 @@ export class RoomsService {
         })
     }
 
-    async findPublicRooms()
+    async searchByName(name:string)
     {
+        if (!name || !name.trim()) {
+            return [];
+        }
         return this.prisma.room.findMany({
             where:{
                 visibility :Visibility.PUBLIC,
+                name:{contains:name.trim() , mode:"insensitive"}
             },
             orderBy: {
             createdAt: 'desc',
@@ -79,6 +83,26 @@ export class RoomsService {
                 createdAt: true,
             }
         })
+    }
+
+    async findPublicRooms()
+    {
+        return this.prisma.room.findMany({
+        where:{
+            visibility :Visibility.PUBLIC,
+        },
+        orderBy: {
+        createdAt: 'desc',
+        },
+        select: {
+            id: true,
+            name: true,
+            subject: true,
+            visibility: true,
+            ownerId:true,
+            createdAt: true,
+        }
+    })  
     }
 
 
