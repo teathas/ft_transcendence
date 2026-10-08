@@ -109,4 +109,28 @@ export class FriendsService {
 
 		return rows.map((r) => ({ requestId: r.id, createdAt: r.createdAt, user: r.addressee }));
 	}
+
+	async cancelRequest(meId: string, requestId: string) {
+		const { count } = await this.prisma.friendship.deleteMany({
+			where: { id: requestId, requesterId: meId, status: 'PENDING' },
+		});
+
+		if (count === 0) {
+			throw new NotFoundException('Friend request not found');
+		}
+	}
+
+	async removeFriend(meId: string, friendshipId: string) {
+		const { count } = await this.prisma.friendship.deleteMany({
+			where: {
+				id: friendshipId,
+				status: 'ACCEPTED',
+				OR: [{ requesterId: meId }, { addresseeId: meId }],
+			},
+		});
+
+		if (count === 0) {
+			throw new NotFoundException('Friendship not found');
+		}
+	}
 }

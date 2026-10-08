@@ -1,7 +1,7 @@
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { sendFriendRequestDto } from './dto/send-friend-request.dto';
 import { FriendsService } from './friends.service';
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post } from '@nestjs/common';
 
 @Controller('friends')
 export class FriendsController {
@@ -46,5 +46,23 @@ export class FriendsController {
 		@Param('id', ParseUUIDPipe) id: string,
 	) {
 		return this.friendsService.rejectRequest(user.sub, id);
+	}
+
+	@Delete('requests/:id')
+	@HttpCode(HttpStatus.NO_CONTENT)
+	cancelRequest(
+		@CurrentUser() user: { sub: string },
+		@Param('id', ParseUUIDPipe) id: string,
+	) {
+		return this.friendsService.cancelRequest(user.sub, id);
+	}
+
+	@Delete(':id')
+	@HttpCode(HttpStatus.NO_CONTENT)
+	removeFriend(
+		@CurrentUser() user: { sub: string },
+		@Param('id', ParseUUIDPipe) id: string,
+	) {
+		return this.friendsService.removeFriend(user.sub, id);
 	}
 }
