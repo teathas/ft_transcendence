@@ -22,7 +22,6 @@ export class RoomsController {
         const userId = req.user.sub;
         return this.roomsService.join(roomId, userId,dto);
     }
-    @Public()
     @Get('public')
     async findPublicRooms()
     {
