@@ -46,6 +46,7 @@ model User {
   roomMemberships        RoomMember[]
   sentFriendRequests     Friendship[] @relation("FriendshipRequester")
   receivedFriendRequests Friendship[] @relation("FriendshipAddressee")
+  messages               Message[]
 }
 
 enum UserStatus {
@@ -91,4 +92,15 @@ model RoomMember {
   room Room @relation(fields: [roomId], references: [id])
 
   @@id([userId, roomId])
+}
+
+model Message {
+  id        String   @id @default(uuid())
+  content   String
+  userId    String
+  roomId    String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+  room Room @relation(fields: [roomId], references: [id])
 }
