@@ -27,6 +27,7 @@ model Room {
   ownerId   String
   owner     User         @relation(fields: [ownerId], references: [id])
   members   RoomMember[]
+  messages  Message[]
   createdAt DateTime     @default(now())
 }
 
