@@ -11,6 +11,7 @@ import { RoomsModule } from './rooms/rooms.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path'
 import { FriendsModule } from './friends/friends.module';
+import { MessagesModule } from './messages/messages.module';
 
 @Module({
 	imports: [
@@ -23,6 +24,7 @@ import { FriendsModule } from './friends/friends.module';
 			rootPath: join(process.env.UPLOAD_DIR ?? '/app/uploads'),
 			serveRoot: '/uploads',
 		}),
+		MessagesModule,
 		FriendsModule,
 	],
 	controllers: [AppController],
