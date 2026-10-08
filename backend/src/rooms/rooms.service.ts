@@ -61,6 +61,28 @@ export class RoomsService {
         })
     }
 
+    async findPublicRooms()
+    {
+        return this.prisma.room.findMany({
+            where:{
+                visibility :Visibility.PUBLIC,
+            },
+            orderBy: {
+            createdAt: 'desc',
+            },
+            select: {
+                id: true,
+                name: true,
+                subject: true,
+                visibility: true,
+                ownerId:true,
+                createdAt: true,
+            }
+        })
+    }
+
+
+
     //leave_room
     async leave(roomId: string, userId: string)
     {
