@@ -3,10 +3,14 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateRoomDto,Visibility  } from './dto/create-room.dto';
 import { JoinRoomDto  } from './dto/join-room.dto';
 import { randomBytes } from 'crypto';
+import { RealtimeService } from '../realtime/realtime.service';
 
 @Injectable()
 export class RoomsService {
-    constructor(private prisma: PrismaService) {}
+    constructor(
+		private prisma: PrismaService,
+		private realtime: RealtimeService,
+	) {}
     //create_room
     async create(dto: CreateRoomDto, ownerId: string) {
         const inviteCode = randomBytes(4).toString('hex'); 
@@ -81,8 +85,6 @@ export class RoomsService {
         })
     }
 
-
-
     //leave_room
     async leave(roomId: string, userId: string)
     {
@@ -126,13 +128,16 @@ export class RoomsService {
                 });
             }
         }
-        return this.prisma.roomMember.delete({
-            where: {
-                userId_roomId: {
-                    userId,
-                    roomId,
-                },
-            },
-        })  
+        const removed = await this.prisma.roomMember.delete({
+			where: {
+				userId_roomId: {
+					userId,
+					roomId,
+				},
+			},
+		});
+		this.realtime.removeUserFromRoom(userId, roomId);
+		this.realtime.emitToRoom(roomId, 'room:member-left', { roomId, userId });
+		return removed;
     }
 }
