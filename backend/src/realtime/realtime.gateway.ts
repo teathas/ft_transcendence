@@ -14,6 +14,7 @@ import { AuthService } from '../auth/auth.service';
 import { MessageBody } from '@nestjs/websockets';
 import { PrismaService } from '../prisma/prisma.service';
 import { roomChannel, userChannel } from './channels';
+import { RealtimeService } from './realtime.service';
 
 export type SocketUser = { id: string; email: string };
 
@@ -30,9 +31,11 @@ export class RealtimeGateway
   constructor(
 	private readonly authService: AuthService,
 	private readonly prisma: PrismaService,
+	private readonly realtime: RealtimeService,
 	) {}
 
   afterInit(server: Server) {
+	this.realtime.setServer(server);
     server.use(async (socket, next) => {
       const token = socket.handshake.auth?.token;
       if (typeof token !== 'string' || token.length === 0) {
