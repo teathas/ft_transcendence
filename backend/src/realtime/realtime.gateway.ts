@@ -11,6 +11,9 @@ import {
 import { Server, Socket } from 'socket.io';
 import { Public } from '../auth/decorators/public.decorator';
 import { AuthService } from '../auth/auth.service';
+import { MessageBody } from '@nestjs/websockets';
+import { PrismaService } from '../prisma/prisma.service';
+import { roomChannel, userChannel } from './channels';
 
 export type SocketUser = { id: string; email: string };
 
@@ -24,7 +27,10 @@ export class RealtimeGateway
 
   private readonly logger = new Logger(RealtimeGateway.name);
 
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+	private readonly authService: AuthService,
+	private readonly prisma: PrismaService,
+	) {}
 
   afterInit(server: Server) {
     server.use(async (socket, next) => {
@@ -46,6 +52,7 @@ export class RealtimeGateway
 
   handleConnection(client: Socket) {
     const user = client.data.user as SocketUser;
+	void client.join(userChannel(user.id));
     this.logger.log(`connected: ${client.id} user=${user.id}`);
   }
 
@@ -57,5 +64,46 @@ export class RealtimeGateway
   @SubscribeMessage('health:ping')
   handlePing(@ConnectedSocket() client: Socket) {
     return { ok: true, userId: (client.data.user as SocketUser).id };
+  }
+
+  @SubscribeMessage('room:join')
+  async handleRoomJoin(
+	@ConnectedSocket() client: Socket,
+	@MessageBody() body: { roomId?: unknown },
+  ) {
+	const user = client.data.user as SocketUser;
+	const roomId = body?.roomId;
+	if (typeof roomId !== 'string' || roomId.length === 0) {
+		return { ok: false, error: 'INVALID_ROOM_ID' };
+	}
+
+	const member = await this.prisma.roomMember.findUnique({
+		where: {userId_roomId: { userId: user.id, roomId } },
+	});
+	if (!member) {
+		return { ok: false, error: 'NOT_MEMBER' };
+	}
+
+	const channel = roomChannel(roomId);
+	await client.join(channel);
+	client.to(channel).emit('room:user-joined', { roomId, userId: user.id });
+	return { ok: true };
+  }
+
+  @SubscribeMessage('room:leave')
+  async handleRoomLeave(
+	@ConnectedSocket() client: Socket,
+	@MessageBody() body: { roomId?: unknown },
+  ) {
+	const user = client.data.user as SocketUser;
+	const roomId = body?.roomId;
+	if (typeof roomId !== 'string' || roomId.length === 0) {
+		return { ok: false, error: 'INVALID_ROOM_ID' };
+	}
+
+	const channel = roomChannel(roomId);
+	await client.leave(channel);
+	client.to(channel).emit('room:user-left', { roomId, userId: user.id });
+	return { ok: true };
   }
 }
