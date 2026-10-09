@@ -1,6 +1,8 @@
+import { isAnyNull } from '@prisma/client-runtime-utils';
 import {
 	Controller, Get, Patch, Param, Body, Post, UseInterceptors, UploadedFile,
 	ParseFilePipe, MaxFileSizeValidator, FileTypeValidator,
+	Query,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
@@ -10,6 +12,7 @@ import { memoryStorage } from 'multer';
 import { extname, join } from 'path';
 import { randomUUID } from 'crypto';
 import { mkdir, writeFile } from 'fs/promises';
+import { SearchUsersDto } from './dto/search-users.dto';
 
 @Controller('users')
 export class UsersController {
@@ -18,6 +21,11 @@ export class UsersController {
 	@Get('me')
 	async getMet(@CurrentUser() user: any) {
 		return this.usersService.findById(user.sub);
+	}
+
+	@Get('search')
+	async search(@CurrentUser() user: any, @Query() query: SearchUsersDto) {
+		return this.usersService.searchUsers(user.sub, query.q);
 	}
 
 	@Get(':id')
