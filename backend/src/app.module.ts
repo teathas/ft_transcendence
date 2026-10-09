@@ -11,6 +11,7 @@ import { RoomsModule } from './rooms/rooms.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path'
 import { MessagesModule } from './messages/messages.module';
+import { RealtimeModule } from './realtime/realtime.module';
 
 @Module({
 	imports: [
@@ -24,6 +25,7 @@ import { MessagesModule } from './messages/messages.module';
 			serveRoot: '/uploads',
 		}),
 		MessagesModule,
+		RealtimeModule,
 	],
 	controllers: [AppController],
 	providers: [
