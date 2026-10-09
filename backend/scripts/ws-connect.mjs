@@ -1,7 +1,7 @@
 import { io } from 'socket.io-client';
 
 const url = process.env.WS_URL ?? 'http://localhost:3000';
-const socket = io(url, { transports: ['websocket'], reconnection: false });
+const socket = io(url, { transports: ['websocket'], reconnection: false, auth: { token: process.env.TOKEN }, });
 
 socket.on('connect', async () => {
 	console.log('connected:', socket.id);
