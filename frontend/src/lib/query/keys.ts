@@ -17,6 +17,12 @@ export const queryKeys = {
     recent: (limit: number) =>
       [...queryKeys.rooms.all, "recent", limit] as const,
     detail: (code: string) => [...queryKeys.rooms.all, "detail", code] as const,
+    participants: (code: string) =>
+      [...queryKeys.rooms.detail(code), "participants"] as const,
+    messages: (code: string) =>
+      [...queryKeys.rooms.detail(code), "messages"] as const,
+    files: (code: string) =>
+      [...queryKeys.rooms.detail(code), "files"] as const,
   },
   users: {
     all: ["users"] as const,

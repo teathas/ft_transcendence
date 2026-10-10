@@ -4,27 +4,103 @@
 // Get a free hosted Postgres database in seconds: `npx create-db`
 
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
 }
 
+enum Visibility {
+  PUBLIC
+  PRIVATE
+}
+
+model Room {
+  id         String     @id @default(uuid())
+  name       String
+  subject    String
+  visibility Visibility @default(PUBLIC)
+  inviteCode String     @unique
+
+  ownerId   String
+  owner     User         @relation(fields: [ownerId], references: [id])
+  members   RoomMember[]
+  messages  Message[]
+  createdAt DateTime     @default(now())
+}
+
 model User {
-  id           String   @id @default(uuid())
-  email        String   @unique
-  username     String   @unique
-  passwordHash String
-  avatarUrl    String?
-  status       UserStatus @default(OFFLINE)
-  lastSeenAt   DateTime?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id                     String       @id @default(uuid())
+  email                  String       @unique
+  username               String       @unique
+  passwordHash           String
+  avatarUrl              String?
+  bio                    String?
+  status                 UserStatus   @default(OFFLINE)
+  lastSeenAt             DateTime?
+  createdAt              DateTime     @default(now())
+  updatedAt              DateTime     @updatedAt
+  rooms                  Room[]
+  roomMemberships        RoomMember[]
+  sentFriendRequests     Friendship[] @relation("FriendshipRequester")
+  receivedFriendRequests Friendship[] @relation("FriendshipAddressee")
+  messages               Message[]
 }
 
 enum UserStatus {
   ONLINE
   OFFLINE
+}
+
+model RevokedToken {
+  jti       String   @id
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model Friendship {
+  id          String           @id @default(uuid())
+  requesterId String
+  addresseeId String
+  lowId       String
+  highId      String
+  status      FriendshipStatus @default(PENDING)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  requester User @relation("FriendshipRequester", fields: [requesterId], references: [id], onDelete: Cascade)
+  addressee User @relation("FriendshipAddressee", fields: [addresseeId], references: [id], onDelete: Cascade)
+
+  @@unique([lowId, highId])
+  @@index([requesterId, status])
+  @@index([addresseeId, status])
+}
+
+enum FriendshipStatus {
+  PENDING
+  ACCEPTED
+}
+
+model RoomMember {
+  userId   String
+  roomId   String
+  joinedAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+  room Room @relation(fields: [roomId], references: [id])
+
+  @@id([userId, roomId])
+}
+
+model Message {
+  id        String   @id @default(uuid())
+  content   String
+  userId    String
+  roomId    String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+  room Room @relation(fields: [roomId], references: [id])
 }

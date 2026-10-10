@@ -7,6 +7,9 @@ import type {
   roomSchema,
   roomStatsSchema,
   roomStatusSchema,
+  participantSchema,
+  messageSchema,
+  roomFileSchema,
 } from "./schemas";
 
 export type RoomStatus = z.infer<typeof roomStatusSchema>;
@@ -29,3 +32,7 @@ export type RoomQuery = {
   page: number;
   pageSize: number;
 };
+
+export type Participant = z.infer<typeof participantSchema>;
+export type Message = z.infer<typeof messageSchema>;
+export type RoomFile = z.infer<typeof roomFileSchema>;

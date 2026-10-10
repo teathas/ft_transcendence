@@ -53,3 +53,33 @@ export const roomStatsSchema = z.object({
   owned: z.number().int().nonnegative(),
   participants: z.number().int().nonnegative(),
 });
+
+export const participantRoleSchema = z.enum(["host", "guest"]);
+
+export const participantSchema = z.object({
+  id: z.uuid(),
+  username: z.string(),
+  avatarUrl: z.url().nullable(),
+  role: participantRoleSchema,
+  online: z.boolean(),
+  /** Cursor colour on the shared board. */
+  color: z.string(),
+});
+
+export const messageSchema = z.object({
+  id: z.uuid(),
+  authorId: z.uuid(),
+  authorUsername: z.string(),
+  authorColor: z.string(),
+  body: z.string(),
+  sentAt: z.iso.datetime(),
+});
+
+export const roomFileSchema = z.object({
+  id: z.uuid(),
+  name: z.string(),
+  sizeBytes: z.number().int().nonnegative(),
+  kind: z.enum(["pdf", "image", "document"]),
+  uploadedBy: z.string(),
+  uploadedAt: z.iso.datetime(),
+});
