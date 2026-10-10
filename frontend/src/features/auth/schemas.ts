@@ -14,25 +14,29 @@ export const userSchema = z.object({
   id: z.uuid(),
   email: z.email(),
   username: z.string(),
-  avatarUrl: z.url().nullable(),
+  // A path such as `/uploads/avatars/….png`, not a full URL.
+  avatarUrl: z.string().nullable(),
+  bio: z.string().nullable(),
   status: userStatusSchema,
   lastSeenAt: z.iso.datetime().nullable(),
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),
 });
 
-/** Shape returned by /auth/login and /auth/register. */
+/** What `POST /auth/login` returns: the token alone. */
+export const tokenResponseSchema = z.object({
+  accessToken: z.string().min(1),
+});
+
+/** What the app keeps after signing in: the token and the user it belongs to. */
 export const authResponseSchema = z.object({
   accessToken: z.string().min(1),
   user: userSchema,
 });
 
+/** `LoginDto`: `{ email, password }`. */
 export const loginSchema = z.object({
-  username: z
-    .string()
-    .trim()
-    .min(3, "usernameMinShort")
-    .max(32, "usernameMaxShort"),
+  email: z.email("email"),
   password: z.string().min(8, "passwordMinShort"),
 });
 
@@ -41,7 +45,7 @@ export const loginSchema = z.object({
  * never leaves the browser.
  */
 const registerFieldsSchema = z.object({
-  username: z.string().trim().min(3, "usernameMin").max(30, "usernameMax"),
+  username: z.string().trim().min(3, "usernameMin").max(20, "usernameMax"),
   email: z.email("email"),
   password: z.string().min(8, "passwordMin"),
   confirmPassword: z.string().min(1, "passwordConfirm"),

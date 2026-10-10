@@ -27,8 +27,9 @@ type RetriableConfig = InternalAxiosRequestConfig & { _retried?: boolean };
 export const api: AxiosInstance = axios.create({
   baseURL: env.apiUrl,
   timeout: 15_000,
-  // Send the httpOnly refresh/session cookie to the backend.
-  withCredentials: true,
+  // Off for now: the backend sets no cookie. Turn it back on (and enable CORS
+  // credentials on the backend) the day a refresh cookie exists.
+  // withCredentials: true,
   headers: {
     Accept: "application/json",
     "Content-Type": "application/json",

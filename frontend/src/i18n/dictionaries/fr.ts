@@ -209,8 +209,8 @@ export const fr = {
       title: "Content de vous revoir",
       subtitle:
         "Connectez-vous pour retrouver vos salles et reprendre où vous en étiez.",
-      username: "Nom d’utilisateur",
-      usernamePlaceholder: "Votre nom d’utilisateur",
+      email: "E-mail",
+      emailPlaceholder: "vous@student.42.fr",
       password: "Mot de passe",
       passwordPlaceholder: "Votre mot de passe",
       submit: "Se connecter",
@@ -235,6 +235,7 @@ export const fr = {
       submit: "Créer le compte",
       submitting: "Création du compte…",
       failed: "Création du compte impossible",
+      created: "Compte créé. Connectez-vous pour continuer.",
       haveAccount: "Vous avez déjà un compte ?",
       signIn: "Se connecter",
     },
@@ -556,7 +557,7 @@ export const fr = {
   },
   validation: {
     usernameMin: "Le nom d’utilisateur doit faire au moins 3 caractères",
-    usernameMax: "Le nom d’utilisateur doit faire au plus 30 caractères",
+    usernameMax: "Le nom d’utilisateur doit faire au plus 20 caractères",
     usernameMinShort: "Au moins 3 caractères",
     usernameMaxShort: "Au plus 32 caractères",
     email: "Saisissez une adresse e-mail valide",

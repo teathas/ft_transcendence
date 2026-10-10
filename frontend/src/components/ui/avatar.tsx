@@ -1,3 +1,4 @@
+import { env } from "@/lib/env";
 import { cn } from "@/lib/utils";
 
 /** Up to two letters, so a missing image still identifies someone. */
@@ -21,11 +22,13 @@ export function Avatar({
   );
 
   if (src) {
+    // Uploaded avatars come back as `/uploads/avatars/…`, a path served by the
+    // API; a local preview (`blob:`) or a full URL is already absolute.
+    const url = src.startsWith("/") ? `${env.apiUrl}${src}` : src;
     return (
-      // Avatars are arbitrary user-supplied URLs, which next/image cannot
-      // optimise without whitelisting every possible host.
+      // next/image cannot optimise an arbitrary host without whitelisting it.
       // eslint-disable-next-line @next/next/no-img-element
-      <img src={src} alt="" className={cn(base, "object-cover")} />
+      <img src={url} alt="" className={cn(base, "object-cover")} />
     );
   }
 

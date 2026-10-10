@@ -3,7 +3,7 @@ import { parseResponse } from "@/lib/api/parse";
 import { env } from "@/lib/env";
 
 import { authMocks } from "../mocks";
-import { authResponseSchema, userSchema } from "../schemas";
+import { tokenResponseSchema, userSchema } from "../schemas";
 import type {
   AuthResponse,
   LoginPayload,
@@ -14,30 +14,39 @@ import type {
 } from "../types";
 
 export const authApi = {
+  /**
+   * `POST /auth/login` returns the token alone, so the user is fetched right
+   * after — with the token passed explicitly, since it is not stored yet.
+   */
   async login(payload: LoginPayload): Promise<AuthResponse> {
-    if (env.enableMocks) return authMocks.authResponse(payload.username);
-
     const { data } = await api.post("/auth/login", payload);
-    return parseResponse(authResponseSchema, data, "POST /auth/login");
+    const { accessToken } = parseResponse(
+      tokenResponseSchema,
+      data,
+      "POST /auth/login",
+    );
+
+    const { data: me } = await api.get("/users/me", {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    return {
+      accessToken,
+      user: parseResponse(userSchema, me, "GET /users/me"),
+    };
   },
 
-  async register(payload: RegisterPayload): Promise<AuthResponse> {
-    if (env.enableMocks) return authMocks.authResponse(payload.username);
-
+  /** Creates the account. No token is issued: the user signs in afterwards. */
+  async register(payload: RegisterPayload): Promise<User> {
     const { data } = await api.post("/auth/register", payload);
-    return parseResponse(authResponseSchema, data, "POST /auth/register");
+    return parseResponse(userSchema, data, "POST /auth/register");
   },
 
   async logout(): Promise<void> {
-    if (env.enableMocks) return;
-
     // A 401 here just means the session is already gone.
     await api.post("/auth/logout", undefined, { skipAuthRefresh: true });
   },
 
   async uploadAvatar(file: Blob, filename: string): Promise<User> {
-    if (env.enableMocks) return authMocks.uploadAvatar(file);
-
     const body = new FormData();
     body.append("avatar", file, filename);
 
@@ -50,8 +59,6 @@ export const authApi = {
   },
 
   async updateProfile(payload: ProfilePatch): Promise<User> {
-    if (env.enableMocks) return authMocks.updateProfile(payload);
-
     const { data } = await api.patch("/users/me", payload);
     return parseResponse(userSchema, data, "PATCH /users/me");
   },
@@ -69,9 +76,7 @@ export const authApi = {
   },
 
   async session(): Promise<User> {
-    if (env.enableMocks) return authMocks.session();
-
-    const { data } = await api.get("/auth/me");
-    return parseResponse(userSchema, data, "GET /auth/me");
+    const { data } = await api.get("/users/me");
+    return parseResponse(userSchema, data, "GET /users/me");
   },
 };

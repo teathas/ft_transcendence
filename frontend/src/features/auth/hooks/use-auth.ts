@@ -2,7 +2,9 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
+import { useToast } from "@/components/ui/toast";
 import { routes } from "@/config/routes";
+import { useDict } from "@/i18n/client";
 import { isApiError, tokenStore } from "@/lib/api";
 import { useLocaleRouter } from "@/i18n/navigation";
 import { queryKeys } from "@/lib/query/keys";
@@ -47,15 +49,17 @@ export function useLogin() {
 }
 
 export function useRegister() {
-  const queryClient = useQueryClient();
   const router = useLocaleRouter();
+  const toast = useToast();
+  const d = useDict();
 
   return useMutation({
     mutationFn: authApi.register,
-    onSuccess: (result: AuthResponse) => {
-      tokenStore.set(result.accessToken);
-      queryClient.setQueryData(queryKeys.auth.session(), result.user);
-      router.replace(routes.onboarding);
+    // The account exists but nobody is signed in: say so, then ask for the
+    // credentials on the login page.
+    onSuccess: () => {
+      toast(d.auth.register.created);
+      router.replace(routes.login);
     },
   });
 }

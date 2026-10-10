@@ -19,7 +19,7 @@ import { isApiError } from "@/lib/api";
 import { useLogin } from "../hooks/use-auth";
 import { loginSchema } from "../schemas";
 
-const INITIAL_VALUES = { username: "", password: "" };
+const INITIAL_VALUES = { email: "", password: "" };
 
 export function LoginForm() {
   const d = useDict();
@@ -55,16 +55,18 @@ export function LoginForm() {
           )}
 
           <Field>
-            <FieldLabel {...form.getLabelProps("username")}>
-              {d.auth.login.username}
+            <FieldLabel {...form.getLabelProps("email")}>
+              {d.auth.login.email}
             </FieldLabel>
             <Input
-              {...form.getFieldProps("username")}
-              autoComplete="username"
-              placeholder={d.auth.login.usernamePlaceholder}
+              {...form.getFieldProps("email")}
+              type="email"
+              inputMode="email"
+              autoComplete="email"
+              placeholder={d.auth.login.emailPlaceholder}
               autoFocus
             />
-            <FieldError {...form.getErrorProps("username")} />
+            <FieldError {...form.getErrorProps("email")} />
           </Field>
 
           <Field>

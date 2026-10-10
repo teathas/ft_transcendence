@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const accountSchema = z.object({
-  username: z.string().trim().min(3, "usernameMin").max(30, "usernameMax"),
+  username: z.string().trim().min(3, "usernameMin").max(20, "usernameMax"),
   email: z.email("email"),
 });
 
