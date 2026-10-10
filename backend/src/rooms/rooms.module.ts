@@ -7,6 +7,7 @@ import { RealtimeModule } from '../realtime/realtime.module';
 @Module({
   imports: [AuthModule, RealtimeModule],
   controllers: [RoomsController],
-  providers: [RoomsService]
+  providers: [RoomsService],
+  exports: [RoomsService], 
 })
 export class RoomsModule {}
