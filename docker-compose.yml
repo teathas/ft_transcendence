@@ -45,6 +45,7 @@ services:
       UPLOAD_DIR: ${UPLOAD_DIR}
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN}
+      PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
     depends_on:
       pgdb:
         condition: service_healthy

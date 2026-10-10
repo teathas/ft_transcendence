@@ -1,6 +1,7 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { withPublicAvatar } from '../common/public-url';
 
 export const PUBLIC_USER_SELECT = {
 	id: true,
@@ -25,7 +26,7 @@ export class UsersService {
 		}
 
 		const { passwordHash: _, ...safeUser } = user;
-		return safeUser;
+		return withPublicAvatar(safeUser);
 	}
 
 	async findPublicProfile(id: string) {
@@ -43,7 +44,7 @@ export class UsersService {
 			throw new NotFoundException('User not found');
 		}
 
-		return user;
+		return withPublicAvatar(user);
 	}
 
 	async updateProfile(id: string, dto: UpdateUserDto) {
@@ -62,7 +63,7 @@ export class UsersService {
 		});
 
 		const { passwordHash: _, ...safeUser } = updated;
-		return safeUser;
+		return withPublicAvatar(safeUser);
 	}
 
 	async updateAvatar(id: string, avatarUrl: string) {
@@ -72,7 +73,7 @@ export class UsersService {
 		});
 
 		const { passwordHash: _, ...safeUser } = updated;
-		return safeUser;
+		return withPublicAvatar(safeUser);
 	}
 
 	async removeAvatar(id: string) {
@@ -82,7 +83,7 @@ export class UsersService {
 		});
 		
 		const { passwordHash: _, ...safeUser } = updated;
-		return safeUser;
+		return withPublicAvatar(safeUser);
 	}
 
 	async searchUsers(meId: string, q: string) {
@@ -119,7 +120,7 @@ export class UsersService {
 		}
 
 		return users.map((u) => ({
-			...u,
+			...withPublicAvatar(u),
 			relationship: relationByUserId.get(u.id) ?? 'none',
 		}));
 	}

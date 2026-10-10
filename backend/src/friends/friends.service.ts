@@ -4,6 +4,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { toFriendPair } from './utils/friend-pair';
 import { Prisma } from '../generated/prisma/client';
 import { PUBLIC_USER_SELECT } from '../users/users.service';
+import { withPublicAvatar } from '../common/public-url';
 
 @Injectable()
 export class FriendsService {
@@ -86,7 +87,7 @@ export class FriendsService {
 
 		return rows.map((f) => ({
 			friendshipId: f.id,
-			user: f.requesterId == meId ? f.addressee : f.requester,
+			user: withPublicAvatar(f.requesterId == meId ? f.addressee : f.requester),
 		}));
 	}
 
@@ -97,7 +98,7 @@ export class FriendsService {
 			orderBy: { createdAt: 'desc' },
 		});
 
-		return rows.map((r) => ({ requestId: r.id, createdAt: r.createdAt, user: r.requester }));
+		return rows.map((r) => ({ requestId: r.id, createdAt: r.createdAt, user: withPublicAvatar(r.requester) }));
 	}
 
 	async getSentRequests(meId: string) {
@@ -107,7 +108,7 @@ export class FriendsService {
 			orderBy: { createdAt: 'desc' },
 		});
 
-		return rows.map((r) => ({ requestId: r.id, createdAt: r.createdAt, user: r.addressee }));
+		return rows.map((r) => ({ requestId: r.id, createdAt: r.createdAt, user: withPublicAvatar(r.addressee) }));
 	}
 
 	async cancelRequest(meId: string, requestId: string) {
