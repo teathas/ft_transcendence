@@ -58,7 +58,7 @@ export class UsersService {
 
 		const updated = await this.prisma.user.update({
 			where: { id },
-			data: dto,
+			data: { username: dto.username, bio: dto.bio },
 		});
 
 		const { passwordHash: _, ...safeUser } = updated;
@@ -71,6 +71,16 @@ export class UsersService {
 			data: { avatarUrl },
 		});
 
+		const { passwordHash: _, ...safeUser } = updated;
+		return safeUser;
+	}
+
+	async removeAvatar(id: string) {
+		const updated = await this.prisma.user.update({
+			where: { id },
+			data: { avatarUrl: null },
+		});
+		
 		const { passwordHash: _, ...safeUser } = updated;
 		return safeUser;
 	}

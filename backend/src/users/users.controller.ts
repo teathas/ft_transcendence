@@ -1,7 +1,7 @@
 import { isAnyNull } from '@prisma/client-runtime-utils';
 import {
 	Controller, Get, Patch, Param, Body, Post, UseInterceptors, UploadedFile,
-	ParseFilePipe, MaxFileSizeValidator, FileTypeValidator,
+	Delete, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator,
 	Query,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
@@ -70,4 +70,8 @@ export class UsersController {
 		return this.usersService.updateAvatar(user.sub, avatarUrl);
 	}
 
+	@Delete('me/avatar')
+	async removeAvatar(@CurrentUser() user: any) {
+		return this.usersService.removeAvatar(user.sub);
+	}
 }
