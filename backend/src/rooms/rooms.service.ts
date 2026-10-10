@@ -1,12 +1,21 @@
 import { Injectable,NotFoundException,ForbiddenException,ConflictException } from '@nestjs/common';
+import { Prisma } from '../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateRoomDto,Visibility  } from './dto/create-room.dto';
 import { JoinRoomDto  } from './dto/join-room.dto';
 import { randomBytes } from 'crypto';
+import { FindRoomsQueryDto, RoomSort} from './dto/find-rooms-query.dto';
 
 @Injectable()
 export class RoomsService {
     constructor(private prisma: PrismaService) {}
+
+    async touchActivity(roomId: string) {
+        await this.prisma.room.update({
+            where: { id: roomId },
+            data: { lastActivityAt: new Date() },
+        });
+    }
     //create_room
     async create(dto: CreateRoomDto, ownerId: string) {
         const inviteCode = randomBytes(4).toString('hex'); 
@@ -28,7 +37,7 @@ export class RoomsService {
         return room;
     }
 
-    //join_romm
+    //join_room
     async join(roomId: string, userId: string,dto:JoinRoomDto) {
         const existing = await this.prisma.room.findUnique({
             where: {id : roomId},
@@ -53,6 +62,7 @@ export class RoomsService {
         });
         if(membership)
             throw new ConflictException('User is already a member of this room');
+        await this.touchActivity(roomId);
         return this.prisma.roomMember.create({
             data:{
                 userId,
@@ -60,26 +70,36 @@ export class RoomsService {
             }
         })
     }
-
-    async findPublicRooms()
-    {
-        return this.prisma.room.findMany({
-            where:{
-                visibility :Visibility.PUBLIC,
-            },
-            orderBy: {
-            createdAt: 'desc',
-            },
-            select: {
-                id: true,
-                name: true,
-                subject: true,
-                visibility: true,
-                ownerId:true,
-                createdAt: true,
-            }
-        })
+    private getOrderBy(sort: RoomSort = RoomSort.NEWEST): Prisma.RoomOrderByWithRelationInput[] {
+        switch (sort) {
+            case RoomSort.MEMBERS:
+            return [{ members: { _count: 'desc' } }, { createdAt: 'desc' }];
+            case RoomSort.ACTIVE:
+            return [{ lastActivityAt: 'desc' }, { createdAt: 'desc' }];
+            case RoomSort.NEWEST:
+            default:
+            return [{ createdAt: 'desc' }];
+        }
     }
+    async findPublicRooms(query: FindRoomsQueryDto  = {}) {
+        const name = query.name?.trim();
+        const subject = query.subject?.trim();
+
+        return this.prisma.room.findMany({
+        where: {
+            visibility: Visibility.PUBLIC,
+            ...(name && { name: { contains: name, mode: 'insensitive' } }),
+            ...(subject && { subject: { contains: subject, mode: 'insensitive' } }),
+        },
+        orderBy: this.getOrderBy(query.sort),
+        select: {
+            id: true, name: true, subject: true,
+            visibility: true, ownerId: true, createdAt: true,
+            lastActivityAt: true,_count: { select: { members: true } },
+        },
+        });
+    }
+
 
 
 

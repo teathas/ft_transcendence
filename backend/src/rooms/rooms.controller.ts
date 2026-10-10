@@ -1,15 +1,13 @@
 
-import { Controller, Post, Body, Req, UseGuards,Param, Delete,Get } from '@nestjs/common';
+import { Controller, Post, Body, Req,Param, Delete,Get,Query } from '@nestjs/common';
 import { RoomsService } from './rooms.service';
 import { CreateRoomDto  } from './dto/create-room.dto';
 import { JoinRoomDto  } from './dto/join-room.dto';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { Public } from '../auth/decorators/public.decorator'
+import { FindRoomsQueryDto } from './dto/find-rooms-query.dto';
 
 @Controller('rooms')
 export class RoomsController {
     constructor(private roomsService: RoomsService) { }
-    @UseGuards(JwtAuthGuard)
     @Post()
     async create(@Body() dto:CreateRoomDto,@Req() req: any)
     {
@@ -22,11 +20,12 @@ export class RoomsController {
         const userId = req.user.sub;
         return this.roomsService.join(roomId, userId,dto);
     }
+
     @Get('public')
-    async findPublicRooms()
-    {
-        return this.roomsService.findPublicRooms();
+    async findPublicRooms(@Query() query: FindRoomsQueryDto) {
+    return this.roomsService.findPublicRooms(query);
     }
+
     @Delete(':roomId/leave')
     async leave(@Param('roomId') roomId: string,@Req() req: any)
     {
