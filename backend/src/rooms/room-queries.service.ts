@@ -101,7 +101,8 @@ export class RoomQueriesService {
 
 	/**
 	 * Everything a room needs to open, in one call: the room, who is in it and
-	 * whether they are online, the latest messages, the files and the board.
+	 * whether they are online, the latest messages and the files. The board is
+	 * not here: it arrives over its own live connection (see board-sync).
 	 */
 	async detail(meId: string, roomId: string) {
 		const room = await this.view(meId, roomId);
@@ -109,7 +110,7 @@ export class RoomQueriesService {
 			throw new ForbiddenException('Join the room to open it');
 		}
 
-		const [members, messages, files, board] = await Promise.all([
+		const [members, messages, files] = await Promise.all([
 			this.prisma.roomMember.findMany({
 				where: { roomId },
 				select: { joinedAt: true, user: { select: PUBLIC_USER_SELECT } },
@@ -127,10 +128,6 @@ export class RoomQueriesService {
 				select: fileSelect,
 				orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
 				take: 200,
-			}),
-			this.prisma.room.findUniqueOrThrow({
-				where: { id: roomId },
-				select: { boardSnapshot: true, boardVersion: true, boardUpdatedAt: true },
 			}),
 		]);
 
@@ -150,11 +147,6 @@ export class RoomQueriesService {
 				nextCursor: messages.length > MESSAGES_PAGE ? page[page.length - 1].id : null,
 			},
 			files,
-			board: {
-				snapshot: board.boardSnapshot,
-				version: board.boardVersion,
-				updatedAt: board.boardUpdatedAt,
-			},
 		};
 	}
 }

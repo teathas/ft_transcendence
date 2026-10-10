@@ -61,10 +61,6 @@ export const useParticipants = (id: string) =>
 export const useRoomFiles = (id: string) =>
   useRoomDetail(id, (detail) => detail.files, reuse);
 
-/** The board as stored: what to start from, and the version to save against. */
-export const useRoomBoard = (id: string) =>
-  useRoomDetail(id, (detail) => detail.board, reuse);
-
 export function useMessages(id: string) {
   return useInfiniteQuery({
     queryKey: queryKeys.rooms.messages(id),
@@ -155,33 +151,5 @@ export function useDeleteRoomFile(id: string) {
     mutationFn: (fileId: string) => roomsApi.deleteFile(id, fileId),
     onSuccess: (_void, fileId) =>
       patchFiles((files) => files.filter((file) => file.id !== fileId)),
-  });
-}
-
-export function useSaveBoard(id: string) {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({
-      snapshot,
-      baseVersion,
-    }: {
-      snapshot: Record<string, unknown>;
-      baseVersion: number;
-    }) => roomsApi.saveBoard(id, snapshot, baseVersion),
-    // Keep the cached room in step, so reopening starts from what was saved.
-    onSuccess: ({ version }, { snapshot }) =>
-      queryClient.setQueryData<RoomDetail>(
-        queryKeys.rooms.detail(id),
-        (detail) =>
-          detail && {
-            ...detail,
-            board: {
-              snapshot,
-              version,
-              updatedAt: new Date().toISOString(),
-            },
-          },
-      ),
   });
 }

@@ -25,12 +25,15 @@ const envSchema = z.object({
 
   /**
    * How the whiteboard shares state:
-   * - `local`  — browser-only, no cursors (the default until a server exists)
+   * - `server` — the API's own sync server (the default): live cursors and
+   *               drawing, saved with the room. Used as `local` while mocks
+   *               are on, since there is no API then.
+   * - `local`  — browser-only, no cursors
    * - `demo`   — tldraw's public demo server: real cursors, public data
-   * - `server` — our own sync server at NEXT_PUBLIC_SYNC_URL
    */
-  NEXT_PUBLIC_SYNC_MODE: z.enum(["local", "demo", "server"]).default("local"),
+  NEXT_PUBLIC_SYNC_MODE: z.enum(["local", "demo", "server"]).default("server"),
 
+  /** Where the sync server is. Unset: the API's own address, as ws(s). */
   NEXT_PUBLIC_SYNC_URL: z
     .url({
       protocol: /^wss?$/,
@@ -63,8 +66,12 @@ export const env = {
   /** True while the frontend serves its own mock rooms. */
   enableMocks: parsed.data.NEXT_PUBLIC_ENABLE_MOCKS,
   /** Whiteboard sync strategy — see the schema above. */
-  syncMode: parsed.data.NEXT_PUBLIC_SYNC_MODE,
-  syncUrl: parsed.data.NEXT_PUBLIC_SYNC_URL,
+  syncMode: parsed.data.NEXT_PUBLIC_ENABLE_MOCKS
+    ? "local"
+    : parsed.data.NEXT_PUBLIC_SYNC_MODE,
+  syncUrl:
+    parsed.data.NEXT_PUBLIC_SYNC_URL ??
+    parsed.data.NEXT_PUBLIC_API_URL.replace(/^http/, "ws"),
   isProduction: process.env.NODE_ENV === "production",
   isDevelopment: process.env.NODE_ENV === "development",
 } as const;

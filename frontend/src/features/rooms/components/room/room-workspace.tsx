@@ -27,7 +27,7 @@ const FULL_HEIGHT = "h-[calc(100svh-3.5rem)] lg:h-svh";
 
 export function RoomWorkspace({ id }: { id: string }) {
   const d = useDict();
-  const { data: room, isPending, error, isFetchedAfterMount } = useRoom(id);
+  const { data: room, isPending, error } = useRoom(id);
   const { data: participants } = useParticipants(id);
   const { user } = useSession();
   const [syncStatus, setSyncStatus] = useState<SyncStatus>("loading");
@@ -114,18 +114,11 @@ export function RoomWorkspace({ id }: { id: string }) {
       />
 
       <div className="flex min-h-0 flex-1">
-        {/* The board starts from the stored copy, so it waits for the room
-            to have been fetched: a cached one could be out of date and the
-            first save would then be refused. */}
-        {isFetchedAfterMount ? (
-          <BoardPanel
-            roomId={room.id}
-            identity={identity}
-            onStatusChange={handleStatusChange}
-          />
-        ) : (
-          <Skeleton className="m-4 min-h-0 flex-1 rounded-xl" />
-        )}
+        <BoardPanel
+          roomId={room.id}
+          identity={identity}
+          onStatusChange={handleStatusChange}
+        />
 
         <aside
           className={cn(

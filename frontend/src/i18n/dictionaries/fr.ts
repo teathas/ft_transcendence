@@ -611,10 +611,6 @@ export const fr = {
     fileFailed: "Le fichier n’a pas pu être envoyé ou enregistré.",
     download: "Télécharger {name}",
     deleteFile: "Supprimer {name}",
-    board: {
-      conflict:
-        "Quelqu’un a enregistré ce tableau après votre ouverture. Vos dernières modifications n’ont pas été enregistrées — rechargez pour voir les siennes.",
-    },
     fileTooBig: "{name} dépasse {size} et n’a pas été partagé.",
     unavailable: {
       title: "Cette salle n’est pas disponible",
@@ -631,9 +627,9 @@ export const fr = {
         title: "Tout le monde voit votre curseur et vos modifications",
       },
       local: {
-        text: "Enregistré",
+        text: "Local",
         title:
-          "Le tableau est enregistré dans la salle. Les autres voient vos modifications en la rouvrant ; le partage en direct viendra plus tard.",
+          "Ce tableau n’est enregistré que dans votre navigateur. Les autres ne le voient pas encore.",
       },
       offline: {
         text: "Hors ligne",

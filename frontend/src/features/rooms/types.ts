@@ -1,7 +1,6 @@
 import type { z } from "zod";
 
 import type {
-  boardSchema,
   createRoomSchema,
   joinRoomSchema,
   messageSchema,
@@ -40,7 +39,6 @@ export type RoomQuery = {
 export type Participant = z.infer<typeof participantSchema>;
 export type Message = z.infer<typeof messageSchema>;
 export type RoomFile = z.infer<typeof roomFileSchema>;
-export type Board = z.infer<typeof boardSchema>;
 
 /** One page of a conversation, newest first, and where the older ones start. */
 export type MessagePage = { items: Message[]; nextCursor: string | null };
@@ -51,5 +49,4 @@ export type RoomDetail = {
   participants: Participant[];
   messages: MessagePage;
   files: RoomFile[];
-  board: Board;
 };

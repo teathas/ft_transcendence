@@ -14,6 +14,7 @@ import { FriendsModule } from './friends/friends.module';
 import { MessagesModule } from './messages/messages.module';
 import { RealtimeModule } from './realtime/realtime.module';
 import { DirectMessagesModule } from './direct-messages/direct-messages.module';
+import { BoardSyncModule } from './board-sync/board-sync.module';
 
 @Module({
 	imports: [
@@ -40,6 +41,7 @@ import { DirectMessagesModule } from './direct-messages/direct-messages.module';
 		FriendsModule,
 		RealtimeModule,
 		DirectMessagesModule,
+		BoardSyncModule,
 	],
 	controllers: [AppController],
 	providers: [

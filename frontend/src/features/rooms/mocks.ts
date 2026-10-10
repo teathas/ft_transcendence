@@ -346,7 +346,6 @@ export const roomDetailMocks = {
         nextCursor: null,
       },
       files: [...MOCK_FILES, ...uploadedFiles],
-      board: { snapshot: null, version: 0, updatedAt: null },
     };
   },
   messages: (): Promise<MessagePage> =>
@@ -356,7 +355,6 @@ export const roomDetailMocks = {
     if (index >= 0) uploadedFiles.splice(index, 1);
     return settle(undefined, 200);
   },
-  saveBoard: (baseVersion: number) => settle({ version: baseVersion + 1 }, 100),
 
   uploadFile: (file: File) => {
     const extension = file.name.split(".").pop()?.toLowerCase() ?? "";

@@ -11,10 +11,8 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { Public } from '../auth/decorators/public.decorator'
 import { ListRoomsDto } from './dto/list-rooms.dto';
 import { JoinByCodeDto } from './dto/join-by-code.dto';
-import { SaveBoardDto } from './dto/save-board.dto';
 import { RoomQueriesService } from './room-queries.service';
 import { RoomFilesService, MAX_FILE_SIZE } from './room-files.service';
-import { RoomBoardService } from './room-board.service';
 
 @Controller('rooms')
 export class RoomsController {
@@ -22,7 +20,6 @@ export class RoomsController {
         private roomsService: RoomsService,
         private queries: RoomQueriesService,
         private files: RoomFilesService,
-        private board: RoomBoardService,
     ) { }
 
     // Fixed paths first: `:roomId` would swallow them.
@@ -89,15 +86,5 @@ export class RoomsController {
     async removeFile(@Param('roomId', ParseUUIDPipe) roomId: string, @Param('fileId', ParseUUIDPipe) fileId: string, @Req() req: any)
     {
         await this.files.remove(roomId, fileId, req.user.sub);
-    }
-    @Get(':roomId/board')
-    async getBoard(@Param('roomId', ParseUUIDPipe) roomId: string, @Req() req: any)
-    {
-        return this.board.get(roomId, req.user.sub);
-    }
-    @Put(':roomId/board')
-    async saveBoard(@Param('roomId', ParseUUIDPipe) roomId: string, @Body() dto: SaveBoardDto, @Req() req: any)
-    {
-        return this.board.save(roomId, req.user.sub, dto);
     }
 }

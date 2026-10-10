@@ -128,19 +128,10 @@ export const fileWireSchema = z.object({
   uploader: z.object({ id: z.uuid(), username: z.string() }).nullable(),
 });
 
-export const boardSchema = z.object({
-  /** A tldraw snapshot, or null for a board nobody has drawn on. */
-  snapshot: z.record(z.string(), z.unknown()).nullable(),
-  /** Counts saves; a save made from an older one is refused. */
-  version: z.number().int().nonnegative(),
-  updatedAt: z.iso.datetime().nullable(),
-});
-
 /** `GET /rooms/:id`: everything a room needs to open, in one answer. */
 export const roomDetailWireSchema = z.object({
   room: roomSchema,
   members: z.array(memberWireSchema),
   messages: messagePageWireSchema,
   files: z.array(fileWireSchema),
-  board: boardSchema,
 });

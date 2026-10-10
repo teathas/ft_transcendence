@@ -604,10 +604,6 @@ export const en = {
     fileFailed: "The file could not be sent or saved.",
     download: "Download {name}",
     deleteFile: "Delete {name}",
-    board: {
-      conflict:
-        "Someone saved this board after you opened it. Your latest changes were not saved — reload to see theirs.",
-    },
     fileTooBig: "{name} is over {size} and was not shared.",
     unavailable: {
       title: "This room is not available",
@@ -624,9 +620,9 @@ export const en = {
         title: "Everyone sees your cursor and your edits",
       },
       local: {
-        text: "Saved",
+        text: "Local",
         title:
-          "The board is saved to the room. Others see your changes when they reopen it; live sharing comes later.",
+          "This board is saved in your browser only. Other people cannot see it yet.",
       },
       offline: {
         text: "Offline",

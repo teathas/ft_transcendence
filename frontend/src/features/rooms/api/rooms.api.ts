@@ -116,7 +116,6 @@ export const roomsApi = {
       participants: wire.members.map(toParticipant),
       messages: toMessagePage(wire.messages),
       files: wire.files.map(toFile),
-      board: wire.board,
     };
   },
 
@@ -158,25 +157,6 @@ export const roomsApi = {
     if (env.enableMocks) return roomDetailMocks.deleteFile(fileId);
 
     await api.delete(`/rooms/${id}/files/${fileId}`);
-  },
-
-  /** Saves the whole board. Refused (409) if it changed since `baseVersion`. */
-  async saveBoard(
-    id: string,
-    snapshot: Record<string, unknown>,
-    baseVersion: number,
-  ): Promise<{ version: number }> {
-    if (env.enableMocks) return roomDetailMocks.saveBoard(baseVersion);
-
-    const { data } = await api.put(`/rooms/${id}/board`, {
-      snapshot,
-      baseVersion,
-    });
-    return parseResponse(
-      z.object({ version: z.number().int() }),
-      data,
-      "PUT /rooms/:id/board",
-    );
   },
 
   async create(payload: CreateRoomPayload): Promise<Room> {
