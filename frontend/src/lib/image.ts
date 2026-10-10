@@ -1,4 +1,10 @@
 export const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+
+/**
+ * The types `POST /users/me/avatar` accepts — its `FileTypeValidator` matches
+ * jpg, jpeg, png and webp. Anything else would only come back as an error.
+ */
+export const AVATAR_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
 export const AVATAR_MAX_EDGE = 512;
 
 export function formatBytes(bytes: number) {
@@ -9,8 +15,8 @@ export function formatBytes(bytes: number) {
 
 /** Returns an error message, or `null` when the file is usable. */
 export function validateImageFile(file: File): string | null {
-  if (!file.type.startsWith("image/")) {
-    return "That file is not an image.";
+  if (!(AVATAR_TYPES as readonly string[]).includes(file.type)) {
+    return "Only JPG, PNG or WebP images are accepted.";
   }
   if (file.size > MAX_IMAGE_BYTES) {
     return `Images must be under ${formatBytes(MAX_IMAGE_BYTES)}.`;

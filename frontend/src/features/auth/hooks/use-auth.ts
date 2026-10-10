@@ -8,6 +8,7 @@ import { useDict } from "@/i18n/client";
 import { isApiError, tokenStore } from "@/lib/api";
 import { useLocaleRouter } from "@/i18n/navigation";
 import { queryKeys } from "@/lib/query/keys";
+import { resetCache } from "@/lib/query/persister";
 
 import { authApi } from "../api/auth.api";
 import type { AuthResponse } from "../types";
@@ -19,7 +20,6 @@ export function useSession() {
     queryFn: authApi.session,
     // A 401 here is the answer, not a failure worth retrying.
     retry: false,
-    staleTime: 5 * 60_000,
   });
 
   return {
@@ -41,6 +41,8 @@ export function useLogin() {
   return useMutation({
     mutationFn: authApi.login,
     onSuccess: (result: AuthResponse) => {
+      // Drop anything a previous user left in the stored cache.
+      resetCache(queryClient);
       tokenStore.set(result.accessToken);
       queryClient.setQueryData(queryKeys.auth.session(), result.user);
       router.replace(routes.dashboard);
@@ -99,7 +101,7 @@ export function useDeleteAccount() {
     mutationFn: authApi.deleteAccount,
     onSuccess: () => {
       tokenStore.clear();
-      queryClient.clear();
+      resetCache(queryClient);
       router.replace(routes.register);
     },
   });
@@ -114,7 +116,7 @@ export function useLogout() {
     // Drop local state whether or not the server call succeeded.
     onSettled: () => {
       tokenStore.clear();
-      queryClient.clear();
+      resetCache(queryClient);
       router.replace(routes.login);
     },
   });

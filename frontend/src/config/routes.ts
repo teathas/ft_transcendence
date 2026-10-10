@@ -10,7 +10,6 @@ export const routes = {
   home: "/" as Route,
   login: "/login" as Route,
   register: "/register" as Route,
-  onboarding: "/onboarding" as Route,
   dashboard: "/dashboard" as Route,
   rooms: "/rooms" as Route,
   profile: "/profile" as Route,

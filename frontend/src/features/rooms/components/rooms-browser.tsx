@@ -44,8 +44,7 @@ export function RoomsBrowser() {
     pageSize: Math.max(1, Number(state.pageSize) || 12),
   };
 
-  const { data, isPending, isError, error, refetch, isFetching } =
-    useRooms(query);
+  const { data, isPending, error, refetch, isFetching } = useRooms(query);
 
   /** Any filter change invalidates the current page number. */
   const setFilters = (patch: Record<string, string>) =>
@@ -101,7 +100,9 @@ export function RoomsBrowser() {
               <Skeleton key={index} className="h-44 rounded-xl" />
             ))}
           </div>
-        ) : isError ? (
+        ) : !data ? (
+          // Only when there is nothing to show: a failed refresh keeps the
+          // cached list on screen, and the banner explains why.
           <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed px-6 py-14 text-center">
             <span className="flex size-11 items-center justify-center rounded-xl bg-amber-500/10">
               <TriangleAlert
@@ -154,7 +155,7 @@ export function RoomsBrowser() {
           </div>
         )}
 
-        {!isPending && !isError && (
+        {data && (
           <Pagination
             page={query.page}
             pageSize={query.pageSize}

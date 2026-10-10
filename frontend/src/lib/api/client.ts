@@ -7,6 +7,7 @@ import axios, {
 
 import { env } from "@/lib/env";
 
+import { connectionStore } from "./connection";
 import { toApiError } from "./errors";
 import { tokenStore } from "./tokens";
 
@@ -83,10 +84,19 @@ function refreshAccessToken(): Promise<string | null> {
 }
 
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    connectionStore.set(true);
+    return response;
+  },
   async (error: unknown) => {
     const config = (error as AxiosError).config as RetriableConfig | undefined;
     const status = (error as AxiosError).response?.status;
+
+    // No response at all: the backend is unreachable. A status code of any kind
+    // means it answered. A cancelled request says nothing either way.
+    if (!axios.isCancel(error)) {
+      connectionStore.set(Boolean((error as AxiosError).response));
+    }
 
     if (
       status === 401 &&

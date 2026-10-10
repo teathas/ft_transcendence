@@ -445,56 +445,6 @@ export const en = {
     },
   },
 
-  onboarding: {
-    metaTitle: "Get started",
-    metaDescription: "Set up your profile and open your first room.",
-    progress: "Step {current} of {total} · {label}",
-    progressLabel: "Progress",
-    steps: {
-      welcome: "Welcome",
-      picture: "Picture",
-      firstRoom: "First room",
-    },
-    welcome: {
-      title: "Welcome 👋",
-      titleNamed: "Welcome, {name} 👋",
-      subtitle:
-        "Shared Room is one room where everyone writes, draws and talks together. Two quick steps and you are in.",
-      board: {
-        title: "A board everyone can draw on",
-        description: "One infinite canvas, shared by the whole room.",
-      },
-      chat: {
-        title: "Chat that stays in context",
-        description: "Ask a question without interrupting the explanation.",
-      },
-      files: {
-        title: "Material within reach",
-        description: "Drop a PDF or an image and everyone can open it.",
-      },
-      submit: "Get started",
-    },
-    avatar: {
-      title: "Pick a picture",
-      subtitle:
-        "It shows next to your cursor on the board, so people know who is drawing. You can skip this and add one later.",
-      saveAndContinue: "Save and continue",
-    },
-    firstRoom: {
-      title: "Open your first room",
-      subtitle:
-        "Start one and share the code, or step into a room someone already opened.",
-      create: {
-        title: "Create a room",
-        description: "Start a board and share the code with your group.",
-      },
-      join: {
-        title: "Join with a code",
-        description: "Step into a room someone has already opened.",
-      },
-      later: "I’ll do this later",
-    },
-  },
 
   room: {
     metaTitle: "Room {code}",
@@ -568,6 +518,10 @@ export const en = {
     roomCodeMin: "Enter the room code",
     roomCodeMax: "That code looks too long",
     roomCodeFormat: "Codes use letters, numbers and dashes only",
+  },
+
+  connection: {
+    lost: "The server is not responding. The data shown may be out of date.",
   },
 
   errors: {

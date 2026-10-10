@@ -441,55 +441,6 @@ export const ar = {
     },
   },
 
-  onboarding: {
-    metaTitle: "ابدأ الآن",
-    metaDescription: "أعدّ ملفك الشخصي وافتح غرفتك الأولى.",
-    progress: "الخطوة {current} من {total} · {label}",
-    progressLabel: "التقدّم",
-    steps: {
-      welcome: "مرحبًا",
-      picture: "الصورة",
-      firstRoom: "الغرفة الأولى",
-    },
-    welcome: {
-      title: "مرحبًا 👋",
-      titleNamed: "مرحبًا يا {name} 👋",
-      subtitle:
-        "‏Shared Room غرفة واحدة يكتب فيها الجميع ويرسمون ويتحادثون معًا. خطوتان سريعتان وتصبح بالداخل.",
-      board: {
-        title: "سبورة يرسم عليها الجميع",
-        description: "لوحة لا نهائية، تتشاركها الغرفة كلها.",
-      },
-      chat: {
-        title: "محادثة في صلب الموضوع",
-        description: "اطرح سؤالًا دون أن تقطع الشرح.",
-      },
-      files: {
-        title: "المواد في المتناول",
-        description: "أسقِط ملف PDF أو صورة ليفتحها الجميع.",
-      },
-      submit: "ابدأ الآن",
-    },
-    avatar: {
-      title: "اختر صورة",
-      subtitle:
-        "تظهر بجوار مؤشرك على السبورة، فيعرف الآخرون من يرسم. يمكنك تخطّي هذه الخطوة وإضافتها لاحقًا.",
-      saveAndContinue: "حفظ ومتابعة",
-    },
-    firstRoom: {
-      title: "افتح غرفتك الأولى",
-      subtitle: "ابدأ واحدة وشارك رمزها، أو ادخل غرفة فتحها أحدهم من قبل.",
-      create: {
-        title: "إنشاء غرفة",
-        description: "افتح سبورة وشارك الرمز مع مجموعتك.",
-      },
-      join: {
-        title: "الانضمام برمز",
-        description: "ادخل غرفة فتحها أحدهم من قبل.",
-      },
-      later: "سأفعل ذلك لاحقًا",
-    },
-  },
 
   room: {
     metaTitle: "غرفة {code}",
@@ -561,6 +512,10 @@ export const ar = {
     roomCodeMin: "أدخل رمز الغرفة",
     roomCodeMax: "يبدو هذا الرمز طويلًا جدًا",
     roomCodeFormat: "يتكوّن الرمز من حروف وأرقام وشرطات فقط",
+  },
+
+  connection: {
+    lost: "الخادم لا يستجيب. قد تكون البيانات المعروضة قديمة.",
   },
 
   errors: {

@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/field";
 import { useDict } from "@/i18n/client";
 import { t } from "@/i18n/translate";
-import { formatBytes, MAX_IMAGE_BYTES } from "@/lib/image";
+import { AVATAR_TYPES, formatBytes, MAX_IMAGE_BYTES } from "@/lib/image";
 import { cn } from "@/lib/utils";
 
 import type { AvatarPicker as Picker } from "../hooks/use-avatar-picker";
@@ -74,7 +74,7 @@ export function AvatarPicker({
           <input
             id={inputId}
             type="file"
-            accept="image/*"
+            accept={AVATAR_TYPES.join(",")}
             disabled={disabled}
             onChange={(event) => picker.select(event.target.files?.[0])}
             aria-describedby={`${inputId}-hint`}

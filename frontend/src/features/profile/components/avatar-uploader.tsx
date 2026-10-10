@@ -10,7 +10,11 @@ import {
 } from "@/features/auth/hooks/use-auth";
 import { useDict } from "@/i18n/client";
 import { isApiError } from "@/lib/api";
-import { downscaleImage, validateImageFile } from "@/lib/image";
+import {
+  AVATAR_TYPES,
+  downscaleImage,
+  validateImageFile,
+} from "@/lib/image";
 import { cn } from "@/lib/utils";
 
 /**
@@ -64,7 +68,7 @@ export function AvatarUploader({
         <input
           id={inputId}
           type="file"
-          accept="image/*"
+          accept={AVATAR_TYPES.join(",")}
           disabled={isBusy}
           onChange={(event) => handleFile(event.target.files?.[0])}
           className="peer sr-only"

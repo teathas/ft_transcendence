@@ -452,56 +452,6 @@ export const fr = {
     },
   },
 
-  onboarding: {
-    metaTitle: "Commencer",
-    metaDescription: "Configurez votre profil et ouvrez votre première salle.",
-    progress: "Étape {current} sur {total} · {label}",
-    progressLabel: "Progression",
-    steps: {
-      welcome: "Bienvenue",
-      picture: "Photo",
-      firstRoom: "Première salle",
-    },
-    welcome: {
-      title: "Bienvenue 👋",
-      titleNamed: "Bienvenue, {name} 👋",
-      subtitle:
-        "Shared Room, c’est une salle où tout le monde écrit, dessine et échange ensemble. Deux étapes rapides et vous y êtes.",
-      board: {
-        title: "Un tableau où chacun peut dessiner",
-        description: "Un canevas infini, partagé par toute la salle.",
-      },
-      chat: {
-        title: "Une discussion qui reste dans le contexte",
-        description: "Posez une question sans interrompre l’explication.",
-      },
-      files: {
-        title: "Les supports à portée de main",
-        description: "Déposez un PDF ou une image, chacun peut l’ouvrir.",
-      },
-      submit: "Commencer",
-    },
-    avatar: {
-      title: "Choisissez une photo",
-      subtitle:
-        "Elle s’affiche à côté de votre curseur sur le tableau : les autres savent qui dessine. Vous pouvez passer cette étape et en ajouter une plus tard.",
-      saveAndContinue: "Enregistrer et continuer",
-    },
-    firstRoom: {
-      title: "Ouvrez votre première salle",
-      subtitle:
-        "Lancez-en une et partagez le code, ou entrez dans une salle déjà ouverte.",
-      create: {
-        title: "Créer une salle",
-        description: "Ouvrez un tableau et partagez le code avec votre groupe.",
-      },
-      join: {
-        title: "Rejoindre avec un code",
-        description: "Entrez dans une salle que quelqu’un a déjà ouverte.",
-      },
-      later: "Je ferai ça plus tard",
-    },
-  },
 
   room: {
     metaTitle: "Salle {code}",
@@ -576,6 +526,10 @@ export const fr = {
     roomCodeMax: "Ce code paraît trop long",
     roomCodeFormat:
       "Un code ne contient que des lettres, des chiffres et des tirets",
+  },
+
+  connection: {
+    lost: "Le serveur ne répond pas. Les données affichées peuvent être obsolètes.",
   },
 
   errors: {

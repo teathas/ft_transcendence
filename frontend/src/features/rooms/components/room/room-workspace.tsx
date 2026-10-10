@@ -27,7 +27,7 @@ const FULL_HEIGHT = "h-[calc(100svh-3.5rem)] lg:h-svh";
 
 export function RoomWorkspace({ code }: { code: string }) {
   const d = useDict();
-  const { data: room, isPending, isError, error } = useRoom(code);
+  const { data: room, isPending, error } = useRoom(code);
   const { data: participants } = useParticipants(code);
   const { user } = useSession();
   const [syncStatus, setSyncStatus] = useState<SyncStatus>("loading");
@@ -71,7 +71,8 @@ export function RoomWorkspace({ code }: { code: string }) {
     );
   }
 
-  if (isError || !room) {
+  // A failed refresh keeps the cached room: only an empty result is an error.
+  if (!room) {
     return (
       <div
         className={cn(

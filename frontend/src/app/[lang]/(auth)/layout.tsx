@@ -2,6 +2,7 @@ import { BrandWordmark } from "@/components/layout/brand-mark";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { routes } from "@/config/routes";
+import { RedirectIfAuthenticated } from "@/features/auth/components/route-guards";
 import { Link } from "@/i18n/navigation";
 import { getDict } from "@/i18n/server";
 
@@ -51,7 +52,9 @@ export default async function AuthLayout({ children }: LayoutProps<"/[lang]">) {
         </div>
 
         <div className="flex flex-1 items-center justify-center px-4 py-10 sm:px-8">
-          <div className="w-full max-w-sm">{children}</div>
+          <div className="w-full max-w-sm">
+            <RedirectIfAuthenticated>{children}</RedirectIfAuthenticated>
+          </div>
         </div>
       </main>
     </div>
