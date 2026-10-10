@@ -28,9 +28,6 @@ model Room {
   owner     User         @relation(fields: [ownerId], references: [id])
   members   RoomMember[]
   messages  Message[]
-  lastActivityAt DateTime @default(now())
-  @@index([lastActivityAt])
-
   files     RoomFile[]
   createdAt DateTime     @default(now())
 
@@ -42,6 +39,8 @@ model Room {
   boardSnapshot  Json?
   boardVersion   Int       @default(0)
   boardUpdatedAt DateTime?
+
+  @@index([lastActiveAt])
 }
 
 model User {

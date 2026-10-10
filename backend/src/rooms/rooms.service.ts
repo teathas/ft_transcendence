@@ -17,7 +17,7 @@ export class RoomsService {
     async touchActivity(roomId: string) {
         await this.prisma.room.update({
             where: { id: roomId },
-            data: { lastActivityAt: new Date() },
+            data: { lastActiveAt: new Date() },
         });
     }
 
@@ -80,7 +80,7 @@ export class RoomsService {
             case RoomSort.MEMBERS:
             return [{ members: { _count: 'desc' } }, { createdAt: 'desc' }];
             case RoomSort.ACTIVE:
-            return [{ lastActivityAt: 'desc' }, { createdAt: 'desc' }];
+            return [{ lastActiveAt: 'desc' }, { createdAt: 'desc' }];
             case RoomSort.NEWEST:
             default:
             return [{ createdAt: 'desc' }];
@@ -100,7 +100,7 @@ export class RoomsService {
         select: {
             id: true, name: true, subject: true,
             visibility: true, ownerId: true, createdAt: true,
-            lastActivityAt: true,_count: { select: { members: true } },
+            lastActiveAt: true,_count: { select: { members: true } },
         },
         });
     }

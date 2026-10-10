@@ -23,8 +23,6 @@ export class MessagesService {
 
     async send(roomId: string, userId: string, dto: SendMessageDto) {
         await this.assertMember(roomId, userId);
-        // The other activity column, kept up to date for `GET /rooms/public`.
-        await this.roomsService.touchActivity(roomId);
 
         const [message] = await this.prisma.$transaction([
             this.prisma.message.create({
