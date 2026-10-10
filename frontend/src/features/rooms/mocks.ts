@@ -293,8 +293,9 @@ export const roomsMocks = {
 
   list: (query: RoomQuery) => settle(selectRooms(MOCK_ROOMS, query)),
 
-  create: ({ name, subject, visibility }: CreateRoomPayload) =>
-    settle<Room>({
+  // Kept in the list, so the room you are sent to can be found again.
+  create: ({ name, subject, visibility }: CreateRoomPayload) => {
+    const room: Room = {
       id: crypto.randomUUID(),
       visibility,
       inviteCode: codeFrom(name),
@@ -307,26 +308,31 @@ export const roomsMocks = {
       ownerUsername: MOCK_USER.username,
       lastActiveAt: new Date().toISOString(),
       createdAt: new Date().toISOString(),
-    }),
+    };
+    MOCK_ROOMS.unshift(room);
+    return settle(room);
+  },
 
   join: ({ code }: JoinRoomPayload) => {
     const known = MOCK_ROOMS.find((room) => room.inviteCode === code);
-    return settle<Room>(
-      known ?? {
-        id: crypto.randomUUID(),
-        visibility: "PRIVATE",
-        inviteCode: code,
-        isMember: true,
-        name: `Room ${code}`,
-        subject: "Mathematics",
-        status: "active",
-        participantCount: 2,
-        ownerId: OTHER_OWNERS[0].id,
-        ownerUsername: OTHER_OWNERS[0].username,
-        lastActiveAt: new Date().toISOString(),
-        createdAt: new Date().toISOString(),
-      },
-    );
+    if (known) return settle(known);
+
+    const room: Room = {
+      id: crypto.randomUUID(),
+      visibility: "PRIVATE",
+      inviteCode: code,
+      isMember: true,
+      name: `Room ${code}`,
+      subject: "Mathematics",
+      status: "active",
+      participantCount: 2,
+      ownerId: OTHER_OWNERS[0].id,
+      ownerUsername: OTHER_OWNERS[0].username,
+      lastActiveAt: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+    };
+    MOCK_ROOMS.unshift(room);
+    return settle(room);
   },
 };
 

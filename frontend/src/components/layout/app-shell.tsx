@@ -45,7 +45,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         role="dialog"
         aria-modal={isOpen}
         aria-label={d.nav.navigation}
-        aria-hidden={!isOpen}
+        inert={!isOpen}
         className={cn(
           "fixed inset-y-0 start-0 z-50 w-72 border-e bg-card transition-transform duration-200 lg:hidden",
           // `translate` has no logical form, so the closed position is mirrored

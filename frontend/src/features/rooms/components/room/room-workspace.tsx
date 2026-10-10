@@ -143,7 +143,7 @@ export function RoomWorkspace({ id }: { id: string }) {
         role="dialog"
         aria-modal={isMobileRailOpen}
         aria-label={d.room.panels}
-        aria-hidden={!isMobileRailOpen}
+        inert={!isMobileRailOpen}
         className={cn(
           "fixed inset-x-0 bottom-0 z-50 flex h-[75svh] flex-col rounded-t-xl border-t bg-card",
           "transition-transform duration-200 lg:hidden",
