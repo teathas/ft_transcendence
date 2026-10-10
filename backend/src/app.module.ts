@@ -12,6 +12,7 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path'
 import { FriendsModule } from './friends/friends.module';
 import { MessagesModule } from './messages/messages.module';
+import { RealtimeModule } from './realtime/realtime.module';
 
 @Module({
 	imports: [
@@ -26,6 +27,7 @@ import { MessagesModule } from './messages/messages.module';
 		}),
 		MessagesModule,
 		FriendsModule,
+		RealtimeModule,
 	],
 	controllers: [AppController],
 	providers: [

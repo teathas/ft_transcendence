@@ -6,6 +6,8 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { randomUUID } from 'crypto';
 
+export type JwtPayload = { sub: string; email: string; jti: string; exp: number };
+
 @Injectable()
 export class AuthService {
 	constructor(
@@ -66,5 +68,22 @@ export class AuthService {
 		});
 
 		return { message: 'Logged out successfully' };
+	}
+
+	async verifyAccessToken(token: string): Promise<JwtPayload> {
+		let payload: JwtPayload;
+		try {
+			payload = await this.jwtService.verifyAsync<JwtPayload>(token);
+		} catch {
+			throw new UnauthorizedException('Invalid or expired token');
+		}
+
+		const revoked = await this.prisma.revokedToken.findUnique({
+			where: { jti: payload.jti },
+		});
+		if (revoked) {
+			throw new UnauthorizedException('Token has been revoked');
+		}
+		return payload;
 	}
 }
