@@ -6,7 +6,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 function connect(name, token) {
 	return new Promise((resolve, reject) => {
-		const s = io(url, { transport: ['websocket'], reconnection: false, auth: { token }});
+		const s = io(url, { transports: ['websocket'], reconnection: false, rejectUnauthorized: false, auth: { token } });
 		s.on('connect', () => { console.log(`${name} connected`); resolve(s); });
 		s.on('connect_error', (e) => reject(new Error(`${name} connect_error: ${e.message}`)));
 	});
