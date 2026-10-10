@@ -3,6 +3,7 @@ import { Controller, Post, Body, Req,Param, Delete,Get,Query } from '@nestjs/com
 import { RoomsService } from './rooms.service';
 import { CreateRoomDto  } from './dto/create-room.dto';
 import { JoinRoomDto  } from './dto/join-room.dto';
+import { FindRoomsQueryDto } from './dto/find-rooms-query.dto';
 
 @Controller('rooms')
 export class RoomsController {
@@ -19,13 +20,10 @@ export class RoomsController {
         const userId = req.user.sub;
         return this.roomsService.join(roomId, userId,dto);
     }
+
     @Get('public')
-    async findPublicRooms(
-        @Query('name') name?: string,
-        @Query('subject') subject?: string
-    )
-    {
-        return this.roomsService.findPublicRooms({name,subject});
+    async findPublicRooms(@Query() query: FindRoomsQueryDto) {
+    return this.roomsService.findPublicRooms(query);
     }
 
     @Delete(':roomId/leave')

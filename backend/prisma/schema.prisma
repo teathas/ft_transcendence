@@ -28,6 +28,9 @@ model Room {
   owner     User         @relation(fields: [ownerId], references: [id])
   members   RoomMember[]
   messages  Message[]
+  lastActivityAt DateTime @default(now())
+  @@index([lastActivityAt])
+
   createdAt DateTime     @default(now())
 }
 
