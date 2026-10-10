@@ -10,6 +10,6 @@ import { RoomFilesService } from './room-files.service';
   imports: [AuthModule, RealtimeModule],
   controllers: [RoomsController],
   exports: [RoomsService], 
-  providers: [RoomsService, RoomQueriesService, RoomFilesService, RoomBoardService]
+  providers: [RoomsService, RoomQueriesService, RoomFilesService]
 })
 export class RoomsModule {}

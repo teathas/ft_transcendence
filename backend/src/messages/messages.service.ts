@@ -19,19 +19,12 @@ export class MessagesService {
         });
         if (!member)
             throw new ForbiddenException('You are not a member of this room');
-        await this.roomsService.touchActivity(roomId);
-        return this.prisma.message.create({
-            data:{
-                content : dto.content,
-                userId,
-                roomId
-            }
-        })
-
     }
 
     async send(roomId: string, userId: string, dto: SendMessageDto) {
         await this.assertMember(roomId, userId);
+        // The other activity column, kept up to date for `GET /rooms/public`.
+        await this.roomsService.touchActivity(roomId);
 
         const [message] = await this.prisma.$transaction([
             this.prisma.message.create({
