@@ -2,15 +2,17 @@
 
 import { useState } from "react";
 import { ArrowLeft, Check, Copy, PanelRight, Users } from "lucide-react";
-import Link from "next/link";
 
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { buttonStyles } from "@/components/ui/button";
 import { routes } from "@/config/routes";
+import { useDict } from "@/i18n/client";
+import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
 import { useParticipants } from "../../hooks/use-room";
+import { useSubjectLabel } from "../../subject-label";
 import type { SyncStatus } from "./board-synced";
 import { SyncBadge } from "./sync-badge";
 import type { Room } from "../../types";
@@ -28,6 +30,8 @@ export function RoomHeader({
   onToggleRail: () => void;
   onOpenMobileRail: () => void;
 }) {
+  const d = useDict();
+  const subjectLabel = useSubjectLabel();
   const { data: participants } = useParticipants(room.code);
   const [copied, setCopied] = useState(false);
 
@@ -47,23 +51,25 @@ export function RoomHeader({
     <header className="flex h-14 shrink-0 items-center gap-3 border-b px-3 sm:px-4">
       <Link
         href={routes.rooms}
-        aria-label="Back to rooms"
+        aria-label={d.room.back}
         className={buttonStyles({ variant: "ghost", size: "icon" })}
       >
-        <ArrowLeft className="size-4" aria-hidden="true" />
+        <ArrowLeft className="size-4 rtl:rotate-180" aria-hidden="true" />
       </Link>
 
       <div className="min-w-0">
         <h1 className="truncate text-sm font-semibold">{room.name}</h1>
-        <p className="truncate text-xs text-muted-foreground">{room.subject}</p>
+        <p className="truncate text-xs text-muted-foreground">
+          {subjectLabel(room.subject)}
+        </p>
       </div>
 
       <button
         type="button"
         onClick={copyCode}
-        title="Copy the room code"
+        title={d.room.copyCodeTitle}
         className={cn(
-          "ml-1 hidden items-center gap-1.5 bg-muted text-muted-foreground hover:text-foreground",
+          "ms-1 hidden items-center gap-1.5 bg-muted text-muted-foreground hover:text-foreground",
           "rounded-md px-2 py-1 font-mono text-xs transition-colors sm:inline-flex",
         )}
       >
@@ -74,14 +80,14 @@ export function RoomHeader({
           <Copy className="size-3" aria-hidden="true" />
         )}
         <span className="sr-only">
-          {copied ? "Code copied" : "Copy room code"}
+          {copied ? d.room.copied : d.room.copyCode}
         </span>
       </button>
 
-      <div className="ml-auto flex items-center gap-2 sm:gap-3">
+      <div className="ms-auto flex items-center gap-2 sm:gap-3">
         <SyncBadge status={syncStatus} />
 
-        <div className="hidden items-center -space-x-2 sm:flex">
+        <div className="hidden items-center -space-x-2 sm:flex rtl:space-x-reverse">
           {online.slice(0, 4).map((person) => (
             <Avatar
               key={person.id}
@@ -106,9 +112,7 @@ export function RoomHeader({
           variant="ghost"
           size="icon"
           onClick={onToggleRail}
-          aria-label={
-            isRailOpen ? "Hide the side panel" : "Show the side panel"
-          }
+          aria-label={isRailOpen ? d.room.hidePanel : d.room.showPanel}
           aria-pressed={isRailOpen}
           className="hidden lg:inline-flex"
         >

@@ -3,24 +3,8 @@
 import { FileText, MessageSquare, Pencil } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-
-const HIGHLIGHTS = [
-  {
-    icon: Pencil,
-    title: "A board everyone can draw on",
-    description: "One infinite canvas, shared by the whole room.",
-  },
-  {
-    icon: MessageSquare,
-    title: "Chat that stays in context",
-    description: "Ask a question without interrupting the explanation.",
-  },
-  {
-    icon: FileText,
-    title: "Material within reach",
-    description: "Drop a PDF or an image and everyone can open it.",
-  },
-];
+import { useDict } from "@/i18n/client";
+import { t } from "@/i18n/translate";
 
 export function WelcomeStep({
   username,
@@ -29,20 +13,41 @@ export function WelcomeStep({
   username?: string;
   onNext: () => void;
 }) {
+  const d = useDict();
+
+  const highlights = [
+    {
+      icon: Pencil,
+      title: d.onboarding.welcome.board.title,
+      description: d.onboarding.welcome.board.description,
+    },
+    {
+      icon: MessageSquare,
+      title: d.onboarding.welcome.chat.title,
+      description: d.onboarding.welcome.chat.description,
+    },
+    {
+      icon: FileText,
+      title: d.onboarding.welcome.files.title,
+      description: d.onboarding.welcome.files.description,
+    },
+  ];
+
   return (
     <div className="flex flex-col gap-8">
       <header className="flex flex-col gap-2">
         <h1 className="text-2xl font-semibold tracking-tight text-balance sm:text-3xl">
-          Welcome{username ? `, ${username}` : ""} 👋
+          {username
+            ? t(d.onboarding.welcome.titleNamed, { name: username })
+            : d.onboarding.welcome.title}
         </h1>
         <p className="text-pretty text-muted-foreground">
-          Shared Room is one room where everyone writes, draws and talks
-          together. Two quick steps and you are in.
+          {d.onboarding.welcome.subtitle}
         </p>
       </header>
 
       <ul className="flex flex-col gap-3">
-        {HIGHLIGHTS.map(({ icon: Icon, title, description }) => (
+        {highlights.map(({ icon: Icon, title, description }) => (
           <li
             key={title}
             className="flex items-start gap-3 rounded-xl border bg-card p-4"
@@ -61,7 +66,7 @@ export function WelcomeStep({
       </ul>
 
       <Button size="lg" onClick={onNext}>
-        Get started
+        {d.onboarding.welcome.submit}
       </Button>
     </div>
   );

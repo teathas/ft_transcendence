@@ -1,18 +1,21 @@
-import Link from "next/link";
-
 import { BrandWordmark } from "@/components/layout/brand-mark";
 import { Container } from "@/components/layout/container";
+import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { buttonStyles } from "@/components/ui/button";
 import { routes } from "@/config/routes";
+import { Link } from "@/i18n/navigation";
+import { getDict } from "@/i18n/server";
 
-const SECTIONS = [
-  { label: "Features", href: "#features" },
-  { label: "Classroom", href: "#classroom" },
-  { label: "How it works", href: "#how-it-works" },
-];
+export async function SiteHeader() {
+  const d = await getDict();
 
-export function SiteHeader() {
+  const sections = [
+    { label: d.landing.sections.features, href: "#features" },
+    { label: d.landing.sections.classroom, href: "#classroom" },
+    { label: d.landing.sections.howItWorks, href: "#how-it-works" },
+  ];
+
   return (
     <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur-md">
       <Container className="flex h-16 items-center gap-6">
@@ -22,7 +25,7 @@ export function SiteHeader() {
 
         {/* In-page anchors, so plain <a> rather than typed <Link>. */}
         <nav className="hidden items-center gap-1 md:flex">
-          {SECTIONS.map((section) => (
+          {sections.map((section) => (
             <a
               key={section.href}
               href={section.href}
@@ -33,7 +36,7 @@ export function SiteHeader() {
           ))}
         </nav>
 
-        <div className="ml-auto flex items-center gap-2 sm:gap-3">
+        <div className="ms-auto flex items-center gap-2 sm:gap-3">
           <Link
             href={routes.login}
             className={buttonStyles({
@@ -42,15 +45,16 @@ export function SiteHeader() {
               className: "hidden sm:inline-flex",
             })}
           >
-            Sign in
+            {d.landing.header.signIn}
           </Link>
           <Link
             href={routes.createRoom}
             className={buttonStyles({ size: "sm" })}
           >
-            Create a Room
+            {d.landing.header.createRoom}
           </Link>
-          <div className="hidden sm:block">
+          <div className="hidden items-center gap-1 sm:flex">
+            <LanguageSwitcher />
             <ThemeToggle />
           </div>
         </div>

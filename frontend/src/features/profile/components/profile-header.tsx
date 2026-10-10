@@ -3,12 +3,16 @@
 import { CalendarDays, Mail } from "lucide-react";
 
 import type { User } from "@/features/auth/types";
-import { formatDate } from "@/lib/format";
+import { useDict } from "@/i18n/client";
+import { t } from "@/i18n/translate";
+import { useFormat } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 import { AvatarUploader } from "./avatar-uploader";
 
 export function ProfileHeader({ user }: { user: User }) {
+  const d = useDict();
+  const format = useFormat();
   const isOnline = user.status === "ONLINE";
 
   return (
@@ -43,7 +47,7 @@ export function ProfileHeader({ user }: { user: User }) {
                   isOnline ? "bg-emerald-500" : "bg-muted-foreground/60",
                 )}
               />
-              {isOnline ? "Online" : "Offline"}
+              {isOnline ? d.room.online : d.room.offline}
             </span>
 
             <span className="inline-flex items-center gap-1.5">
@@ -52,7 +56,9 @@ export function ProfileHeader({ user }: { user: User }) {
             </span>
             <span className="inline-flex items-center gap-1.5">
               <CalendarDays className="size-3.5" aria-hidden="true" />
-              Joined {formatDate(user.createdAt)}
+              {t(d.profile.header.joined, {
+                date: format.date(user.createdAt),
+              })}
             </span>
           </div>
         </div>

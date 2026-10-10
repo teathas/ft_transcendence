@@ -2,27 +2,25 @@
 
 import { Radio, WifiOff } from "lucide-react";
 
+import { useDict } from "@/i18n/client";
 import { cn } from "@/lib/utils";
 
 import type { SyncStatus } from "./board-synced";
 
-const LABELS: Record<SyncStatus, { text: string; title: string }> = {
-  loading: { text: "Connecting", title: "Connecting to the board server" },
-  online: { text: "Live", title: "Everyone sees your cursor and your edits" },
-  offline: {
-    text: "Local",
-    title:
-      "This board is saved in your browser only. Other people cannot see it yet.",
-  },
-  error: {
-    text: "Offline",
-    title: "The board server is unreachable; your edits stay on this device.",
-  },
-};
+/** The badge's own vocabulary, which is not the connection's. */
+const KEYS = {
+  loading: "connecting",
+  online: "live",
+  offline: "local",
+  error: "offline",
+} as const satisfies Record<SyncStatus, string>;
 
 /** Says plainly whether other people can see you — never implies more. */
 export function SyncBadge({ status }: { status: SyncStatus }) {
-  const { text, title } = LABELS[status];
+  const d = useDict();
+  const key = KEYS[status];
+  const text = d.room.sync[key].text;
+  const title = d.room.sync[key].title;
   const isLive = status === "online";
 
   return (

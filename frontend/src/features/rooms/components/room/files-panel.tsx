@@ -5,7 +5,9 @@ import { FileImage, FileText, LoaderCircle, Upload } from "lucide-react";
 
 import { buttonStyles } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { formatRelativeTime } from "@/lib/format";
+import { useDict } from "@/i18n/client";
+import { t } from "@/i18n/translate";
+import { useFormat } from "@/lib/format";
 import { formatBytes } from "@/lib/image";
 import { cn } from "@/lib/utils";
 
@@ -14,6 +16,8 @@ import { useRoomFiles, useUploadRoomFile } from "../../hooks/use-room";
 const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
 
 export function FilesPanel({ roomCode }: { roomCode: string }) {
+  const d = useDict();
+  const { relativeTime } = useFormat();
   const inputId = useId();
   const { data: files, isPending } = useRoomFiles(roomCode);
   const upload = useUploadRoomFile(roomCode);
@@ -28,7 +32,10 @@ export function FilesPanel({ roomCode }: { roomCode: string }) {
     const tooBig = chosen.find((file) => file.size > MAX_UPLOAD_BYTES);
     if (tooBig) {
       setError(
-        `${tooBig.name} is over ${formatBytes(MAX_UPLOAD_BYTES)} and was not shared.`,
+        t(d.room.fileTooBig, {
+          name: tooBig.name,
+          size: formatBytes(MAX_UPLOAD_BYTES),
+        }),
       );
       return;
     }
@@ -50,7 +57,7 @@ export function FilesPanel({ roomCode }: { roomCode: string }) {
               <li key={file.id}>
                 <button
                   type="button"
-                  className="flex w-full items-center gap-3 rounded-lg border bg-card px-3 py-2.5 text-left transition-colors hover:border-primary/40"
+                  className="flex w-full items-center gap-3 rounded-lg border bg-card px-3 py-2.5 text-start transition-colors hover:border-primary/40"
                 >
                   <Icon
                     className="size-4 shrink-0 text-muted-foreground"
@@ -62,7 +69,7 @@ export function FilesPanel({ roomCode }: { roomCode: string }) {
                     </span>
                     <span className="block text-xs text-muted-foreground">
                       {formatBytes(file.sizeBytes)} · {file.uploadedBy} ·{" "}
-                      {formatRelativeTime(file.uploadedAt)}
+                      {relativeTime(file.uploadedAt)}
                     </span>
                   </span>
                 </button>
@@ -122,11 +129,11 @@ export function FilesPanel({ roomCode }: { roomCode: string }) {
             "peer-disabled:pointer-events-none peer-disabled:opacity-50",
           )}
         >
-          Choose files
+          {d.room.chooseFiles}
         </label>
 
         <p className="text-xs text-muted-foreground">
-          or drop them here · up to {formatBytes(MAX_UPLOAD_BYTES)}
+          {t(d.room.filesDropHint, { size: formatBytes(MAX_UPLOAD_BYTES) })}
         </p>
 
         {error && (

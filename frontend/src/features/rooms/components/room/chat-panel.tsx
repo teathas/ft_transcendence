@@ -6,19 +6,15 @@ import { SendHorizonal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useDict } from "@/i18n/client";
+import { useFormat } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 import { useMessages, useSendMessage } from "../../hooks/use-room";
 
-function timeOf(iso: string) {
-  return new Intl.DateTimeFormat("en", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  }).format(new Date(iso));
-}
-
 export function ChatPanel({ roomCode }: { roomCode: string }) {
+  const d = useDict();
+  const { time } = useFormat();
   const { data: messages, isPending } = useMessages(roomCode);
   const sendMessage = useSendMessage(roomCode);
   const [draft, setDraft] = useState("");
@@ -76,10 +72,10 @@ export function ChatPanel({ roomCode }: { roomCode: string }) {
                         {message.authorUsername}
                       </span>
                       <span className="text-[10px] text-muted-foreground">
-                        {timeOf(message.sentAt)}
+                        {time(message.sentAt)}
                       </span>
                     </p>
-                    <p className="mt-1 rounded-lg rounded-tl-sm bg-muted/60 px-3 py-2 text-sm text-pretty">
+                    <p className="mt-1 rounded-lg rounded-ss-sm bg-muted/60 px-3 py-2 text-sm text-pretty">
                       {message.body}
                     </p>
                   </div>
@@ -95,16 +91,16 @@ export function ChatPanel({ roomCode }: { roomCode: string }) {
         <Input
           value={draft}
           onChange={(event) => setDraft(event.target.value)}
-          placeholder="Ask a question…"
-          aria-label="Message"
+          placeholder={d.room.chatPlaceholder}
+          aria-label={d.room.message}
         />
         <Button
           type="submit"
           size="icon"
-          aria-label="Send"
+          aria-label={d.room.send}
           disabled={!draft.trim()}
         >
-          <SendHorizonal className="size-4" aria-hidden="true" />
+          <SendHorizonal className="size-4 rtl:rotate-180" aria-hidden="true" />
         </Button>
       </form>
     </div>

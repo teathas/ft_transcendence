@@ -13,17 +13,14 @@ import {
 import { Input } from "@/components/ui/input";
 import { Modal } from "@/components/ui/modal";
 import { Select, type SelectOption } from "@/components/ui/select";
+import { useDict } from "@/i18n/client";
 import { useZodForm } from "@/hooks/use-zod-form";
 import { isApiError } from "@/lib/api";
 
 import { useCreateRoom } from "../hooks/use-rooms";
 import { SUBJECTS } from "../mocks";
 import { createRoomSchema } from "../schemas";
-
-const SUBJECT_OPTIONS: SelectOption[] = SUBJECTS.map((subject) => ({
-  value: subject,
-  label: subject,
-}));
+import { useSubjectLabel } from "../subject-label";
 
 export function CreateRoomModal({
   open,
@@ -32,6 +29,12 @@ export function CreateRoomModal({
   open: boolean;
   onClose: () => void;
 }) {
+  const d = useDict();
+  const subjectLabel = useSubjectLabel();
+  const subjectOptions: SelectOption[] = SUBJECTS.map((subject) => ({
+    value: subject,
+    label: subjectLabel(subject),
+  }));
   const createRoom = useCreateRoom();
   const isSubmitting = createRoom.isPending;
   const apiError = isApiError(createRoom.error) ? createRoom.error : null;
@@ -52,8 +55,8 @@ export function CreateRoomModal({
     <Modal
       open={open}
       onClose={onClose}
-      title="Create a room"
-      description="Give it a name and a subject. You get a code to share right after."
+      title={d.rooms.create.title}
+      description={d.rooms.create.description}
     >
       <form onSubmit={form.handleSubmit} noValidate>
         <fieldset disabled={isSubmitting}>
@@ -65,10 +68,12 @@ export function CreateRoomModal({
             )}
 
             <Field>
-              <FieldLabel {...form.getLabelProps("name")}>Room name</FieldLabel>
+              <FieldLabel {...form.getLabelProps("name")}>
+                {d.rooms.create.name}
+              </FieldLabel>
               <Input
                 {...form.getFieldProps("name")}
-                placeholder="Mathematics — Algebra"
+                placeholder={d.rooms.create.namePlaceholder}
                 autoFocus
               />
               <FieldError {...form.getErrorProps("name")} />
@@ -76,13 +81,13 @@ export function CreateRoomModal({
 
             <Field>
               <FieldLabel {...form.getLabelProps("subject")}>
-                Subject
+                {d.rooms.create.subject}
               </FieldLabel>
               <Select
                 inputId={subjectProps.id}
-                options={SUBJECT_OPTIONS}
+                options={subjectOptions}
                 value={
-                  SUBJECT_OPTIONS.find(
+                  subjectOptions.find(
                     (option) => option.value === subjectProps.value,
                   ) ?? null
                 }
@@ -92,7 +97,7 @@ export function CreateRoomModal({
                   } as React.ChangeEvent<HTMLInputElement>)
                 }
                 onBlur={subjectProps.onBlur}
-                placeholder="Pick a subject"
+                placeholder={d.rooms.create.subjectPlaceholder}
                 isDisabled={isSubmitting}
               />
               <FieldError {...form.getErrorProps("subject")} />
@@ -100,7 +105,7 @@ export function CreateRoomModal({
 
             <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
               <Button type="button" variant="ghost" onClick={onClose}>
-                Cancel
+                {d.common.cancel}
               </Button>
               <Button type="submit" disabled={isSubmitting}>
                 {isSubmitting && (
@@ -109,7 +114,7 @@ export function CreateRoomModal({
                     aria-hidden="true"
                   />
                 )}
-                Create room
+                {d.rooms.create.submit}
               </Button>
             </div>
           </FieldGroup>

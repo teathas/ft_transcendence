@@ -2,18 +2,19 @@
 
 import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
 
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import { BrandWordmark } from "@/components/layout/brand-mark";
 import { Button } from "@/components/ui/button";
 import { routes } from "@/config/routes";
+import { useDict } from "@/i18n/client";
+import { Link, useBarePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
+  const d = useDict();
   const [isOpen, setIsOpen] = useState(false);
-  const pathname = usePathname();
+  const pathname = useBarePathname();
 
   // Escape closes the drawer, the way any dialog should.
   useEffect(() => {
@@ -27,7 +28,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex flex-1">
-      <aside className="sticky top-0 hidden h-svh w-64 shrink-0 border-r bg-card lg:block">
+      <aside className="sticky top-0 hidden h-svh w-64 shrink-0 border-e bg-card lg:block">
         <AppSidebar />
       </aside>
 
@@ -43,18 +44,20 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <aside
         role="dialog"
         aria-modal={isOpen}
-        aria-label="Navigation"
+        aria-label={d.nav.navigation}
         aria-hidden={!isOpen}
         className={cn(
-          "fixed inset-y-0 left-0 z-50 w-72 border-r bg-card transition-transform duration-200 lg:hidden",
-          isOpen ? "translate-x-0" : "-translate-x-full",
+          "fixed inset-y-0 start-0 z-50 w-72 border-e bg-card transition-transform duration-200 lg:hidden",
+          // `translate` has no logical form, so the closed position is mirrored
+          // explicitly: off to the left in LTR, off to the right in RTL.
+          isOpen ? "translate-x-0" : "-translate-x-full rtl:translate-x-full",
         )}
       >
-        <div className="absolute top-3 right-3">
+        <div className="absolute end-3 top-3">
           <Button
             variant="ghost"
             size="icon"
-            aria-label="Close navigation"
+            aria-label={d.nav.closeNavigation}
             onClick={() => setIsOpen(false)}
           >
             <X className="size-4" aria-hidden="true" />
@@ -68,7 +71,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <Button
             variant="ghost"
             size="icon"
-            aria-label="Open navigation"
+            aria-label={d.nav.openNavigation}
             aria-expanded={isOpen}
             onClick={() => setIsOpen(true)}
           >

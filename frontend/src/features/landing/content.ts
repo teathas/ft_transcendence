@@ -10,24 +10,26 @@ export const PARTICIPANTS = [
   { name: "Sara Diallo", initials: "SD", role: "Student", color: "#f59e0b" },
 ] as const;
 
+/** `key` points into `dictionary.landing.showcase.messages`: the mockup is
+ *  marketing copy, so its wording translates with everything else. */
 export const CHAT_MESSAGES = [
   {
     author: "Luca Moreau",
     color: "#10b981",
     time: "10:04",
-    body: "How do we factor this one?",
+    key: "question",
   },
   {
     author: "Amina Chen",
     color: "#6366f1",
     time: "10:05",
-    body: "Look for the perfect square — the middle term is the giveaway.",
+    key: "answer",
   },
   {
     author: "Sara Diallo",
     color: "#f59e0b",
     time: "10:06",
-    body: "Got it, it's (x + 1)²",
+    key: "gotIt",
   },
 ] as const;
 
@@ -36,5 +38,4 @@ export const ROOM_FILES = [
   { name: "exercise-3.png", meta: "Image · 1.2 MB", kind: "image" },
 ] as const;
 
-export const ROOM_TITLE = "Mathematics — Algebra";
 export const ROOM_CODE = "ALG-4271";

@@ -6,9 +6,9 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
 
 import { routes } from "@/config/routes";
+import { useLocaleRouter } from "@/i18n/navigation";
 import { queryKeys } from "@/lib/query/keys";
 
 import { roomsApi } from "../api/rooms.api";
@@ -50,7 +50,7 @@ export function useRecentRooms(limit = 6) {
 
 function useEnterRoom() {
   const queryClient = useQueryClient();
-  const router = useRouter();
+  const router = useLocaleRouter();
 
   return (room: Room) => {
     queryClient.setQueryData(queryKeys.rooms.detail(room.code), room);

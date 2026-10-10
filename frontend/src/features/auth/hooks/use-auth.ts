@@ -1,10 +1,10 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
 
 import { routes } from "@/config/routes";
 import { isApiError, tokenStore } from "@/lib/api";
+import { useLocaleRouter } from "@/i18n/navigation";
 import { queryKeys } from "@/lib/query/keys";
 
 import { authApi } from "../api/auth.api";
@@ -34,7 +34,7 @@ export function useSession() {
 
 export function useLogin() {
   const queryClient = useQueryClient();
-  const router = useRouter();
+  const router = useLocaleRouter();
 
   return useMutation({
     mutationFn: authApi.login,
@@ -48,7 +48,7 @@ export function useLogin() {
 
 export function useRegister() {
   const queryClient = useQueryClient();
-  const router = useRouter();
+  const router = useLocaleRouter();
 
   return useMutation({
     mutationFn: authApi.register,
@@ -89,7 +89,7 @@ export function useChangePassword() {
 
 export function useDeleteAccount() {
   const queryClient = useQueryClient();
-  const router = useRouter();
+  const router = useLocaleRouter();
 
   return useMutation({
     mutationFn: authApi.deleteAccount,
@@ -103,7 +103,7 @@ export function useDeleteAccount() {
 
 export function useLogout() {
   const queryClient = useQueryClient();
-  const router = useRouter();
+  const router = useLocaleRouter();
 
   return useMutation({
     mutationFn: authApi.logout,

@@ -4,7 +4,8 @@ import { useState } from "react";
 
 import { cn } from "@/lib/utils";
 
-import { formatDuration, type ActivityPoint } from "../mocks";
+import type { ActivityPoint } from "../mocks";
+import { useActivityFormat } from "../use-activity-format";
 
 /**
  * Minutes collaborated per day. One series, so the title names it and no
@@ -12,6 +13,7 @@ import { formatDuration, type ActivityPoint } from "../mocks";
  * value for keyboard and screen-reader users.
  */
 export function ActivityChart({ data }: { data: ActivityPoint[] }) {
+  const { weekdayLong, weekdayNarrow, duration } = useActivityFormat();
   const [hovered, setHovered] = useState<number | null>(null);
   const peak = Math.max(...data.map((point) => point.minutes));
 
@@ -24,7 +26,7 @@ export function ActivityChart({ data }: { data: ActivityPoint[] }) {
 
         return (
           <div
-            key={`${point.fullLabel}-${index}`}
+            key={point.weekday}
             className="flex min-w-0 flex-1 flex-col items-center gap-1.5"
           >
             {/* Its own row, so a value never sits on top of its bar. */}
@@ -39,13 +41,13 @@ export function ActivityChart({ data }: { data: ActivityPoint[] }) {
                     : "text-transparent",
               )}
             >
-              {formatDuration(point.minutes)}
+              {duration(point.minutes)}
             </span>
 
             <div className="flex w-full flex-1 items-end justify-center">
               <button
                 type="button"
-                aria-label={`${point.fullLabel}: ${formatDuration(point.minutes)}`}
+                aria-label={`${weekdayLong(point.weekday)}: ${duration(point.minutes)}`}
                 onMouseEnter={() => setHovered(index)}
                 onMouseLeave={() => setHovered(null)}
                 onFocus={() => setHovered(index)}
@@ -61,7 +63,7 @@ export function ActivityChart({ data }: { data: ActivityPoint[] }) {
             </div>
 
             <span className="w-full border-t border-border pt-1.5 text-center text-xs text-muted-foreground">
-              {point.label}
+              {weekdayNarrow(point.weekday)}
             </span>
           </div>
         );

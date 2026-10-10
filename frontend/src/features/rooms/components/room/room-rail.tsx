@@ -2,6 +2,7 @@
 
 import { FileText, MessageSquare, Users } from "lucide-react";
 
+import { useDict } from "@/i18n/client";
 import { cn } from "@/lib/utils";
 
 import { ChatPanel } from "./chat-panel";
@@ -9,9 +10,9 @@ import { FilesPanel } from "./files-panel";
 import { PeoplePanel } from "./people-panel";
 
 export const RAIL_TABS = [
-  { id: "chat", label: "Chat", icon: MessageSquare },
-  { id: "files", label: "Files", icon: FileText },
-  { id: "people", label: "People", icon: Users },
+  { id: "chat", icon: MessageSquare },
+  { id: "files", icon: FileText },
+  { id: "people", icon: Users },
 ] as const;
 
 export type RailTab = (typeof RAIL_TABS)[number]["id"];
@@ -25,14 +26,12 @@ export function RoomRail({
   tab: RailTab;
   onTabChange: (tab: RailTab) => void;
 }) {
+  const d = useDict();
+
   return (
     <>
-      <div
-        role="tablist"
-        aria-label="Room panel tabs"
-        className="flex border-b"
-      >
-        {RAIL_TABS.map(({ id, label, icon: Icon }) => (
+      <div role="tablist" aria-label={d.room.tabs} className="flex border-b">
+        {RAIL_TABS.map(({ id, icon: Icon }) => (
           <button
             key={id}
             type="button"
@@ -47,7 +46,7 @@ export function RoomRail({
             )}
           >
             <Icon className="size-4" aria-hidden="true" />
-            {label}
+            {d.room[id]}
           </button>
         ))}
       </div>

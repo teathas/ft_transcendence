@@ -43,7 +43,7 @@ export function TableHeaderCell({
   return (
     <th
       className={cn(
-        "px-4 py-3 text-left text-xs font-medium tracking-wide text-muted-foreground uppercase",
+        "px-4 py-3 text-start text-xs font-medium tracking-wide text-muted-foreground uppercase",
         className,
       )}
       {...props}

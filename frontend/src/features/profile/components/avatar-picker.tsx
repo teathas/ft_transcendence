@@ -10,6 +10,8 @@ import {
   FieldError,
   FieldLabel,
 } from "@/components/ui/field";
+import { useDict } from "@/i18n/client";
+import { t } from "@/i18n/translate";
 import { formatBytes, MAX_IMAGE_BYTES } from "@/lib/image";
 import { cn } from "@/lib/utils";
 
@@ -21,7 +23,7 @@ export function AvatarPicker({
   disabled = false,
   hasSavedAvatar = false,
   onRemoveSaved,
-  label = "Photo",
+  label,
 }: {
   picker: Picker;
   username: string;
@@ -30,12 +32,15 @@ export function AvatarPicker({
   onRemoveSaved?: () => void;
   label?: string;
 }) {
+  const d = useDict();
   const inputId = useId();
   const canRemove = picker.hasPick || (hasSavedAvatar && onRemoveSaved);
 
   return (
     <div className="flex flex-col gap-3">
-      <FieldLabel htmlFor={inputId}>{label}</FieldLabel>
+      <FieldLabel htmlFor={inputId}>
+        {label ?? d.profile.picker.label}
+      </FieldLabel>
 
       <div
         onDragOver={(event) => event.preventDefault()}
@@ -57,8 +62,8 @@ export function AvatarPicker({
             {picker.file
               ? `${picker.file.name} · ${formatBytes(picker.file.size)}`
               : picker.shownAvatar
-                ? "Using your current photo"
-                : "Using your initials"}
+                ? d.profile.picker.usingCurrent
+                : d.profile.picker.usingInitials}
           </p>
         </div>
 
@@ -85,12 +90,14 @@ export function AvatarPicker({
             )}
           >
             <Upload className="size-3.5" aria-hidden="true" />
-            {picker.hasPick ? "Choose another photo" : "Choose a photo"}
+            {picker.hasPick
+              ? d.profile.picker.chooseAnother
+              : d.profile.picker.choose}
           </label>
 
           <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <ImageUp className="size-3.5" aria-hidden="true" />
-            or drop an image here
+            {d.profile.picker.dropHint}
           </p>
         </div>
 
@@ -105,14 +112,15 @@ export function AvatarPicker({
             }
           >
             <Trash2 className="size-3.5" aria-hidden="true" />
-            {picker.hasPick ? "Remove selection" : "Remove photo"}
+            {picker.hasPick
+              ? d.profile.picker.removeSelection
+              : d.profile.picker.removePhoto}
           </Button>
         )}
       </div>
 
       <FieldDescription id={`${inputId}-hint`}>
-        Optional. PNG, JPG or WebP up to {formatBytes(MAX_IMAGE_BYTES)} — large
-        images are shrunk before upload.
+        {t(d.profile.picker.hint, { size: formatBytes(MAX_IMAGE_BYTES) })}
       </FieldDescription>
 
       <FieldError messages={picker.error ? [picker.error] : undefined} />

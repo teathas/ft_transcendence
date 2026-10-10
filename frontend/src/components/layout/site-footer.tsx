@@ -1,9 +1,10 @@
-import Link from "next/link";
-
 import { BrandWordmark } from "@/components/layout/brand-mark";
 import { Container } from "@/components/layout/container";
 import { EXTERNAL, routes } from "@/config/routes";
 import { siteConfig } from "@/config/site";
+import { Link } from "@/i18n/navigation";
+import { getDict } from "@/i18n/server";
+import { t } from "@/i18n/translate";
 
 function GithubIcon({ className }: { className?: string }) {
   return (
@@ -18,20 +19,22 @@ function GithubIcon({ className }: { className?: string }) {
   );
 }
 
-const PRODUCT_LINKS = [
-  { label: "Features", href: "#features" },
-  { label: "Classroom", href: "#classroom" },
-  { label: "How it works", href: "#how-it-works" },
-];
+export async function SiteFooter() {
+  const d = await getDict();
 
-export function SiteFooter() {
+  const productLinks = [
+    { label: d.landing.sections.features, href: "#features" },
+    { label: d.landing.sections.classroom, href: "#classroom" },
+    { label: d.landing.sections.howItWorks, href: "#how-it-works" },
+  ];
+
   return (
     <footer className="border-t">
       <Container className="grid gap-10 py-12 sm:grid-cols-2 lg:grid-cols-4 lg:py-16">
         <div className="lg:col-span-2">
           <BrandWordmark />
           <p className="mt-3 max-w-xs text-sm text-pretty text-muted-foreground">
-            {siteConfig.description}
+            {d.common.description}
           </p>
           <a
             href={EXTERNAL.github}
@@ -40,14 +43,14 @@ export function SiteFooter() {
             className="mt-5 inline-flex items-center gap-2 rounded-md text-sm text-muted-foreground transition-colors hover:text-foreground"
           >
             <GithubIcon className="size-4" />
-            View on GitHub
+            {d.landing.footer.viewOnGithub}
           </a>
         </div>
 
         <div>
-          <p className="text-sm font-semibold">Product</p>
+          <p className="text-sm font-semibold">{d.landing.footer.product}</p>
           <ul className="mt-3 flex flex-col gap-2">
-            {PRODUCT_LINKS.map((link) => (
+            {productLinks.map((link) => (
               <li key={link.href}>
                 <a
                   href={link.href}
@@ -61,14 +64,14 @@ export function SiteFooter() {
         </div>
 
         <div>
-          <p className="text-sm font-semibold">Get started</p>
+          <p className="text-sm font-semibold">{d.landing.footer.getStarted}</p>
           <ul className="mt-3 flex flex-col gap-2">
             <li>
               <Link
                 href={routes.createRoom}
                 className="text-sm text-muted-foreground transition-colors hover:text-foreground"
               >
-                Create a Room
+                {d.landing.footer.createRoom}
               </Link>
             </li>
             <li>
@@ -76,7 +79,7 @@ export function SiteFooter() {
                 href={routes.joinRoom}
                 className="text-sm text-muted-foreground transition-colors hover:text-foreground"
               >
-                Join a Room
+                {d.landing.footer.joinRoom}
               </Link>
             </li>
             <li>
@@ -84,7 +87,7 @@ export function SiteFooter() {
                 href={routes.login}
                 className="text-sm text-muted-foreground transition-colors hover:text-foreground"
               >
-                Login
+                {d.landing.footer.login}
               </Link>
             </li>
           </ul>
@@ -94,7 +97,10 @@ export function SiteFooter() {
       <Container>
         <div className="border-t py-6">
           <p className="text-xs text-muted-foreground">
-            © {new Date().getFullYear()} {siteConfig.name}. A 42 school project.
+            {t(d.landing.footer.copyright, {
+              year: new Date().getFullYear(),
+              name: siteConfig.name,
+            })}
           </p>
         </div>
       </Container>

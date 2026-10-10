@@ -11,6 +11,7 @@ import {
 } from "@/features/auth/hooks/use-auth";
 import { AvatarPicker } from "@/features/profile/components/avatar-picker";
 import { useAvatarPicker } from "@/features/profile/hooks/use-avatar-picker";
+import { useDict } from "@/i18n/client";
 import { isApiError } from "@/lib/api";
 import { downscaleImage } from "@/lib/image";
 
@@ -25,6 +26,7 @@ export function AvatarStep({
   onNext: () => void;
   onBack: () => void;
 }) {
+  const d = useDict();
   const picker = useAvatarPicker(currentAvatarUrl);
   const uploadAvatar = useUploadAvatar();
   const updateProfile = useUpdateProfile();
@@ -64,11 +66,10 @@ export function AvatarStep({
       <div className="flex flex-col gap-8">
         <header className="flex flex-col gap-2">
           <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-            Pick a picture
+            {d.onboarding.avatar.title}
           </h1>
           <p className="text-pretty text-muted-foreground">
-            It shows next to your cursor on the board, so people know who is
-            drawing. You can skip this and add one later.
+            {d.onboarding.avatar.subtitle}
           </p>
         </header>
 
@@ -99,7 +100,9 @@ export function AvatarStep({
                 aria-hidden="true"
               />
             )}
-            {picker.file ? "Save and continue" : "Continue"}
+            {picker.file
+              ? d.onboarding.avatar.saveAndContinue
+              : d.common.continue}
           </Button>
           <Button
             type="button"
@@ -109,7 +112,7 @@ export function AvatarStep({
             onClick={onBack}
             className="sm:flex-none"
           >
-            Back
+            {d.common.back}
           </Button>
         </div>
       </div>

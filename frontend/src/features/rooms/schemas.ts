@@ -27,12 +27,8 @@ export const roomPageSchema = z.object({
 });
 
 export const createRoomSchema = z.object({
-  name: z
-    .string()
-    .trim()
-    .min(3, "Room name must be at least 3 characters")
-    .max(60, "Room name must be at most 60 characters"),
-  subject: z.string().trim().min(1, "Pick a subject"),
+  name: z.string().trim().min(3, "roomNameMin").max(60, "roomNameMax"),
+  subject: z.string().trim().min(1, "roomSubject"),
 });
 
 /** Codes are shown as `ALG-4271`, but typed however people feel like typing. */
@@ -41,9 +37,9 @@ export const joinRoomSchema = z.object({
     .string()
     .trim()
     .toUpperCase()
-    .min(4, "Enter the room code")
-    .max(12, "That code looks too long")
-    .regex(/^[A-Z0-9-]+$/, "Codes use letters, numbers and dashes only"),
+    .min(4, "roomCodeMin")
+    .max(12, "roomCodeMax")
+    .regex(/^[A-Z0-9-]+$/, "roomCodeFormat"),
 });
 
 /** Aggregates for the KPI row — computed over all rooms, not one page. */

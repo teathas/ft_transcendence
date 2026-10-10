@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
+import { useDict } from "@/i18n/client";
 import { useZodForm } from "@/hooks/use-zod-form";
 import { isApiError } from "@/lib/api";
 
@@ -27,6 +28,7 @@ const INITIAL_VALUES = {
 };
 
 export function RegisterForm() {
+  const d = useDict();
   const register = useRegister();
   const isSubmitting = register.isPending;
 
@@ -56,44 +58,46 @@ export function RegisterForm() {
         <FieldGroup>
           {apiError && !hasFieldLevelApiError && (
             <Alert variant="destructive">
-              <AlertTitle>Could not create your account</AlertTitle>
+              <AlertTitle>{d.auth.register.failed}</AlertTitle>
               <AlertDescription>{apiError.message}</AlertDescription>
             </Alert>
           )}
 
           <Field>
             <FieldLabel {...form.getLabelProps("username")}>
-              Username
+              {d.auth.register.username}
             </FieldLabel>
             <Input
               {...form.getFieldProps("username")}
               autoComplete="username"
-              placeholder="norminette"
+              placeholder={d.auth.register.usernamePlaceholder}
               autoFocus
             />
             <FieldError {...form.getErrorProps("username")} />
           </Field>
 
           <Field>
-            <FieldLabel {...form.getLabelProps("email")}>Email</FieldLabel>
+            <FieldLabel {...form.getLabelProps("email")}>
+              {d.auth.register.email}
+            </FieldLabel>
             <Input
               {...form.getFieldProps("email")}
               type="email"
               inputMode="email"
               autoComplete="email"
-              placeholder="you@student.42.fr"
+              placeholder={d.auth.register.emailPlaceholder}
             />
             <FieldError {...form.getErrorProps("email")} />
           </Field>
 
           <Field>
             <FieldLabel {...form.getLabelProps("password")}>
-              Password
+              {d.auth.register.password}
             </FieldLabel>
             <PasswordInput
               {...form.getFieldProps("password")}
               autoComplete="new-password"
-              placeholder="At least 8 characters"
+              placeholder={d.auth.register.passwordPlaceholder}
             />
             <FieldError {...form.getErrorProps("password")} />
             {form.values.password.length > 0 && (
@@ -103,12 +107,12 @@ export function RegisterForm() {
 
           <Field>
             <FieldLabel {...form.getLabelProps("confirmPassword")}>
-              Confirm password
+              {d.auth.register.confirmPassword}
             </FieldLabel>
             <PasswordInput
               {...form.getFieldProps("confirmPassword")}
               autoComplete="new-password"
-              placeholder="Re-enter your password"
+              placeholder={d.auth.register.confirmPasswordPlaceholder}
             />
             <FieldError {...form.getErrorProps("confirmPassword")} />
           </Field>
@@ -120,7 +124,7 @@ export function RegisterForm() {
                 aria-hidden="true"
               />
             )}
-            {isSubmitting ? "Creating account…" : "Register"}
+            {isSubmitting ? d.auth.register.submitting : d.auth.register.submit}
           </Button>
         </FieldGroup>
       </fieldset>

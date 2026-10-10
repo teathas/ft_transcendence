@@ -4,6 +4,8 @@ import { useEffect } from "react";
 import { useTheme } from "next-themes";
 import type { Editor } from "tldraw";
 
+import { useLocale } from "@/i18n/client";
+
 /**
  * Pushes who you are onto the editor.
  *
@@ -17,6 +19,7 @@ export function useBoardIdentity(
   identity: { id: string; name: string; color: string },
 ) {
   const { resolvedTheme } = useTheme();
+  const locale = useLocale();
 
   // `onMount` fires once, so these are pushed from effects instead —
   // otherwise a theme switch or a rename mid-session would not reach the board.
@@ -26,6 +29,14 @@ export function useBoardIdentity(
       colorScheme: resolvedTheme === "dark" ? "dark" : "light",
     });
   }, [editor, resolvedTheme]);
+
+  // tldraw ships its own translations for all three of our languages, Arabic
+  // included, and lays its own UI out right to left from this alone. Without
+  // it the board would stay English inside a fully Arabic page.
+  useEffect(() => {
+    if (!editor) return;
+    editor.user.updateUserPreferences({ locale });
+  }, [editor, locale]);
 
   useEffect(() => {
     if (!editor) return;

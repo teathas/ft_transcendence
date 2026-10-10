@@ -8,6 +8,7 @@ import {
   useUpdateProfile,
   useUploadAvatar,
 } from "@/features/auth/hooks/use-auth";
+import { useDict } from "@/i18n/client";
 import { isApiError } from "@/lib/api";
 import { downscaleImage, validateImageFile } from "@/lib/image";
 import { cn } from "@/lib/utils";
@@ -23,6 +24,7 @@ export function AvatarUploader({
   username: string;
   avatarUrl: string | null;
 }) {
+  const d = useDict();
   const inputId = useId();
   const uploadAvatar = useUploadAvatar();
   const removeAvatar = useUpdateProfile();
@@ -70,7 +72,7 @@ export function AvatarUploader({
 
         <label
           htmlFor={inputId}
-          title="Change profile photo"
+          title={d.profile.changePhoto}
           onDragOver={(event) => event.preventDefault()}
           onDrop={(event) => {
             event.preventDefault();
@@ -104,17 +106,17 @@ export function AvatarUploader({
             )}
           </span>
 
-          <span className="sr-only">Change profile photo</span>
+          <span className="sr-only">{d.profile.changePhoto}</span>
         </label>
 
         {avatarUrl && !isBusy && (
           <button
             type="button"
             onClick={() => removeAvatar.mutate({ avatarUrl: null })}
-            aria-label="Remove profile photo"
-            title="Remove profile photo"
+            aria-label={d.profile.removePhoto}
+            title={d.profile.removePhoto}
             className={cn(
-              "absolute -top-0.5 -right-0.5 bg-card text-muted-foreground hover:text-destructive",
+              "absolute -end-0.5 -top-0.5 bg-card text-muted-foreground hover:text-destructive",
               "flex size-7 items-center justify-center rounded-full border shadow-sm transition-colors",
             )}
           >

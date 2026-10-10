@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Modal } from "@/components/ui/modal";
+import { useDict } from "@/i18n/client";
 import { useZodForm } from "@/hooks/use-zod-form";
 import { isApiError } from "@/lib/api";
 
@@ -26,6 +27,7 @@ export function JoinRoomModal({
   open: boolean;
   onClose: () => void;
 }) {
+  const d = useDict();
   const joinRoom = useJoinRoom();
   const isSubmitting = joinRoom.isPending;
   const apiError = isApiError(joinRoom.error) ? joinRoom.error : null;
@@ -44,8 +46,8 @@ export function JoinRoomModal({
     <Modal
       open={open}
       onClose={onClose}
-      title="Join a room"
-      description="Enter the code someone shared with you."
+      title={d.rooms.join.title}
+      description={d.rooms.join.description}
     >
       <form onSubmit={form.handleSubmit} noValidate>
         <fieldset disabled={isSubmitting}>
@@ -57,25 +59,25 @@ export function JoinRoomModal({
             )}
 
             <Field>
-              <FieldLabel {...form.getLabelProps("code")}>Room code</FieldLabel>
+              <FieldLabel {...form.getLabelProps("code")}>
+                {d.rooms.join.code}
+              </FieldLabel>
               <Input
                 {...form.getFieldProps("code")}
-                placeholder="ALG-4271"
+                placeholder={d.rooms.join.codePlaceholder}
                 autoCapitalize="characters"
                 autoComplete="off"
                 spellCheck={false}
                 className="font-mono tracking-wider uppercase"
                 autoFocus
               />
-              <FieldDescription>
-                Codes look like three letters, a dash and four digits.
-              </FieldDescription>
+              <FieldDescription>{d.rooms.join.codeHint}</FieldDescription>
               <FieldError {...form.getErrorProps("code")} />
             </Field>
 
             <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
               <Button type="button" variant="ghost" onClick={onClose}>
-                Cancel
+                {d.common.cancel}
               </Button>
               <Button type="submit" disabled={isSubmitting}>
                 {isSubmitting && (
@@ -84,7 +86,7 @@ export function JoinRoomModal({
                     aria-hidden="true"
                   />
                 )}
-                Join room
+                {d.rooms.join.submit}
               </Button>
             </div>
           </FieldGroup>

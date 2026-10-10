@@ -2,6 +2,7 @@
 
 import { Check } from "lucide-react";
 
+import { useDict } from "@/i18n/client";
 import { cn } from "@/lib/utils";
 
 import { getPasswordStrength } from "../password-strength";
@@ -25,7 +26,9 @@ const TEXT_COLORS = [
 ] as const;
 
 export function PasswordStrengthMeter({ password }: { password: string }) {
-  const { score, label, checks } = getPasswordStrength(password);
+  const d = useDict();
+  const { score, checks } = getPasswordStrength(password);
+  const label = d.auth.passwordStrength.levels[score];
 
   return (
     <div className="flex flex-col gap-2">
@@ -33,7 +36,7 @@ export function PasswordStrengthMeter({ password }: { password: string }) {
         <div
           className="flex flex-1 gap-1"
           role="meter"
-          aria-label="Password strength"
+          aria-label={d.auth.passwordStrength.label}
           aria-valuemin={0}
           aria-valuemax={4}
           aria-valuenow={score}
@@ -58,7 +61,7 @@ export function PasswordStrengthMeter({ password }: { password: string }) {
       <ul className="grid grid-cols-2 gap-x-3 gap-y-1">
         {checks.map((check) => (
           <li
-            key={check.label}
+            key={check.id}
             className={cn(
               "flex items-center gap-1.5 text-xs transition-colors",
               check.passed
@@ -70,7 +73,7 @@ export function PasswordStrengthMeter({ password }: { password: string }) {
               className={cn("size-3 shrink-0", !check.passed && "opacity-40")}
               aria-hidden="true"
             />
-            {check.label}
+            {d.auth.passwordStrength.checks[check.id]}
           </li>
         ))}
       </ul>

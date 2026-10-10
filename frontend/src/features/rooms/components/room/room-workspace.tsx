@@ -2,11 +2,12 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { DoorOpen, TriangleAlert, X } from "lucide-react";
-import Link from "next/link";
 
 import { Button, buttonStyles } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { routes } from "@/config/routes";
+import { useDict } from "@/i18n/client";
+import { Link } from "@/i18n/navigation";
 import { isApiError } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
@@ -25,6 +26,7 @@ import { RoomRail, type RailTab } from "./room-rail";
 const FULL_HEIGHT = "h-[calc(100svh-3.5rem)] lg:h-svh";
 
 export function RoomWorkspace({ code }: { code: string }) {
+  const d = useDict();
   const { data: room, isPending, isError, error } = useRoom(code);
   const { data: participants } = useParticipants(code);
   const { user } = useSession();
@@ -35,12 +37,12 @@ export function RoomWorkspace({ code }: { code: string }) {
   const identity = useMemo(
     () => ({
       id: user?.id ?? "anonymous",
-      name: user?.username ?? "Guest",
+      name: user?.username ?? d.room.guest,
       color:
         participants?.find((person) => person.id === user?.id)?.color ??
         "#6366f1",
     }),
-    [user?.id, user?.username, participants],
+    [user?.id, user?.username, participants, d],
   );
 
   const handleStatusChange = useCallback(
@@ -84,19 +86,17 @@ export function RoomWorkspace({ code }: { code: string }) {
           />
         </span>
         <h1 className="text-xl font-semibold tracking-tight">
-          This room is not available
+          {d.room.unavailable.title}
         </h1>
         <p className="max-w-sm text-sm text-pretty text-muted-foreground">
-          {isApiError(error)
-            ? error.message
-            : "The room may have been closed, or the code is wrong."}
+          {isApiError(error) ? error.message : d.room.unavailable.body}
         </p>
         <Link
           href={routes.rooms}
           className={buttonStyles({ variant: "outline", className: "mt-2" })}
         >
           <DoorOpen className="size-4" aria-hidden="true" />
-          Back to your rooms
+          {d.room.unavailable.back}
         </Link>
       </div>
     );
@@ -121,7 +121,7 @@ export function RoomWorkspace({ code }: { code: string }) {
 
         <aside
           className={cn(
-            "hidden w-80 shrink-0 flex-col border-l bg-card xl:w-96",
+            "hidden w-80 shrink-0 flex-col border-s bg-card xl:w-96",
             isRailOpen && "lg:flex",
           )}
         >
@@ -141,7 +141,7 @@ export function RoomWorkspace({ code }: { code: string }) {
       <aside
         role="dialog"
         aria-modal={isMobileRailOpen}
-        aria-label="Room panels"
+        aria-label={d.room.panels}
         aria-hidden={!isMobileRailOpen}
         className={cn(
           "fixed inset-x-0 bottom-0 z-50 flex h-[75svh] flex-col rounded-t-xl border-t bg-card",
@@ -159,9 +159,9 @@ export function RoomWorkspace({ code }: { code: string }) {
           <Button
             variant="ghost"
             size="icon"
-            aria-label="Close panels"
+            aria-label={d.room.closePanels}
             onClick={() => setIsMobileRailOpen(false)}
-            className="absolute right-1.5"
+            className="absolute end-1.5"
           >
             <X className="size-4" aria-hidden="true" />
           </Button>

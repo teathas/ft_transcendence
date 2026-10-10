@@ -15,12 +15,16 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { useDeleteAccount } from "@/features/auth/hooks/use-auth";
+import { useDict } from "@/i18n/client";
+import { t } from "@/i18n/translate";
 import { useZodForm } from "@/hooks/use-zod-form";
 import { isApiError } from "@/lib/api";
 
 import { SectionCard } from "./section-card";
 
 export function DangerZone({ username }: { username: string }) {
+  const d = useDict();
+  const hint = d.profile.danger.confirmHint;
   const [isConfirming, setIsConfirming] = useState(false);
   const deleteAccount = useDeleteAccount();
   const isSubmitting = deleteAccount.isPending;
@@ -33,9 +37,9 @@ export function DangerZone({ username }: { username: string }) {
         .object({ confirmation: z.string() })
         .refine((values) => values.confirmation.trim() === username, {
           path: ["confirmation"],
-          error: `Type “${username}” exactly to confirm`,
+          error: t(hint, { username }),
         }),
-    [username],
+    [username, hint],
   );
 
   const form = useZodForm({
@@ -50,12 +54,12 @@ export function DangerZone({ username }: { username: string }) {
   return (
     <SectionCard
       tone="danger"
-      title="Delete account"
-      description="Your rooms, boards and messages are removed for everyone. This cannot be undone."
+      title={d.profile.danger.title}
+      description={d.profile.danger.description}
     >
       {!isConfirming ? (
         <Button variant="destructive" onClick={() => setIsConfirming(true)}>
-          Delete my account
+          {d.profile.danger.submit}
         </Button>
       ) : (
         <form onSubmit={form.handleSubmit} noValidate>
@@ -69,7 +73,7 @@ export function DangerZone({ username }: { username: string }) {
 
               <Field>
                 <FieldLabel {...form.getLabelProps("confirmation")}>
-                  Confirm your username
+                  {d.profile.danger.confirmLabel}
                 </FieldLabel>
                 <Input
                   {...form.getFieldProps("confirmation")}
@@ -78,8 +82,7 @@ export function DangerZone({ username }: { username: string }) {
                   autoFocus
                 />
                 <FieldDescription>
-                  Type <strong className="text-foreground">{username}</strong>{" "}
-                  to unlock the button below.
+                  {t(d.profile.danger.confirmDescription, { username })}
                 </FieldDescription>
                 <FieldError {...form.getErrorProps("confirmation")} />
               </Field>
@@ -96,7 +99,7 @@ export function DangerZone({ username }: { username: string }) {
                       aria-hidden="true"
                     />
                   )}
-                  Permanently delete
+                  {d.profile.danger.permanentlyDelete}
                 </Button>
                 <Button
                   type="button"
@@ -104,7 +107,7 @@ export function DangerZone({ username }: { username: string }) {
                   disabled={isSubmitting}
                   onClick={() => setIsConfirming(false)}
                 >
-                  Cancel
+                  {d.common.cancel}
                 </Button>
               </div>
             </FieldGroup>

@@ -1,5 +1,12 @@
 import { z } from "zod";
 
+/**
+ * Messages are dictionary keys, not sentences: `FieldError` translates them at
+ * render, which is the only moment the active language is known. A key the
+ * dictionary does not carry is printed as-is, which is what lets the backend's
+ * own messages travel the same path untouched.
+ */
+
 // Mirrors the Prisma `User` model and its `UserStatus` enum exactly.
 export const userStatusSchema = z.enum(["ONLINE", "OFFLINE"]);
 
@@ -24,9 +31,9 @@ export const loginSchema = z.object({
   username: z
     .string()
     .trim()
-    .min(3, "At least 3 characters")
-    .max(32, "At most 32 characters"),
-  password: z.string().min(8, "At least 8 characters"),
+    .min(3, "usernameMinShort")
+    .max(32, "usernameMaxShort"),
+  password: z.string().min(8, "passwordMinShort"),
 });
 
 /**
@@ -34,14 +41,10 @@ export const loginSchema = z.object({
  * never leaves the browser.
  */
 const registerFieldsSchema = z.object({
-  username: z
-    .string()
-    .trim()
-    .min(3, "Username must be at least 3 characters")
-    .max(30, "Username must be at most 30 characters"),
-  email: z.email("Enter a valid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
-  confirmPassword: z.string().min(1, "Confirm your password"),
+  username: z.string().trim().min(3, "usernameMin").max(30, "usernameMax"),
+  email: z.email("email"),
+  password: z.string().min(8, "passwordMin"),
+  confirmPassword: z.string().min(1, "passwordConfirm"),
 });
 
 /**
@@ -50,7 +53,7 @@ const registerFieldsSchema = z.object({
  */
 export const registerFormSchema = registerFieldsSchema.refine(
   (values) => values.password === values.confirmPassword,
-  { path: ["confirmPassword"], error: "Passwords do not match" },
+  { path: ["confirmPassword"], error: "passwordMismatch" },
 );
 
 /** What actually goes to the backend — `confirmPassword` is dropped. */

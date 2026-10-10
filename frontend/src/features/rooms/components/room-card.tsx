@@ -1,13 +1,15 @@
 "use client";
 
 import { Clock, Presentation, Users } from "lucide-react";
-import Link from "next/link";
 
 import { routes } from "@/config/routes";
-import { formatRelativeTime } from "@/lib/format";
+import { useDict } from "@/i18n/client";
+import { Link } from "@/i18n/navigation";
+import { useFormat } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 import type { Room } from "../types";
+import { useSubjectLabel } from "../subject-label";
 
 // A stable accent per room, so a board is recognisable at a glance.
 const ACCENTS = [
@@ -25,6 +27,10 @@ function accentFor(code: string) {
 }
 
 export function RoomCard({ room }: { room: Room }) {
+  const d = useDict();
+  const { relativeTime } = useFormat();
+  const subjectLabel = useSubjectLabel();
+
   return (
     <Link
       href={routes.room(room.code)}
@@ -47,7 +53,7 @@ export function RoomCard({ room }: { room: Room }) {
         <span className="flex shrink-0 items-center gap-2">
           {room.status === "archived" && (
             <span className="rounded-md bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
-              Archived
+              {d.rooms.status.archived}
             </span>
           )}
           <span className="rounded-md bg-muted px-2 py-0.5 font-mono text-[11px] text-muted-foreground">
@@ -61,20 +67,22 @@ export function RoomCard({ room }: { room: Room }) {
           {room.name}
         </h3>
         <p className="text-xs text-muted-foreground">
-          {room.subject} · @{room.ownerUsername}
+          {subjectLabel(room.subject)} · @{room.ownerUsername}
         </p>
       </div>
 
       <div className="mt-auto flex items-center gap-4 text-xs text-muted-foreground">
-        <span className="inline-flex items-center gap-1.5">
+        <span
+          className="inline-flex items-center gap-1.5"
+          title={d.common.people}
+        >
           <Users className="size-3.5" aria-hidden="true" />
-          {room.participantCount}{" "}
-          {room.participantCount === 1 ? "person" : "people"}
+          {room.participantCount}
         </span>
         {room.lastActiveAt && (
           <span className="inline-flex items-center gap-1.5">
             <Clock className="size-3.5" aria-hidden="true" />
-            {formatRelativeTime(room.lastActiveAt)}
+            {relativeTime(room.lastActiveAt)}
           </span>
         )}
       </div>

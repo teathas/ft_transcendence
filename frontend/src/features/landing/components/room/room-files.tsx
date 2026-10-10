@@ -1,13 +1,16 @@
 import { FileImage, FileText } from "lucide-react";
 
+import { getDict } from "@/i18n/server";
 import { cn } from "@/lib/utils";
 
 import { ROOM_FILES } from "../../content";
 
-export function RoomFiles({ className }: { className?: string }) {
+export async function RoomFiles({ className }: { className?: string }) {
+  const d = await getDict();
+
   return (
     <div className={cn("flex flex-col gap-3 p-4", className)}>
-      <p className="text-xs font-semibold">Files</p>
+      <p className="text-xs font-semibold">{d.landing.showcase.files}</p>
 
       <ul className="flex flex-col gap-2">
         {ROOM_FILES.map((file) => {
