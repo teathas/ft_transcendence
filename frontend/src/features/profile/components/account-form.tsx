@@ -12,9 +12,11 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { useUpdateProfile } from "@/features/auth/hooks/use-auth";
 import type { User } from "@/features/auth/types";
 import { useDict } from "@/i18n/client";
+import { t } from "@/i18n/translate";
 import { useZodForm } from "@/hooks/use-zod-form";
 import { isApiError } from "@/lib/api";
 
@@ -29,7 +31,11 @@ export function AccountForm({ user }: { user: User }) {
 
   const form = useZodForm({
     schema: accountSchema,
-    initialValues: { username: user.username, email: user.email },
+    initialValues: {
+      username: user.username,
+      email: user.email,
+      bio: user.bio ?? "",
+    },
     externalErrors: apiError?.fieldErrors,
     onSubmit: (values) => {
       if (isSubmitting) return;
@@ -39,7 +45,8 @@ export function AccountForm({ user }: { user: User }) {
 
   const isUnchanged =
     form.values.username.trim() === user.username &&
-    form.values.email.trim() === user.email;
+    form.values.email.trim() === user.email &&
+    form.values.bio.trim() === (user.bio ?? "");
 
   return (
     <SectionCard
@@ -84,6 +91,24 @@ export function AccountForm({ user }: { user: User }) {
               />
               <FieldDescription>{d.profile.account.emailHint}</FieldDescription>
               <FieldError {...form.getErrorProps("email")} />
+            </Field>
+
+            <Field>
+              <FieldLabel {...form.getLabelProps("bio")}>
+                {d.profile.account.bio}
+              </FieldLabel>
+              <Textarea
+                {...form.getFieldProps("bio")}
+                rows={3}
+                maxLength={280}
+                placeholder={d.profile.account.bioPlaceholder}
+              />
+              <FieldDescription>
+                {t(d.profile.account.bioCount, {
+                  count: form.values.bio.length,
+                })}
+              </FieldDescription>
+              <FieldError {...form.getErrorProps("bio")} />
             </Field>
 
             <Button

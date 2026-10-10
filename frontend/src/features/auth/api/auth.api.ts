@@ -1,8 +1,6 @@
 import { api } from "@/lib/api";
 import { parseResponse } from "@/lib/api/parse";
-import { env } from "@/lib/env";
 
-import { authMocks } from "../mocks";
 import { tokenResponseSchema, userSchema } from "../schemas";
 import type {
   AuthResponse,
@@ -63,15 +61,17 @@ export const authApi = {
     return parseResponse(userSchema, data, "PATCH /users/me");
   },
 
-  async changePassword(payload: PasswordChangePayload): Promise<void> {
-    if (env.enableMocks) return authMocks.changePassword(payload);
+  async removeAvatar(): Promise<User> {
+    const { data } = await api.delete("/users/me/avatar");
+    return parseResponse(userSchema, data, "DELETE /users/me/avatar");
+  },
 
+  /** A wrong current password is a 400, so it never looks like an expired session. */
+  async changePassword(payload: PasswordChangePayload): Promise<void> {
     await api.patch("/users/me/password", payload);
   },
 
   async deleteAccount(): Promise<void> {
-    if (env.enableMocks) return authMocks.deleteAccount();
-
     await api.delete("/users/me", { skipAuthRefresh: true });
   },
 

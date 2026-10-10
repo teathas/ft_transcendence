@@ -5,7 +5,7 @@ import { Camera, LoaderCircle, X } from "lucide-react";
 
 import { Avatar } from "@/components/ui/avatar";
 import {
-  useUpdateProfile,
+  useRemoveAvatar,
   useUploadAvatar,
 } from "@/features/auth/hooks/use-auth";
 import { useDict } from "@/i18n/client";
@@ -31,7 +31,7 @@ export function AvatarUploader({
   const d = useDict();
   const inputId = useId();
   const uploadAvatar = useUploadAvatar();
-  const removeAvatar = useUpdateProfile();
+  const removeAvatar = useRemoveAvatar();
   const [isPreparing, setIsPreparing] = useState(false);
   const [fileError, setFileError] = useState<string | null>(null);
 
@@ -116,7 +116,7 @@ export function AvatarUploader({
         {avatarUrl && !isBusy && (
           <button
             type="button"
-            onClick={() => removeAvatar.mutate({ avatarUrl: null })}
+            onClick={() => removeAvatar.mutate()}
             aria-label={d.profile.removePhoto}
             title={d.profile.removePhoto}
             className={cn(

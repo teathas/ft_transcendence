@@ -13,6 +13,7 @@ import { join } from 'path'
 import { FriendsModule } from './friends/friends.module';
 import { MessagesModule } from './messages/messages.module';
 import { RealtimeModule } from './realtime/realtime.module';
+import { DirectMessagesModule } from './direct-messages/direct-messages.module';
 
 @Module({
 	imports: [
@@ -28,6 +29,7 @@ import { RealtimeModule } from './realtime/realtime.module';
 		MessagesModule,
 		FriendsModule,
 		RealtimeModule,
+		DirectMessagesModule,
 	],
 	controllers: [AppController],
 	providers: [

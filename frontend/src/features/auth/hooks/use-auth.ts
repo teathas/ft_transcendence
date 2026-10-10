@@ -89,6 +89,17 @@ export function useUploadAvatar() {
   });
 }
 
+export function useRemoveAvatar() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: authApi.removeAvatar,
+    onSuccess: (user) => {
+      queryClient.setQueryData(queryKeys.auth.session(), user);
+    },
+  });
+}
+
 export function useChangePassword() {
   return useMutation({ mutationFn: authApi.changePassword });
 }

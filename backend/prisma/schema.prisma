@@ -50,6 +50,8 @@ model User {
   sentFriendRequests     Friendship[] @relation("FriendshipRequester")
   receivedFriendRequests Friendship[] @relation("FriendshipAddressee")
   messages               Message[]
+  sentDirectMessages     DirectMessage[] @relation("DirectMessageSent")
+  receivedDirectMessages DirectMessage[] @relation("DirectMessageReceived")
 }
 
 enum UserStatus {
@@ -106,4 +108,24 @@ model Message {
 
   user User @relation(fields: [userId], references: [id])
   room Room @relation(fields: [roomId], references: [id])
+}
+
+/// A message between two friends. Only accepted friends can exchange them; the
+/// service checks that, the database does not.
+model DirectMessage {
+  id         String    @id @default(uuid())
+  content    String
+  senderId   String
+  receiverId String
+  createdAt  DateTime  @default(now())
+  /// Set once the receiver has opened the conversation.
+  readAt     DateTime?
+
+  sender   User @relation("DirectMessageSent", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver User @relation("DirectMessageReceived", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  // One thread is read as two directions, newest first.
+  @@index([senderId, receiverId, createdAt])
+  // The unread counters.
+  @@index([receiverId, readAt])
 }

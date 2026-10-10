@@ -1,6 +1,14 @@
 "use client";
 
-import { Gauge, LayoutGrid, LogOut, Plus, UserRound } from "lucide-react";
+import {
+  Gauge,
+  LayoutGrid,
+  LogOut,
+  MessagesSquare,
+  Plus,
+  UserRound,
+  Users,
+} from "lucide-react";
 
 import { BrandWordmark } from "@/components/layout/brand-mark";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
@@ -10,6 +18,7 @@ import { Button, buttonStyles } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { routes } from "@/config/routes";
 import { useLogout, useSession } from "@/features/auth/hooks/use-auth";
+import { useFriendsSummary } from "@/features/friends/hooks/use-friends";
 import { useRecentRooms } from "@/features/rooms/hooks/use-rooms";
 import { useDict } from "@/i18n/client";
 import { Link, useBarePathname } from "@/i18n/navigation";
@@ -20,11 +29,14 @@ function NavLink({
   active,
   children,
   onNavigate,
+  badge,
 }: {
   href: string;
   active: boolean;
   children: React.ReactNode;
   onNavigate?: () => void;
+  /** A count shown at the end of the row; hidden when 0. */
+  badge?: number;
 }) {
   return (
     <Link
@@ -39,6 +51,11 @@ function NavLink({
       )}
     >
       {children}
+      {badge ? (
+        <span className="ms-auto min-w-5 rounded-full bg-primary px-1.5 py-0.5 text-center text-[11px] leading-none font-medium text-primary-foreground tabular-nums">
+          {badge}
+        </span>
+      ) : null}
     </Link>
   );
 }
@@ -50,6 +67,7 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
   const { user } = useSession();
   const logout = useLogout();
   const { data: rooms, isPending } = useRecentRooms();
+  const { data: summary } = useFriendsSummary();
 
   return (
     <div className="flex h-full flex-col gap-6 p-4">
@@ -87,6 +105,26 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
         >
           <LayoutGrid className="size-4" aria-hidden="true" />
           {d.nav.allRooms}
+        </NavLink>
+
+        <NavLink
+          href={routes.friends}
+          active={pathname === routes.friends}
+          onNavigate={onNavigate}
+          badge={summary?.received}
+        >
+          <Users className="size-4" aria-hidden="true" />
+          {d.nav.friends}
+        </NavLink>
+
+        <NavLink
+          href={routes.messages}
+          active={pathname.startsWith(routes.messages)}
+          onNavigate={onNavigate}
+          badge={summary?.unreadMessages}
+        >
+          <MessagesSquare className="size-4" aria-hidden="true" />
+          {d.nav.messages}
         </NavLink>
 
         <NavLink

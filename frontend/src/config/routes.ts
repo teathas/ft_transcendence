@@ -13,7 +13,10 @@ export const routes = {
   dashboard: "/dashboard" as Route,
   rooms: "/rooms" as Route,
   profile: "/profile" as Route,
+  friends: "/friends" as Route,
+  messages: "/messages" as Route,
   room: (code: string) => `/rooms/${code}` as Route,
+  thread: (friendId: string) => `/messages/${friendId}` as Route,
 
   createRoom: "/register" as Route,
   joinRoom: "/login" as Route,

@@ -3,6 +3,8 @@ import { z } from "zod";
 export const accountSchema = z.object({
   username: z.string().trim().min(3, "usernameMin").max(20, "usernameMax"),
   email: z.email("email"),
+  // `UpdateUserDto`: at most 280 characters. Empty clears it.
+  bio: z.string().trim().max(280, "bioMax"),
 });
 
 export const passwordChangeSchema = z

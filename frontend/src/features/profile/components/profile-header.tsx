@@ -32,6 +32,12 @@ export function ProfileHeader({ user }: { user: User }) {
             {user.username}
           </h1>
 
+          {user.bio && (
+            <p className="max-w-prose text-sm text-pretty text-muted-foreground">
+              {user.bio}
+            </p>
+          )}
+
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
             <span
               className={cn(

@@ -1,25 +1,31 @@
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { sendFriendRequestDto } from './dto/send-friend-request.dto';
 import { FriendsService } from './friends.service';
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post, Query } from '@nestjs/common';
+import { ListFriendsDto, SearchPageDto } from './dto/list-friends.dto';
 
 @Controller('friends')
 export class FriendsController {
 	constructor(private friendsService: FriendsService) {}
 
 	@Get()
-	getFriends(@CurrentUser() user: { sub: string }) {
-		return this.friendsService.getFriends(user.sub);
+	getFriends(@CurrentUser() user: { sub: string }, @Query() query: ListFriendsDto) {
+		return this.friendsService.getFriends(user.sub, query);
+	}
+
+	@Get('summary')
+	summary(@CurrentUser() user: { sub: string }) {
+		return this.friendsService.summary(user.sub);
 	}
 
 	@Get('requests/received')
-	getReceived(@CurrentUser() user: { sub: string }) {
-		return this.friendsService.getReceivedRequests(user.sub);
+	getReceived(@CurrentUser() user: { sub: string }, @Query() query: SearchPageDto) {
+		return this.friendsService.getReceivedRequests(user.sub, query);
 	}
 
 	@Get('requests/sent')
-	getSent(@CurrentUser() user: { sub: string }) {
-		return this.friendsService.getSentRequests(user.sub);
+	getSent(@CurrentUser() user: { sub: string }, @Query() query: SearchPageDto) {
+		return this.friendsService.getSentRequests(user.sub, query);
 	}
 
 	@Post('requests')

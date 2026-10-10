@@ -24,8 +24,24 @@ export const queryKeys = {
     files: (code: string) =>
       [...queryKeys.rooms.detail(code), "files"] as const,
   },
+  friends: {
+    all: ["friends"] as const,
+    list: (query?: Record<string, unknown>) =>
+      [...queryKeys.friends.all, "list", query ?? {}] as const,
+    requests: (kind: string, query?: Record<string, unknown>) =>
+      [...queryKeys.friends.all, "requests", kind, query ?? {}] as const,
+    summary: () => [...queryKeys.friends.all, "summary"] as const,
+  },
+  messages: {
+    all: ["dm"] as const,
+    conversations: () => [...queryKeys.messages.all, "conversations"] as const,
+    thread: (friendId: string) =>
+      [...queryKeys.messages.all, "thread", friendId] as const,
+  },
   users: {
     all: ["users"] as const,
+    search: (query?: Record<string, unknown>) =>
+      [...queryKeys.users.all, "search", query ?? {}] as const,
     list: (filters?: Record<string, unknown>) =>
       [...queryKeys.users.all, "list", filters ?? {}] as const,
     detail: (id: string) => [...queryKeys.users.all, "detail", id] as const,
