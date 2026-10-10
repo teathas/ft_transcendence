@@ -45,8 +45,6 @@ services:
       UPLOAD_DIR: ${UPLOAD_DIR}
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN}
-    ports:
-      - "${BACKEND_PORT}:${BACKEND_PORT}"
     depends_on:
       pgdb:
         condition: service_healthy
@@ -72,8 +70,6 @@ services:
     restart: always
     environment:
       PORT: ${FRONTEND_PORT}
-    ports:
-      - "${FRONTEND_PORT}:${FRONTEND_PORT}"
     depends_on:
       backend:
         condition: service_healthy
@@ -84,8 +80,32 @@ services:
       retries: 5
       start_period: 10s
 
+  certs:
+    image: alpine/openssl
+    entrypoint: ["sh"]
+    command: ["/gen-cert.sh"]
+    volumes:
+      - certs:/certs
+      - ./nginx/cert/gen-cert.sh:/gen-cert.sh:ro
+    restart: "no"
+
+  nginx:
+    image: nginx:1.27-alpine
+    ports: 
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - certs:/etc/nginx/certs:ro
+    depends_on:
+      frontend:
+        condition: service_healthy
+      certs:
+        condition: service_completed_successfully
+    restart: always
 
 
 volumes:
   pgdata:
   uploads:
+  certs:
