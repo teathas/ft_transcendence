@@ -151,8 +151,8 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
           {rooms?.map((room) => (
             <NavLink
               key={room.id}
-              href={routes.room(room.code)}
-              active={pathname === routes.room(room.code)}
+              href={routes.room(room.id)}
+              active={pathname === routes.room(room.id)}
               onNavigate={onNavigate}
             >
               <span className="truncate">{room.name}</span>

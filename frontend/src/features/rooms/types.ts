@@ -1,18 +1,21 @@
 import type { z } from "zod";
 
 import type {
+  boardSchema,
   createRoomSchema,
   joinRoomSchema,
+  messageSchema,
+  participantSchema,
+  roomFileSchema,
   roomPageSchema,
   roomSchema,
   roomStatsSchema,
   roomStatusSchema,
-  participantSchema,
-  messageSchema,
-  roomFileSchema,
+  roomVisibilitySchema,
 } from "./schemas";
 
 export type RoomStatus = z.infer<typeof roomStatusSchema>;
+export type RoomVisibility = z.infer<typeof roomVisibilitySchema>;
 export type Room = z.infer<typeof roomSchema>;
 export type RoomPage = z.infer<typeof roomPageSchema>;
 export type RoomStats = z.infer<typeof roomStatsSchema>;
@@ -20,7 +23,8 @@ export type CreateRoomPayload = z.infer<typeof createRoomSchema>;
 export type JoinRoomPayload = z.infer<typeof joinRoomSchema>;
 
 export type RoomSort = "recent" | "name" | "participants";
-export type RoomOwnership = "all" | "owned" | "joined";
+/** `mine` is owned or joined: every room you are in. */
+export type RoomOwnership = "all" | "mine" | "owned" | "joined";
 
 /** Everything the list view can ask for, mirrored in the query string. */
 export type RoomQuery = {
@@ -36,3 +40,16 @@ export type RoomQuery = {
 export type Participant = z.infer<typeof participantSchema>;
 export type Message = z.infer<typeof messageSchema>;
 export type RoomFile = z.infer<typeof roomFileSchema>;
+export type Board = z.infer<typeof boardSchema>;
+
+/** One page of a conversation, newest first, and where the older ones start. */
+export type MessagePage = { items: Message[]; nextCursor: string | null };
+
+/** What opening a room loads, already in the shapes the screens use. */
+export type RoomDetail = {
+  room: Room;
+  participants: Participant[];
+  messages: MessagePage;
+  files: RoomFile[];
+  board: Board;
+};

@@ -6,6 +6,8 @@ import { MOCK_FILES, MOCK_MESSAGES, MOCK_PARTICIPANTS } from "./room-mocks";
 import type {
   CreateRoomPayload,
   Message,
+  MessagePage,
+  RoomDetail,
   RoomFile,
   JoinRoomPayload,
   Room,
@@ -135,7 +137,9 @@ const CURATED_ROOMS: Room[] = SEEDS.map(
 
     return {
       id: `3f1c9a20-${String(index).padStart(4, "0")}-4d7a-9f10-7c2b5e8a1d40`,
-      code,
+      visibility: "PUBLIC",
+      inviteCode: code,
+      isMember: true,
       name,
       subject,
       status: archived ? "archived" : "active",
@@ -198,7 +202,9 @@ const EXTRA_ROOMS: Room[] = VARIANTS.map(([name, subject, prefix], index) => {
 
   return {
     id: `7c4e1b80-${String(index).padStart(4, "0")}-4d7a-9f10-7c2b5e8a1d40`,
-    code: `${prefix}-${String(2000 + index * 37).padStart(4, "0")}`,
+    visibility: "PUBLIC",
+    inviteCode: `${prefix}-${String(2000 + index * 37).padStart(4, "0")}`,
+    isMember: true,
     name,
     subject,
     status: index % 11 === 0 ? "archived" : "active",
@@ -233,13 +239,14 @@ export function selectRooms(rooms: Room[], query: RoomQuery): RoomPage {
     if (
       search &&
       !room.name.toLowerCase().includes(search) &&
-      !room.code.toLowerCase().includes(search) &&
+      !room.inviteCode?.toLowerCase().includes(search) &&
       !room.subject.toLowerCase().includes(search)
     ) {
       return false;
     }
     if (query.subject !== "all" && room.subject !== query.subject) return false;
     if (query.status !== "all" && room.status !== query.status) return false;
+    if (query.ownership === "mine" && !room.isMember) return false;
     if (query.ownership === "owned" && room.ownerId !== MOCK_USER.id) {
       return false;
     }
@@ -265,10 +272,10 @@ export function selectRooms(rooms: Room[], query: RoomQuery): RoomPage {
 }
 
 export const roomsMocks = {
-  get: (code: string) => {
-    const room = MOCK_ROOMS.find((candidate) => candidate.code === code);
+  get: (id: string) => {
+    const room = MOCK_ROOMS.find((candidate) => candidate.id === id);
     if (!room) {
-      throw new ApiError(`No room with the code ${code}.`, { status: 404 });
+      throw new ApiError("This room does not exist.", { status: 404 });
     }
     return settle(room);
   },
@@ -286,10 +293,12 @@ export const roomsMocks = {
 
   list: (query: RoomQuery) => settle(selectRooms(MOCK_ROOMS, query)),
 
-  create: ({ name, subject }: CreateRoomPayload) =>
+  create: ({ name, subject, visibility }: CreateRoomPayload) =>
     settle<Room>({
       id: crypto.randomUUID(),
-      code: codeFrom(name),
+      visibility,
+      inviteCode: codeFrom(name),
+      isMember: true,
       name,
       subject,
       status: "active",
@@ -301,11 +310,13 @@ export const roomsMocks = {
     }),
 
   join: ({ code }: JoinRoomPayload) => {
-    const known = MOCK_ROOMS.find((room) => room.code === code);
+    const known = MOCK_ROOMS.find((room) => room.inviteCode === code);
     return settle<Room>(
       known ?? {
         id: crypto.randomUUID(),
-        code,
+        visibility: "PRIVATE",
+        inviteCode: code,
+        isMember: true,
         name: `Room ${code}`,
         subject: "Mathematics",
         status: "active",
@@ -324,9 +335,28 @@ const sentMessages: Message[] = [];
 const uploadedFiles: RoomFile[] = [];
 
 export const roomDetailMocks = {
-  participants: () => settle(MOCK_PARTICIPANTS, 300),
-  files: () => settle([...MOCK_FILES, ...uploadedFiles], 300),
-  messages: () => settle([...MOCK_MESSAGES, ...sentMessages], 300),
+  detail: async (id: string): Promise<RoomDetail> => {
+    const room = await roomsMocks.get(id);
+    return {
+      room,
+      participants: MOCK_PARTICIPANTS,
+      // Newest first, like the API.
+      messages: {
+        items: [...MOCK_MESSAGES, ...sentMessages].reverse(),
+        nextCursor: null,
+      },
+      files: [...MOCK_FILES, ...uploadedFiles],
+      board: { snapshot: null, version: 0, updatedAt: null },
+    };
+  },
+  messages: (): Promise<MessagePage> =>
+    settle({ items: [], nextCursor: null }, 300),
+  deleteFile: (id: string) => {
+    const index = uploadedFiles.findIndex((file) => file.id === id);
+    if (index >= 0) uploadedFiles.splice(index, 1);
+    return settle(undefined, 200);
+  },
+  saveBoard: (baseVersion: number) => settle({ version: baseVersion + 1 }, 100),
 
   uploadFile: (file: File) => {
     const extension = file.name.split(".").pop()?.toLowerCase() ?? "";

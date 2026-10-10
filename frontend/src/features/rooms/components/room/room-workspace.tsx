@@ -25,10 +25,10 @@ import { RoomRail, type RailTab } from "./room-rail";
  */
 const FULL_HEIGHT = "h-[calc(100svh-3.5rem)] lg:h-svh";
 
-export function RoomWorkspace({ code }: { code: string }) {
+export function RoomWorkspace({ id }: { id: string }) {
   const d = useDict();
-  const { data: room, isPending, error } = useRoom(code);
-  const { data: participants } = useParticipants(code);
+  const { data: room, isPending, error, isFetchedAfterMount } = useRoom(id);
+  const { data: participants } = useParticipants(id);
   const { user } = useSession();
   const [syncStatus, setSyncStatus] = useState<SyncStatus>("loading");
 
@@ -114,11 +114,18 @@ export function RoomWorkspace({ code }: { code: string }) {
       />
 
       <div className="flex min-h-0 flex-1">
-        <BoardPanel
-          roomCode={room.code}
-          identity={identity}
-          onStatusChange={handleStatusChange}
-        />
+        {/* The board starts from the stored copy, so it waits for the room
+            to have been fetched: a cached one could be out of date and the
+            first save would then be refused. */}
+        {isFetchedAfterMount ? (
+          <BoardPanel
+            roomId={room.id}
+            identity={identity}
+            onStatusChange={handleStatusChange}
+          />
+        ) : (
+          <Skeleton className="m-4 min-h-0 flex-1 rounded-xl" />
+        )}
 
         <aside
           className={cn(
@@ -126,7 +133,7 @@ export function RoomWorkspace({ code }: { code: string }) {
             isRailOpen && "lg:flex",
           )}
         >
-          <RoomRail roomCode={room.code} tab={tab} onTabChange={setTab} />
+          <RoomRail roomId={room.id} tab={tab} onTabChange={setTab} />
         </aside>
       </div>
 
@@ -168,7 +175,7 @@ export function RoomWorkspace({ code }: { code: string }) {
           </Button>
         </div>
 
-        <RoomRail roomCode={room.code} tab={tab} onTabChange={setTab} />
+        <RoomRail roomId={room.id} tab={tab} onTabChange={setTab} />
       </aside>
     </div>
   );

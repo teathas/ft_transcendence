@@ -18,11 +18,11 @@ export const RAIL_TABS = [
 export type RailTab = (typeof RAIL_TABS)[number]["id"];
 
 export function RoomRail({
-  roomCode,
+  roomId,
   tab,
   onTabChange,
 }: {
-  roomCode: string;
+  roomId: string;
   tab: RailTab;
   onTabChange: (tab: RailTab) => void;
 }) {
@@ -51,9 +51,9 @@ export function RoomRail({
         ))}
       </div>
 
-      {tab === "chat" && <ChatPanel roomCode={roomCode} />}
-      {tab === "files" && <FilesPanel roomCode={roomCode} />}
-      {tab === "people" && <PeoplePanel roomCode={roomCode} />}
+      {tab === "chat" && <ChatPanel roomId={roomId} />}
+      {tab === "files" && <FilesPanel roomId={roomId} />}
+      {tab === "people" && <PeoplePanel roomId={roomId} />}
     </>
   );
 }

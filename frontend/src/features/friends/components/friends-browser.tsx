@@ -78,17 +78,18 @@ export function FriendsBrowser() {
     pageSize: Math.max(1, Number(state.pageSize) || 12),
   };
 
-  // All four hooks run every render; only the current tab's one is allowed to
-  // ask the network. A hook that is not wanted gets `enabled: false` through
-  // an empty search (people) or simply is not read (the others are cheap and
-  // cached, and share keys with what the tab bar prefetches).
-  const friends = useFriends({ ...paging, sort: state.sort as FriendSort });
-  const received = useRequests("received", paging);
-  const sent = useRequests("sent", paging);
-  const people = usePeople({
-    ...paging,
-    relationship: state.relationship as RelationshipFilter,
-  });
+  // All four hooks are called every render (hooks cannot be conditional), but
+  // only the open tab's one is enabled and so asks the API.
+  const friends = useFriends(
+    { ...paging, sort: state.sort as FriendSort },
+    tab === "friends",
+  );
+  const received = useRequests("received", paging, tab === "received");
+  const sent = useRequests("sent", paging, tab === "sent");
+  const people = usePeople(
+    { ...paging, relationship: state.relationship as RelationshipFilter },
+    tab === "find",
+  );
 
   const goToRequest = (username: string) =>
     setState({ tab: "received", search: username, page: "1" });

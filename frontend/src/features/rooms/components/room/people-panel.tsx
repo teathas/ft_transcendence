@@ -7,9 +7,9 @@ import { cn } from "@/lib/utils";
 
 import { useParticipants } from "../../hooks/use-room";
 
-export function PeoplePanel({ roomCode }: { roomCode: string }) {
+export function PeoplePanel({ roomId }: { roomId: string }) {
   const d = useDict();
-  const { data: participants, isPending } = useParticipants(roomCode);
+  const { data: participants, isPending } = useParticipants(roomId);
 
   if (isPending) {
     return (

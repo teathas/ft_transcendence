@@ -322,13 +322,18 @@ export const en = {
       subject: "Subject",
       subjectPlaceholder: "Pick a subject",
       submit: "Create room",
+      visibility: "Who can find it",
+      public: "Public",
+      private: "Private",
+      publicHint: "Anyone can see it in the list and join it.",
+      privateHint: "Only people with the code can join. It stays out of the list for everyone else.",
     },
     join: {
       title: "Join a room",
       description: "Enter the code someone shared with you.",
       code: "Room code",
-      codePlaceholder: "ALG-4271",
-      codeHint: "Codes look like three letters, a dash and four digits.",
+      codePlaceholder: "A3F9C21B",
+      codeHint: "Codes are eight letters and digits, like A3F9C21B.",
       submit: "Join room",
     },
     empty: {
@@ -572,7 +577,7 @@ export const en = {
 
 
   room: {
-    metaTitle: "Room {code}",
+    metaTitle: "Room",
     back: "Back to rooms",
     copyCode: "Copy room code",
     copyCodeTitle: "Copy the room code",
@@ -596,10 +601,17 @@ export const en = {
     offline: "Offline",
     chooseFiles: "Choose files",
     filesDropHint: "or drop them here · up to {size}",
+    fileFailed: "The file could not be sent or saved.",
+    download: "Download {name}",
+    deleteFile: "Delete {name}",
+    board: {
+      conflict:
+        "Someone saved this board after you opened it. Your latest changes were not saved — reload to see theirs.",
+    },
     fileTooBig: "{name} is over {size} and was not shared.",
     unavailable: {
       title: "This room is not available",
-      body: "The room may have been closed, or the code is wrong.",
+      body: "The room may have been closed, or you are not a member of it.",
       back: "Back to your rooms",
     },
     sync: {
@@ -612,9 +624,9 @@ export const en = {
         title: "Everyone sees your cursor and your edits",
       },
       local: {
-        text: "Local",
+        text: "Saved",
         title:
-          "This board is saved in your browser only. Other people cannot see it yet.",
+          "The board is saved to the room. Others see your changes when they reopen it; live sharing comes later.",
       },
       offline: {
         text: "Offline",

@@ -32,14 +32,15 @@ export function RoomHeader({
 }) {
   const d = useDict();
   const subjectLabel = useSubjectLabel();
-  const { data: participants } = useParticipants(room.code);
+  const { data: participants } = useParticipants(room.id);
   const [copied, setCopied] = useState(false);
 
   const online = participants?.filter((person) => person.online) ?? [];
 
   async function copyCode() {
+    if (!room.inviteCode) return;
     try {
-      await navigator.clipboard.writeText(room.code);
+      await navigator.clipboard.writeText(room.inviteCode);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
@@ -64,16 +65,17 @@ export function RoomHeader({
         </p>
       </div>
 
+      {room.inviteCode && (
       <button
         type="button"
         onClick={copyCode}
         title={d.room.copyCodeTitle}
         className={cn(
           "ms-1 hidden items-center gap-1.5 bg-muted text-muted-foreground hover:text-foreground",
-          "rounded-md px-2 py-1 font-mono text-xs transition-colors sm:inline-flex",
+          "rounded-md px-2 py-1 font-mono text-xs uppercase transition-colors sm:inline-flex",
         )}
       >
-        {room.code}
+        {room.inviteCode}
         {copied ? (
           <Check className="size-3 text-emerald-500" aria-hidden="true" />
         ) : (
@@ -83,6 +85,7 @@ export function RoomHeader({
           {copied ? d.room.copied : d.room.copyCode}
         </span>
       </button>
+      )}
 
       <div className="ms-auto flex items-center gap-2 sm:gap-3">
         <SyncBadge status={syncStatus} />

@@ -325,14 +325,18 @@ export const fr = {
       subject: "Matière",
       subjectPlaceholder: "Choisissez une matière",
       submit: "Créer la salle",
+      visibility: "Qui peut la trouver",
+      public: "Publique",
+      private: "Privée",
+      publicHint: "Tout le monde la voit dans la liste et peut la rejoindre.",
+      privateHint: "Seules les personnes ayant le code peuvent la rejoindre. Elle n’apparaît pas dans la liste des autres.",
     },
     join: {
       title: "Rejoindre une salle",
       description: "Saisissez le code qu’on vous a partagé.",
       code: "Code de la salle",
-      codePlaceholder: "ALG-4271",
-      codeHint:
-        "Un code se compose de trois lettres, d’un tiret et de quatre chiffres.",
+      codePlaceholder: "A3F9C21B",
+      codeHint: "Un code se compose de huit lettres et chiffres, comme A3F9C21B.",
       submit: "Rejoindre",
     },
     empty: {
@@ -580,7 +584,7 @@ export const fr = {
 
 
   room: {
-    metaTitle: "Salle {code}",
+    metaTitle: "Salle",
     back: "Retour aux salles",
     copyCode: "Copier le code de la salle",
     copyCodeTitle: "Copier le code de la salle",
@@ -604,10 +608,17 @@ export const fr = {
     offline: "Hors ligne",
     chooseFiles: "Choisir des fichiers",
     filesDropHint: "ou déposez-les ici · jusqu’à {size}",
+    fileFailed: "Le fichier n’a pas pu être envoyé ou enregistré.",
+    download: "Télécharger {name}",
+    deleteFile: "Supprimer {name}",
+    board: {
+      conflict:
+        "Quelqu’un a enregistré ce tableau après votre ouverture. Vos dernières modifications n’ont pas été enregistrées — rechargez pour voir les siennes.",
+    },
     fileTooBig: "{name} dépasse {size} et n’a pas été partagé.",
     unavailable: {
       title: "Cette salle n’est pas disponible",
-      body: "La salle a peut-être été fermée, ou le code est erroné.",
+      body: "La salle a peut-être été fermée, ou vous n’en êtes pas membre.",
       back: "Retour à vos salles",
     },
     sync: {
@@ -620,9 +631,9 @@ export const fr = {
         title: "Tout le monde voit votre curseur et vos modifications",
       },
       local: {
-        text: "Local",
+        text: "Enregistré",
         title:
-          "Ce tableau n’est enregistré que dans votre navigateur. Les autres ne le voient pas encore.",
+          "Le tableau est enregistré dans la salle. Les autres voient vos modifications en la rouvrant ; le partage en direct viendra plus tard.",
       },
       offline: {
         text: "Hors ligne",

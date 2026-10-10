@@ -12,7 +12,7 @@ import { useBoardIdentity, type BoardIdentity } from "./use-board-identity";
 export type SyncStatus = "loading" | "online" | "offline" | "error";
 
 type BoardProps = {
-  roomCode: string;
+  roomId: string;
   identity: BoardIdentity;
   onStatusChange: (status: SyncStatus) => void;
 };
@@ -53,15 +53,15 @@ function SyncedTldraw({
 }
 
 /** tldraw's public demo server: real cursors, but the data is public. */
-function DemoBoard({ roomCode, ...rest }: BoardProps) {
-  const store = useSyncDemo({ roomId: `shared-room-${roomCode}` });
+function DemoBoard({ roomId, ...rest }: BoardProps) {
+  const store = useSyncDemo({ roomId: `shared-room-${roomId}` });
   return <SyncedTldraw store={store} {...rest} />;
 }
 
 /** Our own sync server, once one exists at NEXT_PUBLIC_SYNC_URL. */
-function ServerBoard({ roomCode, ...rest }: BoardProps) {
+function ServerBoard({ roomId, ...rest }: BoardProps) {
   const store = useSync({
-    uri: `${env.syncUrl}/connect/${roomCode}`,
+    uri: `${env.syncUrl}/connect/${roomId}`,
     assets: PROTOTYPE_ASSET_STORE,
   });
   return <SyncedTldraw store={store} {...rest} />;

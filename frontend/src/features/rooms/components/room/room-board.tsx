@@ -15,11 +15,11 @@ import "tldraw/tldraw.css";
  * exists; the other two paths are already wired so switching is one env var.
  */
 export default function RoomBoard({
-  roomCode,
+  roomId,
   identity,
   onStatusChange,
 }: {
-  roomCode: string;
+  roomId: string;
   identity: BoardIdentity;
   onStatusChange: (status: SyncStatus) => void;
 }) {
@@ -30,12 +30,12 @@ export default function RoomBoard({
   }, [isLocal, onStatusChange]);
 
   if (isLocal) {
-    return <BoardLocal roomCode={roomCode} identity={identity} />;
+    return <BoardLocal roomId={roomId} identity={identity} />;
   }
 
   return (
     <BoardSynced
-      roomCode={roomCode}
+      roomId={roomId}
       identity={identity}
       onStatusChange={onStatusChange}
     />

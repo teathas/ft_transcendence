@@ -31,7 +31,17 @@ model Room {
   lastActivityAt DateTime @default(now())
   @@index([lastActivityAt])
 
+  files     RoomFile[]
   createdAt DateTime     @default(now())
+
+  /// Last message, upload, board save or join: what "active" and "recent" mean.
+  lastActiveAt DateTime @default(now())
+
+  /// The whiteboard as a tldraw snapshot. `boardVersion` counts saves, so a
+  /// save based on an older version is refused instead of overwriting.
+  boardSnapshot  Json?
+  boardVersion   Int       @default(0)
+  boardUpdatedAt DateTime?
 }
 
 model User {
@@ -52,6 +62,7 @@ model User {
   messages               Message[]
   sentDirectMessages     DirectMessage[] @relation("DirectMessageSent")
   receivedDirectMessages DirectMessage[] @relation("DirectMessageReceived")
+  roomFiles              RoomFile[]
 }
 
 enum UserStatus {
@@ -128,4 +139,23 @@ model DirectMessage {
   @@index([senderId, receiverId, createdAt])
   // The unread counters.
   @@index([receiverId, readAt])
+}
+
+/// A file shared in a room. The bytes live on disk; `url` is where they are served.
+model RoomFile {
+  id         String   @id @default(uuid())
+  roomId     String
+  /// Kept when the uploader leaves or deletes their account.
+  uploaderId String?
+  /// The name it had on the uploader's computer.
+  name       String
+  url        String
+  size       Int
+  mimeType   String
+  createdAt  DateTime @default(now())
+
+  room     Room  @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  uploader User? @relation(fields: [uploaderId], references: [id], onDelete: SetNull)
+
+  @@index([roomId, createdAt])
 }

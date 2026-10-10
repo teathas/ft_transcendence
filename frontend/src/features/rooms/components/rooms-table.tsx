@@ -8,14 +8,13 @@ import {
   TableHeaderCell,
   TableRow,
 } from "@/components/ui/table";
-import { routes } from "@/config/routes";
 import { useDict } from "@/i18n/client";
-import { Link } from "@/i18n/navigation";
 import { useFormat } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 import type { Room } from "../types";
 import { useSubjectLabel } from "../subject-label";
+import { RoomLink } from "./room-link";
 
 export function RoomsTable({ rooms }: { rooms: Room[] }) {
   const d = useDict();
@@ -47,15 +46,17 @@ export function RoomsTable({ rooms }: { rooms: Room[] }) {
         {rooms.map((room) => (
           <TableRow key={room.id}>
             <TableCell>
-              <Link
-                href={routes.room(room.code)}
+              <RoomLink
+                room={room}
                 className="font-medium transition-colors hover:text-primary"
               >
                 {room.name}
-              </Link>
-              <span className="mt-0.5 block font-mono text-xs text-muted-foreground">
-                {room.code}
-              </span>
+              </RoomLink>
+              {room.inviteCode && (
+                <span className="mt-0.5 block font-mono text-xs text-muted-foreground uppercase">
+                  {room.inviteCode}
+                </span>
+              )}
             </TableCell>
 
             <TableCell className="hidden text-muted-foreground md:table-cell">

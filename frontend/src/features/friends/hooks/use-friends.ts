@@ -23,16 +23,23 @@ import type {
 // `keepPreviousData`: moving to the next page keeps the current one on screen
 // until the new one arrives, instead of collapsing to skeletons.
 
-export function useFriends(query: FriendsQuery) {
+/** `enabled` is false for a tab that is not on screen, so it asks nothing. */
+export function useFriends(query: FriendsQuery, enabled = true) {
   return useQuery({
+    enabled,
     queryKey: queryKeys.friends.list(query),
     queryFn: () => friendsApi.list(query),
     placeholderData: keepPreviousData,
   });
 }
 
-export function useRequests(kind: RequestKind, query: ListQuery) {
+export function useRequests(
+  kind: RequestKind,
+  query: ListQuery,
+  enabled = true,
+) {
   return useQuery({
+    enabled,
     queryKey: queryKeys.friends.requests(kind, query),
     queryFn: () => friendsApi.requests(kind, query),
     placeholderData: keepPreviousData,
@@ -40,11 +47,11 @@ export function useRequests(kind: RequestKind, query: ListQuery) {
 }
 
 /** Nothing is asked until something is typed: the API needs a `q`. */
-export function usePeople(query: PeopleQuery) {
+export function usePeople(query: PeopleQuery, enabled = true) {
   return useQuery({
     queryKey: queryKeys.users.search(query),
     queryFn: () => friendsApi.search(query),
-    enabled: query.search.trim().length > 0,
+    enabled: enabled && query.search.trim().length > 0,
     placeholderData: keepPreviousData,
   });
 }

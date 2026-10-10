@@ -1,6 +1,7 @@
-import { Controller , Body ,Post ,Param , Req} from '@nestjs/common';
+import { Controller, Body, Get, ParseUUIDPipe, Post, UseGuards, Param, Query, Req } from '@nestjs/common';
 import { MessagesService } from './messages.service';
 import { SendMessageDto  } from './dto/send-message.dto';
+import { ListRoomMessagesDto } from './dto/list-room-messages.dto';
 
 @Controller('rooms')
 export class MessagesController {
@@ -12,6 +13,12 @@ export class MessagesController {
         const userId = req.user.sub;
         return this.messagesService.send(roomId, userId, dto);
 
+    }
+
+    @Get(':roomId/messages')
+    async list(@Param('roomId', ParseUUIDPipe) roomId: string, @Query() query: ListRoomMessagesDto, @Req() req: any)
+    {
+        return this.messagesService.list(roomId, req.user.sub, query);
     }
 
     

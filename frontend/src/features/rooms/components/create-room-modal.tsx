@@ -6,6 +6,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Field,
+  FieldDescription,
   FieldError,
   FieldGroup,
   FieldLabel,
@@ -41,7 +42,7 @@ export function CreateRoomModal({
 
   const form = useZodForm({
     schema: createRoomSchema,
-    initialValues: { name: "", subject: "" },
+    initialValues: { name: "", subject: "", visibility: "PUBLIC" },
     externalErrors: apiError?.fieldErrors,
     onSubmit: (values) => {
       if (isSubmitting) return;
@@ -50,6 +51,12 @@ export function CreateRoomModal({
   });
 
   const subjectProps = form.getFieldProps("subject");
+
+  const visibilityProps = form.getFieldProps("visibility");
+  const visibilityOptions: SelectOption[] = [
+    { value: "PUBLIC", label: d.rooms.create.public },
+    { value: "PRIVATE", label: d.rooms.create.private },
+  ];
 
   return (
     <Modal
@@ -101,6 +108,31 @@ export function CreateRoomModal({
                 isDisabled={isSubmitting}
               />
               <FieldError {...form.getErrorProps("subject")} />
+            </Field>
+
+            <Field>
+              <FieldLabel {...form.getLabelProps("visibility")}>
+                {d.rooms.create.visibility}
+              </FieldLabel>
+              <Select
+                inputId={visibilityProps.id}
+                options={visibilityOptions}
+                value={visibilityOptions.find(
+                  (option) => option.value === visibilityProps.value,
+                )}
+                onChange={(option) =>
+                  visibilityProps.onChange({
+                    target: { value: option?.value ?? "PUBLIC" },
+                  } as React.ChangeEvent<HTMLInputElement>)
+                }
+                isSearchable={false}
+                isDisabled={isSubmitting}
+              />
+              <FieldDescription>
+                {visibilityProps.value === "PRIVATE"
+                  ? d.rooms.create.privateHint
+                  : d.rooms.create.publicHint}
+              </FieldDescription>
             </Field>
 
             <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">

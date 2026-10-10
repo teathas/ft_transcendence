@@ -16,13 +16,11 @@ export const queryKeys = {
     stats: () => [...queryKeys.rooms.all, "stats"] as const,
     recent: (limit: number) =>
       [...queryKeys.rooms.all, "recent", limit] as const,
-    detail: (code: string) => [...queryKeys.rooms.all, "detail", code] as const,
-    participants: (code: string) =>
-      [...queryKeys.rooms.detail(code), "participants"] as const,
-    messages: (code: string) =>
-      [...queryKeys.rooms.detail(code), "messages"] as const,
-    files: (code: string) =>
-      [...queryKeys.rooms.detail(code), "files"] as const,
+    /** Everything a room opens with: room, people, files, board. */
+    detail: (id: string) => [...queryKeys.rooms.all, "detail", id] as const,
+    /** Pages of messages, newest first; seeded from `detail`. */
+    messages: (id: string) =>
+      [...queryKeys.rooms.detail(id), "messages"] as const,
   },
   friends: {
     all: ["friends"] as const,

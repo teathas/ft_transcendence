@@ -41,6 +41,8 @@ export function useRecentRooms(limit = 6) {
     queryFn: () =>
       roomsApi.list({
         ...DEFAULT_ROOM_QUERY,
+        // Only the rooms you are in, not every public one.
+        ownership: "mine",
         sort: "recent",
         pageSize: limit,
       }),
@@ -52,10 +54,9 @@ function useEnterRoom() {
   const queryClient = useQueryClient();
   const router = useLocaleRouter();
 
-  return (room: Room) => {
-    queryClient.setQueryData(queryKeys.rooms.detail(room.code), room);
+  return (room: Pick<Room, "id">) => {
     void queryClient.invalidateQueries({ queryKey: queryKeys.rooms.all });
-    router.push(routes.room(room.code));
+    router.push(routes.room(room.id));
   };
 }
 
@@ -67,4 +68,13 @@ export function useCreateRoom() {
 export function useJoinRoom() {
   const enterRoom = useEnterRoom();
   return useMutation({ mutationFn: roomsApi.join, onSuccess: enterRoom });
+}
+
+/** A public room you are not in yet: join it, then open it. */
+export function useJoinPublicRoom() {
+  const enterRoom = useEnterRoom();
+  return useMutation({
+    mutationFn: (room: Room) => roomsApi.joinPublic(room.id),
+    onSuccess: (_void, room) => enterRoom(room),
+  });
 }

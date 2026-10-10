@@ -15,7 +15,7 @@ export const routes = {
   profile: "/profile" as Route,
   friends: "/friends" as Route,
   messages: "/messages" as Route,
-  room: (code: string) => `/rooms/${code}` as Route,
+  room: (id: string) => `/rooms/${id}` as Route,
   thread: (friendId: string) => `/messages/${friendId}` as Route,
 
   createRoom: "/register" as Route,
