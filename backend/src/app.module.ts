@@ -10,6 +10,7 @@ import { UsersModule } from './users/users.module';
 import { RoomsModule } from './rooms/rooms.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path'
+import { FriendsModule } from './friends/friends.module';
 import { MessagesModule } from './messages/messages.module';
 import { RealtimeModule } from './realtime/realtime.module';
 
@@ -25,6 +26,7 @@ import { RealtimeModule } from './realtime/realtime.module';
 			serveRoot: '/uploads',
 		}),
 		MessagesModule,
+		FriendsModule,
 		RealtimeModule,
 	],
 	controllers: [AppController],
