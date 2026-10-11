@@ -1,30 +1,34 @@
 import { Link2, MessageSquare, Pencil } from "lucide-react";
 
 import { Container } from "@/components/layout/container";
+import { getDict } from "@/i18n/server";
+import { t } from "@/i18n/translate";
 
 import { ROOM_CODE } from "../content";
 
-const STEPS = [
-  {
-    icon: Link2,
-    title: "Create or join a room",
-    description: `Start a room and invite others with a link or a code like ${ROOM_CODE}. No install, no account juggling.`,
-  },
-  {
-    icon: Pencil,
-    title: "Collaborate",
-    description:
-      "Write, draw and explain concepts together on the shared whiteboard. Everyone edits the same canvas.",
-  },
-  {
-    icon: MessageSquare,
-    title: "Communicate",
-    description:
-      "Ask questions in chat and share files without ever leaving the room.",
-  },
-];
+export async function HowItWorks() {
+  const d = await getDict();
 
-export function HowItWorks() {
+  const steps = [
+    {
+      icon: Link2,
+      title: d.landing.howItWorks.create.title,
+      description: t(d.landing.howItWorks.create.description, {
+        code: ROOM_CODE,
+      }),
+    },
+    {
+      icon: Pencil,
+      title: d.landing.howItWorks.collaborate.title,
+      description: d.landing.howItWorks.collaborate.description,
+    },
+    {
+      icon: MessageSquare,
+      title: d.landing.howItWorks.communicate.title,
+      description: d.landing.howItWorks.communicate.description,
+    },
+  ];
+
   return (
     <section
       id="how-it-works"
@@ -33,17 +37,17 @@ export function HowItWorks() {
       <Container>
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
-            Up and running in three steps.
+            {d.landing.howItWorks.title}
           </h2>
         </div>
 
         <ol className="mt-12 grid gap-5 md:grid-cols-3">
-          {STEPS.map(({ icon: Icon, title, description }, index) => (
+          {steps.map(({ icon: Icon, title, description }, index) => (
             <li
               key={title}
               className="relative flex flex-col gap-3 rounded-2xl border bg-card p-6"
             >
-              <span className="absolute top-5 right-6 font-mono text-4xl font-bold text-muted-foreground/40 tabular-nums">
+              <span className="absolute end-6 top-5 font-mono text-4xl font-bold text-muted-foreground/40 tabular-nums">
                 {index + 1}
               </span>
 

@@ -1,3 +1,9 @@
+"use client";
+
+import { useMemo } from "react";
+
+import { useLocale } from "@/i18n/client";
+
 const DIVISIONS: { amount: number; unit: Intl.RelativeTimeFormatUnit }[] = [
   { amount: 60, unit: "second" },
   { amount: 60, unit: "minute" },
@@ -9,32 +15,44 @@ const DIVISIONS: { amount: number; unit: Intl.RelativeTimeFormatUnit }[] = [
 ];
 
 /**
- * "3 minutes ago", "last week", …
+ * Dates and durations in the language the page is in.
  *
- * Only ever call this from the browser: it reads the current time, which would
- * differ between server and client render and trip a hydration mismatch.
+ * `Intl` does the wording — "3 minutes ago", "il y a 3 minutes",
+ * "قبل 3 دقائق" — so none of this lives in the dictionary. The locale comes
+ * from the URL rather than the visitor's OS, which is what keeps a French
+ * timestamp out of an Arabic page.
+ *
+ * Browser-only on purpose: these read the current clock, and a server render
+ * would disagree with the client's by a few milliseconds and trip hydration.
  */
-export function formatRelativeTime(iso: string, now = Date.now()) {
-  // Pinned to "en" to match <html lang="en">. Leaving this undefined follows
-  // the visitor's OS locale, which drops French strings into an English page.
-  // Swap for the active locale when i18n lands.
-  const formatter = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
+export function useFormat() {
+  const locale = useLocale();
 
-  let duration = (new Date(iso).getTime() - now) / 1000;
+  return useMemo(() => {
+    const relative = new Intl.RelativeTimeFormat(locale, { numeric: "auto" });
+    const date = new Intl.DateTimeFormat(locale, { dateStyle: "long" });
+    const time = new Intl.DateTimeFormat(locale, { timeStyle: "short" });
 
-  for (const division of DIVISIONS) {
-    if (Math.abs(duration) < division.amount) {
-      return formatter.format(Math.round(duration), division.unit);
-    }
-    duration /= division.amount;
-  }
+    return {
+      /** "3 minutes ago", "last week", … */
+      relativeTime(iso: string, now = Date.now()): string {
+        let duration = (new Date(iso).getTime() - now) / 1000;
 
-  return formatter.format(Math.round(duration), "year");
-}
+        for (const division of DIVISIONS) {
+          if (Math.abs(duration) < division.amount) {
+            return relative.format(Math.round(duration), division.unit);
+          }
+          duration /= division.amount;
+        }
 
-/** "12 September 2026". Pinned to "en" for the same reason as above. */
-export function formatDate(iso: string) {
-  return new Intl.DateTimeFormat("en", { dateStyle: "long" }).format(
-    new Date(iso),
-  );
+        return relative.format(Math.round(duration), "year");
+      },
+
+      /** "12 September 2026" */
+      date: (iso: string) => date.format(new Date(iso)),
+
+      /** "10:04" */
+      time: (iso: string) => time.format(new Date(iso)),
+    };
+  }, [locale]);
 }

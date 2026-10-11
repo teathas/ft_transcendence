@@ -4,15 +4,17 @@ import { Monitor, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 
 import { useMounted } from "@/hooks/use-mounted";
+import { useDict } from "@/i18n/client";
 import { cn } from "@/lib/utils";
 
 const OPTIONS = [
-  { value: "light", label: "Light", icon: Sun },
-  { value: "dark", label: "Dark", icon: Moon },
-  { value: "system", label: "System", icon: Monitor },
+  { value: "light", icon: Sun },
+  { value: "dark", icon: Moon },
+  { value: "system", icon: Monitor },
 ] as const;
 
 export function ThemeToggle() {
+  const d = useDict();
   const { theme, setTheme } = useTheme();
   // The stored theme is unknown on the server; render nothing as selected
   // until hydration so the markup matches.
@@ -21,10 +23,11 @@ export function ThemeToggle() {
   return (
     <div
       role="radiogroup"
-      aria-label="Theme"
+      aria-label={d.theme.label}
       className="flex items-center gap-0.5 rounded-md border p-0.5"
     >
-      {OPTIONS.map(({ value, label, icon: Icon }) => {
+      {OPTIONS.map(({ value, icon: Icon }) => {
+        const label = d.theme[value];
         const selected = mounted && theme === value;
 
         return (

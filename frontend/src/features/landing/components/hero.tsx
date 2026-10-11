@@ -1,13 +1,16 @@
 import { ArrowRight, Radio } from "lucide-react";
-import Link from "next/link";
 
 import { Container } from "@/components/layout/container";
 import { buttonStyles } from "@/components/ui/button";
 import { routes } from "@/config/routes";
+import { Link } from "@/i18n/navigation";
+import { getDict } from "@/i18n/server";
 
 import { RoomMockup } from "./room/room-mockup";
 
-export function Hero() {
+export async function Hero() {
+  const d = await getDict();
+
   return (
     <section className="relative overflow-hidden">
       {/* Ambient light behind the hero. */}
@@ -20,17 +23,16 @@ export function Hero() {
         <div className="flex animate-fade-up flex-col items-start">
           <span className="inline-flex items-center gap-2 rounded-full border bg-card px-3 py-1 text-xs font-medium text-muted-foreground shadow-xs">
             <Radio className="size-3.5 text-primary" aria-hidden="true" />
-            Real-time collaborative classroom
+            {d.landing.hero.badge}
           </span>
 
           <h1 className="mt-6 text-4xl font-semibold tracking-tight text-balance sm:text-5xl lg:text-6xl">
-            Learn together.{" "}
-            <span className="text-primary">Write together.</span>
+            {d.landing.hero.titleLead}{" "}
+            <span className="text-primary">{d.landing.hero.titleAccent}</span>
           </h1>
 
           <p className="mt-5 max-w-lg text-base text-pretty text-muted-foreground sm:text-lg">
-            A real-time collaborative classroom where everyone can write, draw,
-            chat and share files in the same room.
+            {d.landing.hero.subtitle}
           </p>
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -38,9 +40,10 @@ export function Hero() {
               href={routes.createRoom}
               className={buttonStyles({ size: "lg", className: "group" })}
             >
-              Create a Room
+              {d.landing.hero.createRoom}
+              {/* The arrow means "onward", which is leftward in Arabic. */}
               <ArrowRight
-                className="size-4 transition-transform group-hover:translate-x-0.5"
+                className="size-4 transition-transform group-hover:translate-x-0.5 rtl:rotate-180 rtl:group-hover:-translate-x-0.5"
                 aria-hidden="true"
               />
             </Link>
@@ -48,17 +51,17 @@ export function Hero() {
               href={routes.joinRoom}
               className={buttonStyles({ variant: "outline", size: "lg" })}
             >
-              Join a Room
+              {d.landing.hero.joinRoom}
             </Link>
           </div>
 
           <p className="mt-6 text-sm text-muted-foreground">
-            No setup. Share a link and everyone is on the same board.
+            {d.landing.hero.note}
           </p>
         </div>
 
         <div
-          className="animate-fade-up lg:-mr-8 xl:-mr-16"
+          className="animate-fade-up lg:-me-8 xl:-me-16"
           style={{ animationDelay: "120ms" }}
         >
           <RoomMockup />

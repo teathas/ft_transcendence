@@ -8,10 +8,10 @@ import { BOARD_COMPONENTS } from "./board-config";
 
 /** Browser-only board: persists per device, no remote cursors. */
 export default function BoardLocal({
-  roomCode,
+  roomId,
   identity,
 }: {
-  roomCode: string;
+  roomId: string;
   identity: BoardIdentity;
 }) {
   const [editor, setEditor] = useState<Editor | null>(null);
@@ -19,7 +19,7 @@ export default function BoardLocal({
 
   return (
     <Tldraw
-      persistenceKey={`shared-room-${roomCode}`}
+      persistenceKey={`shared-room-${roomId}`}
       onMount={setEditor}
       components={BOARD_COMPONENTS}
     />

@@ -4,6 +4,7 @@ import { TriangleAlert } from "lucide-react";
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSession } from "@/features/auth/hooks/use-auth";
+import { useDict } from "@/i18n/client";
 
 import { AccountForm } from "./account-form";
 import { DangerZone } from "./danger-zone";
@@ -11,6 +12,7 @@ import { PasswordForm } from "./password-form";
 import { ProfileHeader } from "./profile-header";
 
 export function ProfileView() {
+  const d = useDict();
   const { user, isPending } = useSession();
 
   if (isPending) {
@@ -32,9 +34,9 @@ export function ProfileView() {
             aria-hidden="true"
           />
         </span>
-        <p className="font-medium">Could not load your profile</p>
+        <p className="font-medium">{d.profile.error.title}</p>
         <p className="max-w-sm text-sm text-pretty text-muted-foreground">
-          Your session is not available. Sign in again to manage your account.
+          {d.profile.error.body}
         </p>
       </div>
     );

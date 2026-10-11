@@ -17,11 +17,11 @@ export type LoginPayload = z.infer<typeof loginSchema>;
 export type RegisterPayload = z.infer<typeof registerSchema>;
 export type RegisterFormValues = z.infer<typeof registerFormSchema>;
 
-/** Any subset of the fields `PATCH /users/me` accepts. */
+/** Any subset of the fields `PATCH /users/me` accepts (`UpdateUserDto`). */
 export type ProfilePatch = {
   username?: string;
   email?: string;
-  avatarUrl?: string | null;
+  bio?: string;
 };
 
 export type PasswordChangePayload = {

@@ -1,13 +1,14 @@
 "use client";
 
-import { Clock, Presentation, Users } from "lucide-react";
-import Link from "next/link";
+import { Clock, Lock, Presentation, Users } from "lucide-react";
 
-import { routes } from "@/config/routes";
-import { formatRelativeTime } from "@/lib/format";
+import { useDict } from "@/i18n/client";
+import { useFormat } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 import type { Room } from "../types";
+import { useSubjectLabel } from "../subject-label";
+import { RoomLink } from "./room-link";
 
 // A stable accent per room, so a board is recognisable at a glance.
 const ACCENTS = [
@@ -18,16 +19,20 @@ const ACCENTS = [
   "bg-rose-500/10 text-rose-600 dark:text-rose-400",
 ] as const;
 
-function accentFor(code: string) {
+function accentFor(seed: string) {
   let hash = 0;
-  for (const char of code) hash = (hash + char.charCodeAt(0)) % 997;
+  for (const char of seed) hash = (hash + char.charCodeAt(0)) % 997;
   return ACCENTS[hash % ACCENTS.length];
 }
 
 export function RoomCard({ room }: { room: Room }) {
+  const d = useDict();
+  const { relativeTime } = useFormat();
+  const subjectLabel = useSubjectLabel();
+
   return (
-    <Link
-      href={routes.room(room.code)}
+    <RoomLink
+      room={room}
       className={cn(
         "group relative flex flex-col gap-4 rounded-xl border bg-card p-5",
         "transition-all duration-200 hover:border-primary/40",
@@ -38,7 +43,7 @@ export function RoomCard({ room }: { room: Room }) {
         <span
           className={cn(
             "flex size-10 shrink-0 items-center justify-center rounded-lg",
-            accentFor(room.code),
+            accentFor(room.id),
           )}
         >
           <Presentation className="size-5" aria-hidden="true" />
@@ -47,12 +52,20 @@ export function RoomCard({ room }: { room: Room }) {
         <span className="flex shrink-0 items-center gap-2">
           {room.status === "archived" && (
             <span className="rounded-md bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
-              Archived
+              {d.rooms.status.archived}
             </span>
           )}
-          <span className="rounded-md bg-muted px-2 py-0.5 font-mono text-[11px] text-muted-foreground">
-            {room.code}
-          </span>
+          {room.visibility === "PRIVATE" && (
+            <Lock
+              className="size-3.5 text-muted-foreground"
+              aria-label={d.rooms.create.private}
+            />
+          )}
+          {room.inviteCode && (
+            <span className="rounded-md bg-muted px-2 py-0.5 font-mono text-[11px] text-muted-foreground uppercase">
+              {room.inviteCode}
+            </span>
+          )}
         </span>
       </div>
 
@@ -61,23 +74,25 @@ export function RoomCard({ room }: { room: Room }) {
           {room.name}
         </h3>
         <p className="text-xs text-muted-foreground">
-          {room.subject} · @{room.ownerUsername}
+          {subjectLabel(room.subject)} · @{room.ownerUsername}
         </p>
       </div>
 
       <div className="mt-auto flex items-center gap-4 text-xs text-muted-foreground">
-        <span className="inline-flex items-center gap-1.5">
+        <span
+          className="inline-flex items-center gap-1.5"
+          title={d.common.people}
+        >
           <Users className="size-3.5" aria-hidden="true" />
-          {room.participantCount}{" "}
-          {room.participantCount === 1 ? "person" : "people"}
+          {room.participantCount}
         </span>
         {room.lastActiveAt && (
           <span className="inline-flex items-center gap-1.5">
             <Clock className="size-3.5" aria-hidden="true" />
-            {formatRelativeTime(room.lastActiveAt)}
+            {relativeTime(room.lastActiveAt)}
           </span>
         )}
       </div>
-    </Link>
+    </RoomLink>
   );
 }

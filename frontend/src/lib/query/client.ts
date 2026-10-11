@@ -6,13 +6,18 @@ import {
 
 import { isApiError } from "@/lib/api/errors";
 
+import { CACHE_MAX_AGE } from "./persister";
+
 function makeQueryClient() {
   return new QueryClient({
     defaultOptions: {
       queries: {
-        // Long enough that hydrated server data is not refetched on mount.
-        staleTime: 60_000,
-        gcTime: 5 * 60_000,
+        // Always ask the server again when a page mounts. The cached copy is
+        // still shown while it loads, but it is never trusted as fresh.
+        staleTime: 0,
+        // As long as the stored copy: an entry dropped from memory could not
+        // be saved, so it would be missing after a reload.
+        gcTime: CACHE_MAX_AGE,
         refetchOnWindowFocus: false,
         retry: (failureCount, error) => {
           // Retrying a 404 or a 401 only delays the error the user must see.

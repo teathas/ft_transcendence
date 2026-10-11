@@ -118,7 +118,10 @@ export function useZodForm<S extends ZodType, V extends FieldValues>({
         id: fieldId(name),
         name,
         value: values[name],
-        onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
+        // A text box or a text area: only `.target.value` is read.
+        onChange: (
+          event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+        ) => {
           const next = event.target.value;
           setValues((prev) => ({ ...prev, [name]: next }));
           setEditedSinceSubmit((prev) => ({ ...prev, [name]: true }));

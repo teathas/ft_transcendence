@@ -18,6 +18,7 @@ export const MOCK_USER: User = {
   email: "amina@student.42.fr",
   username: "amina",
   avatarUrl: null,
+  bio: null,
   status: "ONLINE",
   lastSeenAt: new Date().toISOString(),
   createdAt: "2026-09-01T09:12:00.000Z",

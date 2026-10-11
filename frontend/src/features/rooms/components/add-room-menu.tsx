@@ -10,6 +10,7 @@ import {
   DropdownLabel,
   DropdownSeparator,
 } from "@/components/ui/dropdown";
+import { useDict } from "@/i18n/client";
 
 import { CreateRoomModal } from "./create-room-modal";
 import { JoinRoomModal } from "./join-room-modal";
@@ -19,24 +20,25 @@ export function AddRoomMenu({
 }: {
   onFilter: (patch: { ownership?: string; status?: string }) => void;
 }) {
+  const d = useDict();
   const [modal, setModal] = useState<"create" | "join" | null>(null);
 
   return (
     <>
       {/* Split button: the primary action, plus everything adjacent to it. */}
       <div className="flex">
-        <Button className="rounded-r-none" onClick={() => setModal("create")}>
+        <Button className="rounded-e-none" onClick={() => setModal("create")}>
           <Plus className="size-4" aria-hidden="true" />
-          Add room
+          {d.rooms.addMenu.addRoom}
         </Button>
 
         <Dropdown
-          label="More room actions"
+          label={d.rooms.addMenu.more}
           trigger={(triggerProps) => (
             <Button
               {...triggerProps}
-              aria-label="More room actions"
-              className="rounded-l-none border-l border-primary-foreground/25 px-2"
+              aria-label={d.rooms.addMenu.more}
+              className="rounded-s-none border-s border-primary-foreground/25 px-2"
             >
               <ChevronDown className="size-4" aria-hidden="true" />
             </Button>
@@ -48,11 +50,11 @@ export function AddRoomMenu({
             }}
           >
             <LogIn className="size-4" aria-hidden="true" />
-            Join a room with a code
+            {d.rooms.addMenu.joinWithCode}
           </DropdownItem>
 
           <DropdownSeparator />
-          <DropdownLabel>Jump to</DropdownLabel>
+          <DropdownLabel>{d.rooms.addMenu.jumpTo}</DropdownLabel>
 
           <DropdownItem
             onClick={() => {
@@ -60,7 +62,7 @@ export function AddRoomMenu({
             }}
           >
             <Star className="size-4" aria-hidden="true" />
-            Rooms I own
+            {d.rooms.addMenu.roomsIOwn}
           </DropdownItem>
 
           <DropdownItem
@@ -69,7 +71,7 @@ export function AddRoomMenu({
             }}
           >
             <Users className="size-4" aria-hidden="true" />
-            Rooms I joined
+            {d.rooms.addMenu.roomsIJoined}
           </DropdownItem>
 
           <DropdownItem
@@ -78,7 +80,7 @@ export function AddRoomMenu({
             }}
           >
             <Archive className="size-4" aria-hidden="true" />
-            Archived rooms
+            {d.rooms.addMenu.archivedRooms}
           </DropdownItem>
         </Dropdown>
       </div>

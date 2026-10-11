@@ -1,22 +1,61 @@
 "use client";
 
 import { useId, useState } from "react";
-import { FileImage, FileText, LoaderCircle, Upload } from "lucide-react";
+import {
+  Download,
+  FileImage,
+  FileText,
+  LoaderCircle,
+  Trash2,
+  Upload,
+} from "lucide-react";
 
-import { buttonStyles } from "@/components/ui/button";
+import { Button, buttonStyles } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { formatRelativeTime } from "@/lib/format";
+import { useDict } from "@/i18n/client";
+import { t } from "@/i18n/translate";
+import { useSession } from "@/features/auth/hooks/use-auth";
+import { isApiError } from "@/lib/api";
+import { env } from "@/lib/env";
+import { useFormat } from "@/lib/format";
 import { formatBytes } from "@/lib/image";
 import { cn } from "@/lib/utils";
 
-import { useRoomFiles, useUploadRoomFile } from "../../hooks/use-room";
+import {
+  useDeleteRoomFile,
+  useRoom,
+  useRoomFiles,
+  useUploadRoomFile,
+} from "../../hooks/use-room";
+import type { RoomFile } from "../../types";
 
 const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
 
-export function FilesPanel({ roomCode }: { roomCode: string }) {
+/**
+ * The API serves files as downloads under a random name. Fetching the bytes
+ * and saving them gives the file its own name back.
+ */
+async function download(file: RoomFile) {
+  if (!file.url) return;
+  const response = await fetch(`${env.apiUrl}${file.url}`);
+  if (!response.ok) throw new Error(String(response.status));
+
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(await response.blob());
+  link.download = file.name;
+  link.click();
+  URL.revokeObjectURL(link.href);
+}
+
+export function FilesPanel({ roomId }: { roomId: string }) {
+  const d = useDict();
+  const { relativeTime } = useFormat();
   const inputId = useId();
-  const { data: files, isPending } = useRoomFiles(roomCode);
-  const upload = useUploadRoomFile(roomCode);
+  const { data: files, isPending } = useRoomFiles(roomId);
+  const upload = useUploadRoomFile(roomId);
+  const remove = useDeleteRoomFile(roomId);
+  const { data: room } = useRoom(roomId);
+  const { user } = useSession();
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -28,13 +67,26 @@ export function FilesPanel({ roomCode }: { roomCode: string }) {
     const tooBig = chosen.find((file) => file.size > MAX_UPLOAD_BYTES);
     if (tooBig) {
       setError(
-        `${tooBig.name} is over ${formatBytes(MAX_UPLOAD_BYTES)} and was not shared.`,
+        t(d.room.fileTooBig, {
+          name: tooBig.name,
+          size: formatBytes(MAX_UPLOAD_BYTES),
+        }),
       );
       return;
     }
 
     setError(null);
-    for (const file of chosen) upload.mutate(file);
+    for (const file of chosen) {
+      upload.mutate(file, {
+        onError: (failure) =>
+          setError(isApiError(failure) ? failure.message : d.room.fileFailed),
+      });
+    }
+  }
+
+  function save(file: RoomFile) {
+    setError(null);
+    download(file).catch(() => setError(d.room.fileFailed));
   }
 
   return (
@@ -47,10 +99,16 @@ export function FilesPanel({ roomCode }: { roomCode: string }) {
             const Icon = file.kind === "image" ? FileImage : FileText;
 
             return (
-              <li key={file.id}>
+              <li
+                key={file.id}
+                className="flex items-center gap-1 rounded-lg border bg-card pe-1 transition-colors hover:border-primary/40"
+              >
                 <button
                   type="button"
-                  className="flex w-full items-center gap-3 rounded-lg border bg-card px-3 py-2.5 text-left transition-colors hover:border-primary/40"
+                  onClick={() => save(file)}
+                  disabled={!file.url}
+                  aria-label={t(d.room.download, { name: file.name })}
+                  className="flex min-w-0 flex-1 items-center gap-3 px-3 py-2.5 text-start"
                 >
                   <Icon
                     className="size-4 shrink-0 text-muted-foreground"
@@ -62,10 +120,26 @@ export function FilesPanel({ roomCode }: { roomCode: string }) {
                     </span>
                     <span className="block text-xs text-muted-foreground">
                       {formatBytes(file.sizeBytes)} · {file.uploadedBy} ·{" "}
-                      {formatRelativeTime(file.uploadedAt)}
+                      {relativeTime(file.uploadedAt)}
                     </span>
                   </span>
+                  <Download
+                    className="size-4 shrink-0 text-muted-foreground"
+                    aria-hidden="true"
+                  />
                 </button>
+
+                {(file.uploaderId === user?.id || room?.ownerId === user?.id) && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    aria-label={t(d.room.deleteFile, { name: file.name })}
+                    disabled={remove.isPending}
+                    onClick={() => remove.mutate(file.id)}
+                  >
+                    <Trash2 className="size-4" aria-hidden="true" />
+                  </Button>
+                )}
               </li>
             );
           })}
@@ -122,11 +196,11 @@ export function FilesPanel({ roomCode }: { roomCode: string }) {
             "peer-disabled:pointer-events-none peer-disabled:opacity-50",
           )}
         >
-          Choose files
+          {d.room.chooseFiles}
         </label>
 
         <p className="text-xs text-muted-foreground">
-          or drop them here · up to {formatBytes(MAX_UPLOAD_BYTES)}
+          {t(d.room.filesDropHint, { size: formatBytes(MAX_UPLOAD_BYTES) })}
         </p>
 
         {error && (

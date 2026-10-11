@@ -5,19 +5,19 @@
  * files. Delete this file once those endpoints exist.
  */
 export type ActivityPoint = {
-  label: string;
-  fullLabel: string;
+  /** ISO weekday, 1 = Monday. The name is formatted per locale at render. */
+  weekday: 1 | 2 | 3 | 4 | 5 | 6 | 7;
   minutes: number;
 };
 
 export const WEEK_ACTIVITY: ActivityPoint[] = [
-  { label: "M", fullLabel: "Monday", minutes: 45 },
-  { label: "T", fullLabel: "Tuesday", minutes: 80 },
-  { label: "W", fullLabel: "Wednesday", minutes: 30 },
-  { label: "T", fullLabel: "Thursday", minutes: 115 },
-  { label: "F", fullLabel: "Friday", minutes: 65 },
-  { label: "S", fullLabel: "Saturday", minutes: 20 },
-  { label: "S", fullLabel: "Sunday", minutes: 55 },
+  { weekday: 1, minutes: 45 },
+  { weekday: 2, minutes: 80 },
+  { weekday: 3, minutes: 30 },
+  { weekday: 4, minutes: 115 },
+  { weekday: 5, minutes: 65 },
+  { weekday: 6, minutes: 20 },
+  { weekday: 7, minutes: 55 },
 ];
 
 export const DASHBOARD_STATS = {
@@ -26,10 +26,3 @@ export const DASHBOARD_STATS = {
   messagesSent: 348,
   filesShared: 19,
 };
-
-export function formatDuration(minutes: number) {
-  const hours = Math.floor(minutes / 60);
-  const rest = minutes % 60;
-  if (hours === 0) return `${rest}m`;
-  return rest === 0 ? `${hours}h` : `${hours}h ${rest}m`;
-}

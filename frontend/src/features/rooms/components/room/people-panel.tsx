@@ -2,12 +2,14 @@
 
 import { Avatar } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useDict } from "@/i18n/client";
 import { cn } from "@/lib/utils";
 
 import { useParticipants } from "../../hooks/use-room";
 
-export function PeoplePanel({ roomCode }: { roomCode: string }) {
-  const { data: participants, isPending } = useParticipants(roomCode);
+export function PeoplePanel({ roomId }: { roomId: string }) {
+  const d = useDict();
+  const { data: participants, isPending } = useParticipants(roomId);
 
   if (isPending) {
     return (
@@ -36,7 +38,7 @@ export function PeoplePanel({ roomCode }: { roomCode: string }) {
             <span
               aria-hidden="true"
               className={cn(
-                "absolute -right-0.5 -bottom-0.5 size-3 rounded-full ring-2 ring-card",
+                "absolute -end-0.5 -bottom-0.5 size-3 rounded-full ring-2 ring-card",
                 !person.online && "bg-muted-foreground/40",
               )}
               style={
@@ -50,13 +52,13 @@ export function PeoplePanel({ roomCode }: { roomCode: string }) {
               {person.username}
             </span>
             <span className="block text-xs text-muted-foreground">
-              {person.online ? "On the board" : "Away"}
+              {person.online ? d.room.onBoard : d.room.away}
             </span>
           </span>
 
           {person.role === "host" && (
             <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">
-              Host
+              {d.room.host}
             </span>
           )}
         </li>

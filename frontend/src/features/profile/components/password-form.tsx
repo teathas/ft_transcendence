@@ -13,6 +13,7 @@ import {
 import { PasswordInput } from "@/components/ui/password-input";
 import { useChangePassword } from "@/features/auth/hooks/use-auth";
 import { PasswordStrengthMeter } from "@/features/auth/components/password-strength-meter";
+import { useDict } from "@/i18n/client";
 import { useZodForm } from "@/hooks/use-zod-form";
 import { isApiError } from "@/lib/api";
 
@@ -26,6 +27,7 @@ const INITIAL_VALUES = {
 };
 
 export function PasswordForm() {
+  const d = useDict();
   const changePassword = useChangePassword();
   const isSubmitting = changePassword.isPending;
   const apiError = isApiError(changePassword.error)
@@ -44,8 +46,8 @@ export function PasswordForm() {
 
   return (
     <SectionCard
-      title="Password"
-      description="Changing it does not sign you out of rooms you are already in."
+      title={d.profile.password.title}
+      description={d.profile.password.description}
     >
       <form onSubmit={form.handleSubmit} noValidate>
         <fieldset disabled={isSubmitting}>
@@ -59,14 +61,14 @@ export function PasswordForm() {
             {changePassword.isSuccess && (
               <Alert variant="success">
                 <AlertDescription>
-                  Your password has been changed.
+                  {d.profile.password.changed}
                 </AlertDescription>
               </Alert>
             )}
 
             <Field>
               <FieldLabel {...form.getLabelProps("currentPassword")}>
-                Current password
+                {d.profile.password.current}
               </FieldLabel>
               <PasswordInput
                 {...form.getFieldProps("currentPassword")}
@@ -77,7 +79,7 @@ export function PasswordForm() {
 
             <Field>
               <FieldLabel {...form.getLabelProps("newPassword")}>
-                New password
+                {d.profile.password.new}
               </FieldLabel>
               <PasswordInput
                 {...form.getFieldProps("newPassword")}
@@ -91,7 +93,7 @@ export function PasswordForm() {
 
             <Field>
               <FieldLabel {...form.getLabelProps("confirmPassword")}>
-                Confirm new password
+                {d.profile.password.confirm}
               </FieldLabel>
               <PasswordInput
                 {...form.getFieldProps("confirmPassword")}
@@ -111,7 +113,7 @@ export function PasswordForm() {
                   aria-hidden="true"
                 />
               )}
-              Change password
+              {d.profile.password.submit}
             </Button>
           </FieldGroup>
         </fieldset>

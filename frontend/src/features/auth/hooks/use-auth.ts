@@ -1,11 +1,14 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
 
+import { useToast } from "@/components/ui/toast";
 import { routes } from "@/config/routes";
+import { useDict } from "@/i18n/client";
 import { isApiError, tokenStore } from "@/lib/api";
+import { useLocaleRouter } from "@/i18n/navigation";
 import { queryKeys } from "@/lib/query/keys";
+import { resetCache } from "@/lib/query/persister";
 
 import { authApi } from "../api/auth.api";
 import type { AuthResponse } from "../types";
@@ -17,7 +20,6 @@ export function useSession() {
     queryFn: authApi.session,
     // A 401 here is the answer, not a failure worth retrying.
     retry: false,
-    staleTime: 5 * 60_000,
   });
 
   return {
@@ -34,11 +36,13 @@ export function useSession() {
 
 export function useLogin() {
   const queryClient = useQueryClient();
-  const router = useRouter();
+  const router = useLocaleRouter();
 
   return useMutation({
     mutationFn: authApi.login,
     onSuccess: (result: AuthResponse) => {
+      // Drop anything a previous user left in the stored cache.
+      resetCache(queryClient);
       tokenStore.set(result.accessToken);
       queryClient.setQueryData(queryKeys.auth.session(), result.user);
       router.replace(routes.dashboard);
@@ -47,15 +51,17 @@ export function useLogin() {
 }
 
 export function useRegister() {
-  const queryClient = useQueryClient();
-  const router = useRouter();
+  const router = useLocaleRouter();
+  const toast = useToast();
+  const d = useDict();
 
   return useMutation({
     mutationFn: authApi.register,
-    onSuccess: (result: AuthResponse) => {
-      tokenStore.set(result.accessToken);
-      queryClient.setQueryData(queryKeys.auth.session(), result.user);
-      router.replace(routes.onboarding);
+    // The account exists but nobody is signed in: say so, then ask for the
+    // credentials on the login page.
+    onSuccess: () => {
+      toast(d.auth.register.created);
+      router.replace(routes.login);
     },
   });
 }
@@ -83,19 +89,30 @@ export function useUploadAvatar() {
   });
 }
 
+export function useRemoveAvatar() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: authApi.removeAvatar,
+    onSuccess: (user) => {
+      queryClient.setQueryData(queryKeys.auth.session(), user);
+    },
+  });
+}
+
 export function useChangePassword() {
   return useMutation({ mutationFn: authApi.changePassword });
 }
 
 export function useDeleteAccount() {
   const queryClient = useQueryClient();
-  const router = useRouter();
+  const router = useLocaleRouter();
 
   return useMutation({
     mutationFn: authApi.deleteAccount,
     onSuccess: () => {
       tokenStore.clear();
-      queryClient.clear();
+      resetCache(queryClient);
       router.replace(routes.register);
     },
   });
@@ -103,14 +120,14 @@ export function useDeleteAccount() {
 
 export function useLogout() {
   const queryClient = useQueryClient();
-  const router = useRouter();
+  const router = useLocaleRouter();
 
   return useMutation({
     mutationFn: authApi.logout,
     // Drop local state whether or not the server call succeeded.
     onSettled: () => {
       tokenStore.clear();
-      queryClient.clear();
+      resetCache(queryClient);
       router.replace(routes.login);
     },
   });

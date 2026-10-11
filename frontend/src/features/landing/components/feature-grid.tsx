@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 
 import { Container } from "@/components/layout/container";
+import { getDict } from "@/i18n/server";
 import { cn } from "@/lib/utils";
 
 import { CHAT_MESSAGES, PARTICIPANTS, ROOM_FILES } from "../content";
@@ -121,7 +122,13 @@ function WhiteboardVisual() {
   );
 }
 
-function RealtimeVisual() {
+function RealtimeVisual({
+  caption,
+  captionAccent,
+}: {
+  caption: string;
+  captionAccent: string;
+}) {
   const [teacher, student] = PARTICIPANTS;
 
   return (
@@ -162,18 +169,20 @@ function RealtimeVisual() {
       </div>
 
       <p className="text-center text-xs text-muted-foreground">
-        You draw it{" "}
-        <span className="font-medium text-foreground">→ everyone sees it.</span>
+        {caption}{" "}
+        <span className="font-medium text-foreground">{captionAccent}</span>
       </p>
     </div>
   );
 }
 
-function ChatVisual() {
+async function ChatVisual() {
+  const d = await getDict();
+
   return (
     <div className="flex flex-col gap-2">
       {CHAT_MESSAGES.slice(0, 3).map((message) => (
-        <div key={message.body} className="flex items-start gap-2">
+        <div key={message.time} className="flex items-start gap-2">
           <span
             className="mt-0.5 size-5 shrink-0 rounded-full text-center text-[9px] leading-5 font-semibold text-white"
             style={{ backgroundColor: message.color }}
@@ -196,7 +205,7 @@ function ChatVisual() {
               </span>
             </p>
             <p className="mt-0.5 truncate rounded-lg border bg-card px-2 py-1 text-[11px]">
-              {message.body}
+              {d.landing.showcase.messages[message.key]}
             </p>
           </div>
         </div>
@@ -205,7 +214,13 @@ function ChatVisual() {
   );
 }
 
-function FilesVisual() {
+function FilesVisual({
+  sharedLabel,
+  dropHint,
+}: {
+  sharedLabel: string;
+  dropHint: string;
+}) {
   return (
     <div className="flex flex-col gap-2">
       {ROOM_FILES.map((file) => (
@@ -226,64 +241,71 @@ function FilesVisual() {
             </span>
           </span>
           <span className="rounded bg-emerald-500/10 px-1.5 py-0.5 text-[9px] font-medium text-emerald-600 dark:text-emerald-400">
-            Shared
+            {sharedLabel}
           </span>
         </div>
       ))}
       <div className="rounded-lg border border-dashed border-muted-foreground/25 px-2.5 py-2 text-center text-[10px] text-muted-foreground">
-        Drop a PDF, image or document
+        {dropHint}
       </div>
     </div>
   );
 }
 
-const FEATURES = [
-  {
-    icon: Pencil,
-    title: "Collaborative whiteboard",
-    description:
-      "A shared infinite canvas powered by tldraw. Draw, write, add shapes and explain concepts together.",
-    visual: <WhiteboardVisual />,
-  },
-  {
-    icon: Users,
-    title: "Real-time collaboration",
-    description:
-      "Every stroke, note and shape appears for everyone instantly, with each participant's cursor visible on the board.",
-    visual: <RealtimeVisual />,
-  },
-  {
-    icon: MessageSquare,
-    title: "Real-time chat",
-    description:
-      "Ask and answer questions without leaving the room. Names, timestamps and who is online, right beside the board.",
-    visual: <ChatVisual />,
-  },
-  {
-    icon: FileText,
-    title: "File sharing",
-    description:
-      "Drop course material straight into the room — PDFs, images and documents everyone can open.",
-    visual: <FilesVisual />,
-  },
-];
+export async function FeatureGrid() {
+  const d = await getDict();
 
-export function FeatureGrid() {
+  const features = [
+    {
+      icon: Pencil,
+      title: d.landing.features.whiteboard.title,
+      description: d.landing.features.whiteboard.description,
+      visual: <WhiteboardVisual />,
+    },
+    {
+      icon: Users,
+      title: d.landing.features.realtime.title,
+      description: d.landing.features.realtime.description,
+      visual: (
+        <RealtimeVisual
+          caption={d.landing.features.realtime.caption}
+          captionAccent={d.landing.features.realtime.captionAccent}
+        />
+      ),
+    },
+    {
+      icon: MessageSquare,
+      title: d.landing.features.chat.title,
+      description: d.landing.features.chat.description,
+      visual: <ChatVisual />,
+    },
+    {
+      icon: FileText,
+      title: d.landing.features.files.title,
+      description: d.landing.features.files.description,
+      visual: (
+        <FilesVisual
+          sharedLabel={d.landing.features.files.shared}
+          dropHint={d.landing.features.files.dropHint}
+        />
+      ),
+    },
+  ];
+
   return (
     <section id="features" className="scroll-mt-20 py-20 sm:py-28">
       <Container>
         <div className="max-w-2xl">
           <h2 className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
-            Everything you need, in one room.
+            {d.landing.features.title}
           </h2>
           <p className="mt-4 text-base text-pretty text-muted-foreground sm:text-lg">
-            No juggling a call, a whiteboard app and a chat window. Shared Room
-            puts the board, the conversation and the material in a single place.
+            {d.landing.features.subtitle}
           </p>
         </div>
 
         <div className="mt-12 grid gap-5 md:grid-cols-2">
-          {FEATURES.map((feature) => (
+          {features.map((feature) => (
             <FeatureCard key={feature.title} {...feature} />
           ))}
         </div>

@@ -6,46 +6,45 @@ import {
 } from "lucide-react";
 
 import { Container } from "@/components/layout/container";
+import { getDict } from "@/i18n/server";
 
-const USE_CASES = [
-  {
-    icon: Presentation,
-    title: "Online classes",
-    description:
-      "Teachers explain concepts on an interactive shared whiteboard the whole class can follow and join in on.",
-  },
-  {
-    icon: UsersRound,
-    title: "Study groups",
-    description:
-      "Students work through problem sets together, each one able to pick up the pen.",
-  },
-  {
-    icon: BookOpen,
-    title: "Private tutoring",
-    description:
-      "A tutor and a student share one canvas, so corrections happen in the moment instead of over email.",
-  },
-  {
-    icon: GraduationCap,
-    title: "Team workshops",
-    description:
-      "Remote teams brainstorm on an infinite canvas and keep the notes, sketches and files in one room.",
-  },
-];
+export async function UseCases() {
+  const d = await getDict();
 
-export function UseCases() {
+  const useCases = [
+    {
+      icon: Presentation,
+      title: d.landing.useCases.classes.title,
+      description: d.landing.useCases.classes.description,
+    },
+    {
+      icon: UsersRound,
+      title: d.landing.useCases.studyGroups.title,
+      description: d.landing.useCases.studyGroups.description,
+    },
+    {
+      icon: BookOpen,
+      title: d.landing.useCases.tutoring.title,
+      description: d.landing.useCases.tutoring.description,
+    },
+    {
+      icon: GraduationCap,
+      title: d.landing.useCases.workshops.title,
+      description: d.landing.useCases.workshops.description,
+    },
+  ];
+
   return (
     <section className="py-20 sm:py-28">
       <Container>
         <div className="max-w-2xl">
           <h2 className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
-            Built for the way people actually teach.
+            {d.landing.useCases.title}
           </h2>
         </div>
 
         <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {USE_CASES.map(({ icon: Icon, title, description }) => (
+          {useCases.map(({ icon: Icon, title, description }) => (
             <div
               key={title}
               className="group flex flex-col gap-3 rounded-2xl border bg-card p-6 transition-colors hover:border-primary/40"
