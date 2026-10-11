@@ -1,3 +1,4 @@
+import { getDict } from "@/i18n/server";
 import { cn } from "@/lib/utils";
 
 import { PARTICIPANTS } from "../../content";
@@ -7,7 +8,9 @@ import { Cursor } from "./cursor";
  * Mock tldraw canvas: a worked algebra problem, a sticky note and two live
  * cursors. Everything is markup — no image asset, no canvas library.
  */
-export function Whiteboard({ className }: { className?: string }) {
+export async function Whiteboard({ className }: { className?: string }) {
+  const d = await getDict();
+
   return (
     <div
       className={cn(
@@ -19,10 +22,11 @@ export function Whiteboard({ className }: { className?: string }) {
     >
       <div className="relative flex h-full flex-col justify-center gap-3 p-5 sm:p-7">
         <p className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
-          Factoring quadratics
+          {d.landing.showcase.boardTopic}
         </p>
 
-        <div className="space-y-2">
+        {/* The worked problem is maths, so it stays left-to-right. */}
+        <div className="space-y-2" dir="ltr">
           <p className="font-mono text-lg font-semibold sm:text-2xl">
             x² + 2x + 1 = 0
           </p>
@@ -54,11 +58,14 @@ export function Whiteboard({ className }: { className?: string }) {
           </p>
         </div>
 
-        <div className="absolute right-4 bottom-4 hidden w-48 -rotate-2 rounded-md bg-amber-200 p-2.5 shadow-sm sm:block dark:bg-amber-300">
+        <div className="absolute end-4 bottom-4 hidden w-48 -rotate-2 rounded-md bg-amber-200 p-2.5 shadow-sm sm:block dark:bg-amber-300">
           <p className="text-[10px] font-semibold tracking-wide text-amber-900 uppercase">
-            Remember
+            {d.landing.showcase.stickyTitle}
           </p>
-          <p className="mt-0.5 font-mono text-[11px] whitespace-nowrap text-amber-950">
+          <p
+            className="mt-0.5 font-mono text-[11px] whitespace-nowrap text-amber-950"
+            dir="ltr"
+          >
             (a + b)² = a² + 2ab + b²
           </p>
         </div>
@@ -67,12 +74,12 @@ export function Whiteboard({ className }: { className?: string }) {
       <Cursor
         name={PARTICIPANTS[0].name.split(" ")[0]}
         color={PARTICIPANTS[0].color}
-        className="top-[20%] right-[28%] animate-drift"
+        className="end-[28%] top-[20%] animate-drift"
       />
       <Cursor
         name={PARTICIPANTS[1].name.split(" ")[0]}
         color={PARTICIPANTS[1].color}
-        className="bottom-[26%] left-[40%] animate-drift-slow"
+        className="start-[40%] bottom-[26%] animate-drift-slow"
       />
     </div>
   );

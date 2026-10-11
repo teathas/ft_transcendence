@@ -1,7 +1,5 @@
 "use client";
 
-import Link from "next/link";
-
 import {
   Table,
   TableBody,
@@ -10,29 +8,37 @@ import {
   TableHeaderCell,
   TableRow,
 } from "@/components/ui/table";
-import { routes } from "@/config/routes";
-import { formatRelativeTime } from "@/lib/format";
+import { useDict } from "@/i18n/client";
+import { useFormat } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 import type { Room } from "../types";
+import { useSubjectLabel } from "../subject-label";
+import { RoomLink } from "./room-link";
 
 export function RoomsTable({ rooms }: { rooms: Room[] }) {
+  const d = useDict();
+  const { relativeTime } = useFormat();
+  const subjectLabel = useSubjectLabel();
+
   return (
     <Table>
       <TableHead>
         <TableRow className="hover:bg-transparent">
-          <TableHeaderCell>Room</TableHeaderCell>
+          <TableHeaderCell>{d.rooms.table.room}</TableHeaderCell>
           <TableHeaderCell className="hidden md:table-cell">
-            Subject
+            {d.rooms.table.subject}
           </TableHeaderCell>
           <TableHeaderCell className="hidden lg:table-cell">
-            Owner
+            {d.rooms.table.owner}
           </TableHeaderCell>
-          <TableHeaderCell className="text-right">People</TableHeaderCell>
+          <TableHeaderCell className="text-end">
+            {d.rooms.table.people}
+          </TableHeaderCell>
           <TableHeaderCell className="hidden sm:table-cell">
-            Last active
+            {d.rooms.table.lastActive}
           </TableHeaderCell>
-          <TableHeaderCell>Status</TableHeaderCell>
+          <TableHeaderCell>{d.rooms.table.status}</TableHeaderCell>
         </TableRow>
       </TableHead>
 
@@ -40,31 +46,33 @@ export function RoomsTable({ rooms }: { rooms: Room[] }) {
         {rooms.map((room) => (
           <TableRow key={room.id}>
             <TableCell>
-              <Link
-                href={routes.room(room.code)}
+              <RoomLink
+                room={room}
                 className="font-medium transition-colors hover:text-primary"
               >
                 {room.name}
-              </Link>
-              <span className="mt-0.5 block font-mono text-xs text-muted-foreground">
-                {room.code}
-              </span>
+              </RoomLink>
+              {room.inviteCode && (
+                <span className="mt-0.5 block font-mono text-xs text-muted-foreground uppercase">
+                  {room.inviteCode}
+                </span>
+              )}
             </TableCell>
 
             <TableCell className="hidden text-muted-foreground md:table-cell">
-              {room.subject}
+              {subjectLabel(room.subject)}
             </TableCell>
 
             <TableCell className="hidden text-muted-foreground lg:table-cell">
               @{room.ownerUsername}
             </TableCell>
 
-            <TableCell className="text-right tabular-nums">
+            <TableCell className="text-end tabular-nums">
               {room.participantCount}
             </TableCell>
 
             <TableCell className="hidden text-muted-foreground sm:table-cell">
-              {room.lastActiveAt ? formatRelativeTime(room.lastActiveAt) : "—"}
+              {room.lastActiveAt ? relativeTime(room.lastActiveAt) : "—"}
             </TableCell>
 
             <TableCell>
@@ -84,7 +92,9 @@ export function RoomsTable({ rooms }: { rooms: Room[] }) {
                       : "bg-muted-foreground/60",
                   )}
                 />
-                {room.status === "active" ? "Active" : "Archived"}
+                {room.status === "active"
+                  ? d.rooms.status.active
+                  : d.rooms.status.archived}
               </span>
             </TableCell>
           </TableRow>

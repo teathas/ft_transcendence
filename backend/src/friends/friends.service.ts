@@ -4,6 +4,9 @@ import { PrismaService } from '../prisma/prisma.service';
 import { toFriendPair } from './utils/friend-pair';
 import { Prisma } from '../generated/prisma/client';
 import { PUBLIC_USER_SELECT } from '../users/users.service';
+import { pageArgs, Paged } from '../common/dto/page.dto';
+import { friendsOf } from './utils/friend-filters';
+import { ListFriendsDto, SearchPageDto } from './dto/list-friends.dto';
 
 @Injectable()
 export class FriendsService {
@@ -69,45 +72,150 @@ export class FriendsService {
 		}
 	}
 
-	async getFriends(meId: string) {
-		const rows = await this.prisma.friendship.findMany({
-			where: {
-				status: 'ACCEPTED',
-				OR: [{ requesterId: meId }, { addresseeId: meId }],
-			},
-			select: {
-				id: true,
-				requesterId: true,
-				requester: { select: PUBLIC_USER_SELECT },
-				addressee: { select: PUBLIC_USER_SELECT },
-			},
-			orderBy: { createdAt: 'desc' },
-		});
-
-		return rows.map((f) => ({
-			friendshipId: f.id,
-			user: f.requesterId == meId ? f.addressee : f.requester,
-		}));
+	/** The username filter, as Prisma wants it; empty when nothing was typed. */
+	private usernameLike(search?: string): Prisma.UserWhereInput {
+		return search ? { username: { contains: search, mode: 'insensitive' } } : {};
 	}
 
-	async getReceivedRequests(meId: string) {
-		const rows = await this.prisma.friendship.findMany({
-			where: { status: 'PENDING', addresseeId: meId },
-			select: { id: true, createdAt: true, requester: { select: PUBLIC_USER_SELECT }},
-			orderBy: { createdAt: 'desc' },
-		});
+	/** The caller's friends, one page at a time. */
+	async getFriends(meId: string, query: ListFriendsDto): Promise<Paged<unknown>> {
+		const paging = pageArgs(query);
+		const nameFilter = this.usernameLike(query.search);
 
-		return rows.map((r) => ({ requestId: r.id, createdAt: r.createdAt, user: r.requester }));
+		if (query.sort === 'name') {
+			// Read through the users themselves: a friendship has the friend on one
+			// side or the other, so only the users can be ordered by username.
+			const where: Prisma.UserWhereInput = {
+				id: { not: meId },
+				...nameFilter,
+				...friendsOf(meId),
+			};
+			const [users, total] = await this.prisma.$transaction([
+				this.prisma.user.findMany({
+					where,
+					select: PUBLIC_USER_SELECT,
+					orderBy: { username: 'asc' },
+					...paging,
+				}),
+				this.prisma.user.count({ where }),
+			]);
+
+			const ids = users.map((user) => user.id);
+			const rows = await this.prisma.friendship.findMany({
+				where: {
+					status: 'ACCEPTED',
+					OR: [
+						{ requesterId: meId, addresseeId: { in: ids } },
+						{ addresseeId: meId, requesterId: { in: ids } },
+					],
+				},
+				select: { id: true, updatedAt: true, requesterId: true, addresseeId: true },
+			});
+			const friendshipOf = new Map(
+				rows.map((row) => [row.requesterId === meId ? row.addresseeId : row.requesterId, row]),
+			);
+
+			return {
+				items: users.map((user) => ({
+					friendshipId: friendshipOf.get(user.id)?.id,
+					since: friendshipOf.get(user.id)?.updatedAt,
+					user,
+				})),
+				total,
+			};
+		}
+
+		const where: Prisma.FriendshipWhereInput = {
+			status: 'ACCEPTED',
+			OR: [
+				{ requesterId: meId, addressee: nameFilter },
+				{ addresseeId: meId, requester: nameFilter },
+			],
+		};
+		const [rows, total] = await this.prisma.$transaction([
+			this.prisma.friendship.findMany({
+				where,
+				select: {
+					id: true,
+					updatedAt: true,
+					requesterId: true,
+					requester: { select: PUBLIC_USER_SELECT },
+					addressee: { select: PUBLIC_USER_SELECT },
+				},
+				// Accepting is the only update a friendship ever gets, so this is the
+				// moment the two became friends.
+				orderBy: { updatedAt: 'desc' },
+				...paging,
+			}),
+			this.prisma.friendship.count({ where }),
+		]);
+
+		return {
+			items: rows.map((row) => ({
+				friendshipId: row.id,
+				since: row.updatedAt,
+				user: row.requesterId === meId ? row.addressee : row.requester,
+			})),
+			total,
+		};
 	}
 
-	async getSentRequests(meId: string) {
-		const rows = await this.prisma.friendship.findMany({
-			where: { status: 'PENDING', requesterId: meId },
-			select: { id: true, createdAt: true, addressee: { select: PUBLIC_USER_SELECT }},
-			orderBy: { createdAt: 'desc' },
-		});
+	async getReceivedRequests(meId: string, query: SearchPageDto): Promise<Paged<unknown>> {
+		const where: Prisma.FriendshipWhereInput = {
+			status: 'PENDING',
+			addresseeId: meId,
+			requester: this.usernameLike(query.search),
+		};
+		const [rows, total] = await this.prisma.$transaction([
+			this.prisma.friendship.findMany({
+				where,
+				select: { id: true, createdAt: true, requester: { select: PUBLIC_USER_SELECT } },
+				orderBy: { createdAt: 'desc' },
+				...pageArgs(query),
+			}),
+			this.prisma.friendship.count({ where }),
+		]);
 
-		return rows.map((r) => ({ requestId: r.id, createdAt: r.createdAt, user: r.addressee }));
+		return {
+			items: rows.map((r) => ({ requestId: r.id, createdAt: r.createdAt, user: r.requester })),
+			total,
+		};
+	}
+
+	async getSentRequests(meId: string, query: SearchPageDto): Promise<Paged<unknown>> {
+		const where: Prisma.FriendshipWhereInput = {
+			status: 'PENDING',
+			requesterId: meId,
+			addressee: this.usernameLike(query.search),
+		};
+		const [rows, total] = await this.prisma.$transaction([
+			this.prisma.friendship.findMany({
+				where,
+				select: { id: true, createdAt: true, addressee: { select: PUBLIC_USER_SELECT } },
+				orderBy: { createdAt: 'desc' },
+				...pageArgs(query),
+			}),
+			this.prisma.friendship.count({ where }),
+		]);
+
+		return {
+			items: rows.map((r) => ({ requestId: r.id, createdAt: r.createdAt, user: r.addressee })),
+			total,
+		};
+	}
+
+	/** The numbers shown on the tabs and the navigation badge. */
+	async summary(meId: string) {
+		const [friends, received, sent, unreadMessages] = await this.prisma.$transaction([
+			this.prisma.friendship.count({
+				where: { status: 'ACCEPTED', OR: [{ requesterId: meId }, { addresseeId: meId }] },
+			}),
+			this.prisma.friendship.count({ where: { status: 'PENDING', addresseeId: meId } }),
+			this.prisma.friendship.count({ where: { status: 'PENDING', requesterId: meId } }),
+			this.prisma.directMessage.count({ where: { receiverId: meId, readAt: null } }),
+		]);
+
+		return { friends, received, sent, unreadMessages };
 	}
 
 	async cancelRequest(meId: string, requestId: string) {

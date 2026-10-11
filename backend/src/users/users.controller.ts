@@ -2,7 +2,7 @@ import { isAnyNull } from '@prisma/client-runtime-utils';
 import {
 	Controller, Get, Patch, Param, Body, Post, UseInterceptors, UploadedFile,
 	ParseFilePipe, MaxFileSizeValidator, FileTypeValidator,
-	Query,
+	Query, Delete, HttpCode, HttpStatus,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
@@ -13,6 +13,7 @@ import { extname, join } from 'path';
 import { randomUUID } from 'crypto';
 import { mkdir, writeFile } from 'fs/promises';
 import { SearchUsersDto } from './dto/search-users.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 
 @Controller('users')
 export class UsersController {
@@ -25,7 +26,7 @@ export class UsersController {
 
 	@Get('search')
 	async search(@CurrentUser() user: any, @Query() query: SearchUsersDto) {
-		return this.usersService.searchUsers(user.sub, query.q);
+		return this.usersService.searchUsers(user.sub, query);
 	}
 
 	@Get(':id')
@@ -36,6 +37,23 @@ export class UsersController {
 	@Patch('me')
 	async updateMe(@CurrentUser() user: any, @Body() dto: UpdateUserDto) {
 		return this.usersService.updateProfile(user.sub, dto);
+	}
+
+	@Patch('me/password')
+	@HttpCode(HttpStatus.NO_CONTENT)
+	async changePassword(@CurrentUser() user: any, @Body() dto: ChangePasswordDto) {
+		await this.usersService.changePassword(user.sub, dto);
+	}
+
+	@Delete('me/avatar')
+	async removeAvatar(@CurrentUser() user: any) {
+		return this.usersService.removeAvatar(user.sub);
+	}
+
+	@Delete('me')
+	@HttpCode(HttpStatus.NO_CONTENT)
+	async deleteMe(@CurrentUser() user: any) {
+		await this.usersService.deleteAccount(user.sub, user);
 	}
 
 	@Post('me/avatar')

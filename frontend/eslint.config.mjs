@@ -32,7 +32,9 @@ const eslintConfig = defineConfig([
         { prefer: "type-imports", fixStyle: "inline-type-imports" },
       ],
       "no-console": ["warn", { allow: ["warn", "error"] }],
-      // Force every HTTP call through the configured axios instance.
+      // Force every HTTP call through the configured axios instance, and
+      // every internal link through the locale-aware wrapper — a bare
+      // `next/link` would drop the /fr or /ar prefix and reset the language.
       "no-restricted-imports": [
         "error",
         {
@@ -43,15 +45,19 @@ const eslintConfig = defineConfig([
               message:
                 "Import the configured instance from '@/lib/api/client' instead.",
             },
+            {
+              name: "next/link",
+              message: "Import { Link } from '@/i18n/navigation' instead.",
+            },
           ],
         },
       ],
     },
   },
 
-  // The axios instance itself is the one place allowed to import axios.
+  // The two wrappers are the one place each allowed to import the real thing.
   {
-    files: ["src/lib/api/**"],
+    files: ["src/lib/api/**", "src/i18n/navigation.tsx"],
     rules: { "no-restricted-imports": "off" },
   },
 

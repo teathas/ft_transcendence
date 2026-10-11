@@ -1,8 +1,11 @@
 import { Container } from "@/components/layout/container";
+import { getDict } from "@/i18n/server";
 
 import { RoomMockup } from "./room/room-mockup";
 
-export function RoomShowcase() {
+export async function RoomShowcase() {
+  const d = await getDict();
+
   return (
     <section className="relative overflow-hidden py-20 sm:py-28">
       <div
@@ -13,11 +16,10 @@ export function RoomShowcase() {
       <Container className="relative">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
-            One room. Everything in view.
+            {d.landing.showcase.title}
           </h2>
           <p className="mt-4 text-base text-pretty text-muted-foreground sm:text-lg">
-            The board, the people, the conversation and the files — side by
-            side, updating live for everyone in the room.
+            {d.landing.showcase.subtitle}
           </p>
         </div>
 

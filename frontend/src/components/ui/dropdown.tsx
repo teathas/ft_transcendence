@@ -24,6 +24,7 @@ export function Dropdown({
   trigger,
   children,
   align = "end",
+  side = "bottom",
   label,
 }: {
   trigger: (props: {
@@ -34,6 +35,9 @@ export function Dropdown({
   }) => React.ReactNode;
   children: React.ReactNode;
   align?: "start" | "end";
+  /** `"top"` for a trigger near the bottom of the screen, where a menu opening
+   *  downward would run off it. */
+  side?: "top" | "bottom";
   label: string;
 }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -78,9 +82,10 @@ export function Dropdown({
             role="menu"
             aria-label={label}
             className={cn(
-              "absolute z-50 mt-1.5 min-w-56 overflow-hidden rounded-lg border bg-card p-1",
+              "absolute z-50 min-w-56 overflow-hidden rounded-lg border bg-card p-1",
+              side === "top" ? "bottom-full mb-1.5" : "mt-1.5",
               "shadow-lg shadow-black/5 dark:shadow-black/40",
-              align === "end" ? "right-0" : "left-0",
+              align === "end" ? "end-0" : "start-0",
             )}
           >
             {children}
@@ -109,7 +114,7 @@ export function DropdownItem({
       }}
       className={cn(
         "flex w-full items-center gap-2.5 hover:bg-accent hover:text-accent-foreground",
-        "rounded-md px-2.5 py-2 text-left text-sm transition-colors",
+        "rounded-md px-2.5 py-2 text-start text-sm transition-colors",
         "disabled:pointer-events-none disabled:opacity-50",
         className,
       )}

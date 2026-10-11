@@ -28,10 +28,19 @@ model Room {
   owner     User         @relation(fields: [ownerId], references: [id])
   members   RoomMember[]
   messages  Message[]
-  lastActivityAt DateTime @default(now())
-  @@index([lastActivityAt])
-
+  files     RoomFile[]
   createdAt DateTime     @default(now())
+
+  /// Last message, upload, board save or join: what "active" and "recent" mean.
+  lastActiveAt DateTime @default(now())
+
+  /// The whiteboard as a tldraw snapshot. `boardVersion` counts saves, so a
+  /// save based on an older version is refused instead of overwriting.
+  boardSnapshot  Json?
+  boardVersion   Int       @default(0)
+  boardUpdatedAt DateTime?
+
+  @@index([lastActiveAt])
 }
 
 model User {
@@ -50,6 +59,9 @@ model User {
   sentFriendRequests     Friendship[] @relation("FriendshipRequester")
   receivedFriendRequests Friendship[] @relation("FriendshipAddressee")
   messages               Message[]
+  sentDirectMessages     DirectMessage[] @relation("DirectMessageSent")
+  receivedDirectMessages DirectMessage[] @relation("DirectMessageReceived")
+  roomFiles              RoomFile[]
 }
 
 enum UserStatus {
@@ -106,4 +118,43 @@ model Message {
 
   user User @relation(fields: [userId], references: [id])
   room Room @relation(fields: [roomId], references: [id])
+}
+
+/// A message between two friends. Only accepted friends can exchange them; the
+/// service checks that, the database does not.
+model DirectMessage {
+  id         String    @id @default(uuid())
+  content    String
+  senderId   String
+  receiverId String
+  createdAt  DateTime  @default(now())
+  /// Set once the receiver has opened the conversation.
+  readAt     DateTime?
+
+  sender   User @relation("DirectMessageSent", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver User @relation("DirectMessageReceived", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  // One thread is read as two directions, newest first.
+  @@index([senderId, receiverId, createdAt])
+  // The unread counters.
+  @@index([receiverId, readAt])
+}
+
+/// A file shared in a room. The bytes live on disk; `url` is where they are served.
+model RoomFile {
+  id         String   @id @default(uuid())
+  roomId     String
+  /// Kept when the uploader leaves or deletes their account.
+  uploaderId String?
+  /// The name it had on the uploader's computer.
+  name       String
+  url        String
+  size       Int
+  mimeType   String
+  createdAt  DateTime @default(now())
+
+  room     Room  @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  uploader User? @relation(fields: [uploaderId], references: [id], onDelete: SetNull)
+
+  @@index([roomId, createdAt])
 }

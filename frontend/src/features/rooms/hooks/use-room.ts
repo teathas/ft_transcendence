@@ -1,86 +1,155 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+  type InfiniteData,
+} from "@tanstack/react-query";
 
 import { queryKeys } from "@/lib/query/keys";
 
 import { roomsApi } from "../api/rooms.api";
-import type { Message } from "../types";
+import type { Message, MessagePage, RoomDetail, RoomFile } from "../types";
 
-export function useRoom(code: string) {
-  return useQuery({
-    queryKey: queryKeys.rooms.detail(code),
-    queryFn: () => roomsApi.get(code),
-    retry: false,
-  });
-}
+type Pages = InfiniteData<MessagePage, string | undefined>;
 
-export function useParticipants(code: string) {
-  return useQuery({
-    queryKey: queryKeys.rooms.participants(code),
-    queryFn: () => roomsApi.participants(code),
-  });
-}
-
-export function useMessages(code: string) {
-  return useQuery({
-    queryKey: queryKeys.rooms.messages(code),
-    queryFn: () => roomsApi.messages(code),
-  });
-}
-
-export function useSendMessage(code: string) {
+/**
+ * Opening a room is one request. The messages it carries are also copied into
+ * their own paged cache, so older ones can be added above without refetching
+ * the room (and its board) each time.
+ *
+ * No refetch on focus: it would reset that paged history, and until there is a
+ * realtime channel a reopen or reload is what brings new things in.
+ */
+function useRoomDetail<Selected = RoomDetail>(
+  id: string,
+  select?: (detail: RoomDetail) => Selected,
+  { refetchOnMount = true }: { refetchOnMount?: boolean } = {},
+) {
   const queryClient = useQueryClient();
-  const queryKey = queryKeys.rooms.messages(code);
+
+  return useQuery({
+    queryKey: queryKeys.rooms.detail(id),
+    queryFn: async () => {
+      const detail = await roomsApi.detail(id);
+      queryClient.setQueryData<Pages>(queryKeys.rooms.messages(id), {
+        pages: [detail.messages],
+        pageParams: [undefined],
+      });
+      return detail;
+    },
+    select,
+    retry: false,
+    refetchOnWindowFocus: false,
+    refetchOnMount,
+  });
+}
+
+/** The workspace's own: opening the room fetches it. */
+export const useRoom = (id: string) =>
+  useRoomDetail(id, (detail) => detail.room);
+
+// The parts below read what the workspace already fetched. Mounting them later
+// must not fetch again — that would reset the paged messages.
+const reuse = { refetchOnMount: false };
+
+export const useParticipants = (id: string) =>
+  useRoomDetail(id, (detail) => detail.participants, reuse);
+
+export const useRoomFiles = (id: string) =>
+  useRoomDetail(id, (detail) => detail.files, reuse);
+
+export function useMessages(id: string) {
+  return useInfiniteQuery({
+    queryKey: queryKeys.rooms.messages(id),
+    queryFn: ({ pageParam }) => roomsApi.messages(id, pageParam),
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (last) => last.nextCursor ?? undefined,
+    // Filled by the room request; only "load earlier" asks for more.
+    staleTime: Infinity,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+  });
+}
+
+/** Oldest first, the order a conversation is read in. */
+export function flattenMessages(
+  data: { pages: MessagePage[] } | undefined,
+): Message[] {
+  return (data?.pages.flatMap((page) => page.items) ?? []).toReversed();
+}
+
+export function useSendMessage(id: string) {
+  const queryClient = useQueryClient();
+  const queryKey = queryKeys.rooms.messages(id);
+
+  const patchNewest = (change: (items: Message[]) => Message[]) =>
+    queryClient.setQueryData<Pages>(queryKey, (data) => {
+      if (!data) return data;
+      const [first, ...rest] = data.pages;
+      return { ...data, pages: [{ ...first, items: change(first.items) }, ...rest] };
+    });
 
   return useMutation({
-    mutationFn: (body: string) => roomsApi.sendMessage(code, body),
+    mutationFn: (body: string) => roomsApi.sendMessage(id, body),
     // The message appears the instant it is sent; a failure puts the thread
     // back the way it was.
     onMutate: async (body) => {
       await queryClient.cancelQueries({ queryKey });
-      const previous = queryClient.getQueryData<Message[]>(queryKey);
+      const previous = queryClient.getQueryData<Pages>(queryKey);
+      const pendingId = `pending-${crypto.randomUUID()}`;
 
-      const optimistic: Message = {
-        id: `pending-${crypto.randomUUID()}`,
-        authorId: "pending",
-        authorUsername: "You",
-        authorColor: "#6366f1",
-        body,
-        sentAt: new Date().toISOString(),
-      };
-
-      queryClient.setQueryData<Message[]>(queryKey, (current) => [
-        ...(current ?? []),
-        optimistic,
+      patchNewest((items) => [
+        {
+          id: pendingId,
+          authorId: "pending",
+          authorUsername: "You",
+          authorColor: "#6366f1",
+          body,
+          sentAt: new Date().toISOString(),
+        },
+        ...items,
       ]);
-      return { previous };
+      return { previous, pendingId };
     },
     onError: (_error, _body, context) => {
       queryClient.setQueryData(queryKey, context?.previous);
     },
-    onSettled: () => {
-      void queryClient.invalidateQueries({ queryKey });
+    onSuccess: (message, _body, context) => {
+      patchNewest((items) =>
+        items.map((item) => (item.id === context.pendingId ? message : item)),
+      );
     },
   });
 }
 
-export function useUploadRoomFile(code: string) {
+/** Both go through the room's cache directly: no refetch of the whole room. */
+function useFilesCache(id: string) {
   const queryClient = useQueryClient();
+  return (change: (files: RoomFile[]) => RoomFile[]) =>
+    queryClient.setQueryData<RoomDetail>(
+      queryKeys.rooms.detail(id),
+      (detail) => detail && { ...detail, files: change(detail.files) },
+    );
+}
+
+export function useUploadRoomFile(id: string) {
+  const patchFiles = useFilesCache(id);
 
   return useMutation({
-    mutationFn: (file: File) => roomsApi.uploadFile(code, file),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({
-        queryKey: queryKeys.rooms.files(code),
-      });
-    },
+    mutationFn: (file: File) => roomsApi.uploadFile(id, file),
+    onSuccess: (file) => patchFiles((files) => [file, ...files]),
   });
 }
 
-export function useRoomFiles(code: string) {
-  return useQuery({
-    queryKey: queryKeys.rooms.files(code),
-    queryFn: () => roomsApi.files(code),
+export function useDeleteRoomFile(id: string) {
+  const patchFiles = useFilesCache(id);
+
+  return useMutation({
+    mutationFn: (fileId: string) => roomsApi.deleteFile(id, fileId),
+    onSuccess: (_void, fileId) =>
+      patchFiles((files) => files.filter((file) => file.id !== fileId)),
   });
 }

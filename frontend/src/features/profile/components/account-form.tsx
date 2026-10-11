@@ -12,8 +12,11 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { useUpdateProfile } from "@/features/auth/hooks/use-auth";
 import type { User } from "@/features/auth/types";
+import { useDict } from "@/i18n/client";
+import { t } from "@/i18n/translate";
 import { useZodForm } from "@/hooks/use-zod-form";
 import { isApiError } from "@/lib/api";
 
@@ -21,13 +24,18 @@ import { accountSchema } from "../schemas";
 import { SectionCard } from "./section-card";
 
 export function AccountForm({ user }: { user: User }) {
+  const d = useDict();
   const updateProfile = useUpdateProfile();
   const isSubmitting = updateProfile.isPending;
   const apiError = isApiError(updateProfile.error) ? updateProfile.error : null;
 
   const form = useZodForm({
     schema: accountSchema,
-    initialValues: { username: user.username, email: user.email },
+    initialValues: {
+      username: user.username,
+      email: user.email,
+      bio: user.bio ?? "",
+    },
     externalErrors: apiError?.fieldErrors,
     onSubmit: (values) => {
       if (isSubmitting) return;
@@ -37,12 +45,13 @@ export function AccountForm({ user }: { user: User }) {
 
   const isUnchanged =
     form.values.username.trim() === user.username &&
-    form.values.email.trim() === user.email;
+    form.values.email.trim() === user.email &&
+    form.values.bio.trim() === (user.bio ?? "");
 
   return (
     <SectionCard
-      title="Account details"
-      description="Your username is how other people find you in a room."
+      title={d.profile.account.title}
+      description={d.profile.account.description}
     >
       <form onSubmit={form.handleSubmit} noValidate>
         <fieldset disabled={isSubmitting}>
@@ -55,15 +64,13 @@ export function AccountForm({ user }: { user: User }) {
 
             {updateProfile.isSuccess && isUnchanged && (
               <Alert variant="success">
-                <AlertDescription>
-                  Your details have been saved.
-                </AlertDescription>
+                <AlertDescription>{d.profile.account.saved}</AlertDescription>
               </Alert>
             )}
 
             <Field>
               <FieldLabel {...form.getLabelProps("username")}>
-                Username
+                {d.profile.account.username}
               </FieldLabel>
               <Input
                 {...form.getFieldProps("username")}
@@ -73,17 +80,35 @@ export function AccountForm({ user }: { user: User }) {
             </Field>
 
             <Field>
-              <FieldLabel {...form.getLabelProps("email")}>Email</FieldLabel>
+              <FieldLabel {...form.getLabelProps("email")}>
+                {d.profile.account.email}
+              </FieldLabel>
               <Input
                 {...form.getFieldProps("email")}
                 type="email"
                 inputMode="email"
                 autoComplete="email"
               />
-              <FieldDescription>
-                Used to sign in and to recover your account.
-              </FieldDescription>
+              <FieldDescription>{d.profile.account.emailHint}</FieldDescription>
               <FieldError {...form.getErrorProps("email")} />
+            </Field>
+
+            <Field>
+              <FieldLabel {...form.getLabelProps("bio")}>
+                {d.profile.account.bio}
+              </FieldLabel>
+              <Textarea
+                {...form.getFieldProps("bio")}
+                rows={3}
+                maxLength={280}
+                placeholder={d.profile.account.bioPlaceholder}
+              />
+              <FieldDescription>
+                {t(d.profile.account.bioCount, {
+                  count: form.values.bio.length,
+                })}
+              </FieldDescription>
+              <FieldError {...form.getErrorProps("bio")} />
             </Field>
 
             <Button
@@ -97,7 +122,7 @@ export function AccountForm({ user }: { user: User }) {
                   aria-hidden="true"
                 />
               )}
-              Save changes
+              {d.common.saveChanges}
             </Button>
           </FieldGroup>
         </fieldset>

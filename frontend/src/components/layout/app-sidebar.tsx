@@ -1,17 +1,27 @@
 "use client";
 
-import { Gauge, LayoutGrid, LogOut, Plus, UserRound } from "lucide-react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import {
+  Gauge,
+  LayoutGrid,
+  LogOut,
+  MessagesSquare,
+  Plus,
+  UserRound,
+  Users,
+} from "lucide-react";
 
 import { BrandWordmark } from "@/components/layout/brand-mark";
+import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Avatar } from "@/components/ui/avatar";
 import { Button, buttonStyles } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { routes } from "@/config/routes";
 import { useLogout, useSession } from "@/features/auth/hooks/use-auth";
+import { useFriendsSummary } from "@/features/friends/hooks/use-friends";
 import { useRecentRooms } from "@/features/rooms/hooks/use-rooms";
+import { useDict } from "@/i18n/client";
+import { Link, useBarePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
 function NavLink({
@@ -19,11 +29,14 @@ function NavLink({
   active,
   children,
   onNavigate,
+  badge,
 }: {
-  href: React.ComponentProps<typeof Link>["href"];
+  href: string;
   active: boolean;
   children: React.ReactNode;
   onNavigate?: () => void;
+  /** A count shown at the end of the row; hidden when 0. */
+  badge?: number;
 }) {
   return (
     <Link
@@ -38,15 +51,23 @@ function NavLink({
       )}
     >
       {children}
+      {badge ? (
+        <span className="ms-auto min-w-5 rounded-full bg-primary px-1.5 py-0.5 text-center text-[11px] leading-none font-medium text-primary-foreground tabular-nums">
+          {badge}
+        </span>
+      ) : null}
     </Link>
   );
 }
 
 export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
-  const pathname = usePathname();
+  const d = useDict();
+  // Compared against `routes.*`, which carry no locale, so the prefix has to go.
+  const pathname = useBarePathname();
   const { user } = useSession();
   const logout = useLogout();
   const { data: rooms, isPending } = useRecentRooms();
+  const { data: summary } = useFriendsSummary();
 
   return (
     <div className="flex h-full flex-col gap-6 p-4">
@@ -64,17 +85,17 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
         className={buttonStyles({ className: "w-full" })}
       >
         <Plus className="size-4" aria-hidden="true" />
-        New room
+        {d.nav.newRoom}
       </Link>
 
-      <nav className="flex flex-col gap-1" aria-label="Main">
+      <nav className="flex flex-col gap-1" aria-label={d.nav.main}>
         <NavLink
           href={routes.dashboard}
           active={pathname === routes.dashboard}
           onNavigate={onNavigate}
         >
           <Gauge className="size-4" aria-hidden="true" />
-          Dashboard
+          {d.nav.dashboard}
         </NavLink>
 
         <NavLink
@@ -83,7 +104,27 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
           onNavigate={onNavigate}
         >
           <LayoutGrid className="size-4" aria-hidden="true" />
-          All rooms
+          {d.nav.allRooms}
+        </NavLink>
+
+        <NavLink
+          href={routes.friends}
+          active={pathname === routes.friends}
+          onNavigate={onNavigate}
+          badge={summary?.received}
+        >
+          <Users className="size-4" aria-hidden="true" />
+          {d.nav.friends}
+        </NavLink>
+
+        <NavLink
+          href={routes.messages}
+          active={pathname.startsWith(routes.messages)}
+          onNavigate={onNavigate}
+          badge={summary?.unreadMessages}
+        >
+          <MessagesSquare className="size-4" aria-hidden="true" />
+          {d.nav.messages}
         </NavLink>
 
         <NavLink
@@ -92,13 +133,13 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
           onNavigate={onNavigate}
         >
           <UserRound className="size-4" aria-hidden="true" />
-          Profile
+          {d.nav.profile}
         </NavLink>
       </nav>
 
       <div className="flex min-h-0 flex-1 flex-col gap-2">
         <p className="px-3 text-xs font-medium tracking-wide text-muted-foreground uppercase">
-          Recent
+          {d.nav.recent}
         </p>
 
         <div className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto">
@@ -110,8 +151,8 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
           {rooms?.map((room) => (
             <NavLink
               key={room.id}
-              href={routes.room(room.code)}
-              active={pathname === routes.room(room.code)}
+              href={routes.room(room.id)}
+              active={pathname === routes.room(room.id)}
               onNavigate={onNavigate}
             >
               <span className="truncate">{room.name}</span>
@@ -119,7 +160,9 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
           ))}
 
           {rooms?.length === 0 && (
-            <p className="px-3 text-sm text-muted-foreground">No rooms yet.</p>
+            <p className="px-3 text-sm text-muted-foreground">
+              {d.nav.noRoomsYet}
+            </p>
           )}
         </div>
       </div>
@@ -137,26 +180,31 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
           />
           <span className="min-w-0 flex-1">
             <span className="block truncate text-sm font-medium">
-              {user?.username ?? "Signed out"}
+              {user?.username ?? d.nav.signedOut}
             </span>
             <span className="block truncate text-xs text-muted-foreground">
-              {user?.email ?? "No session"}
+              {user?.email ?? d.nav.noSession}
             </span>
           </span>
         </Link>
 
+        {/* Two rows: "Se déconnecter" or "تسجيل الخروج" is wider than "Sign
+            out", and three controls no longer fit on one line. */}
         <div className="flex items-center justify-between gap-2">
           <ThemeToggle />
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => logout.mutate()}
-            disabled={logout.isPending}
-          >
-            <LogOut className="size-3.5" aria-hidden="true" />
-            Sign out
-          </Button>
+          <LanguageSwitcher side="top" />
         </div>
+
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => logout.mutate()}
+          disabled={logout.isPending}
+          className="w-full justify-start"
+        >
+          <LogOut className="size-3.5 rtl:rotate-180" aria-hidden="true" />
+          {d.nav.signOut}
+        </Button>
       </div>
     </div>
   );

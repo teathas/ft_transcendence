@@ -21,11 +21,11 @@ const RoomBoard = dynamic(() => import("./room-board"), {
 });
 
 export function BoardPanel({
-  roomCode,
+  roomId,
   identity,
   onStatusChange,
 }: {
-  roomCode: string;
+  roomId: string;
   identity: BoardIdentity;
   onStatusChange: (status: SyncStatus) => void;
 }) {
@@ -33,7 +33,7 @@ export function BoardPanel({
     <div className="relative min-h-0 flex-1 bg-background">
       <div className="absolute inset-0">
         <RoomBoard
-          roomCode={roomCode}
+          roomId={roomId}
           identity={identity}
           onStatusChange={onStatusChange}
         />

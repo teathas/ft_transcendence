@@ -4,18 +4,23 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateRoomDto,Visibility  } from './dto/create-room.dto';
 import { JoinRoomDto  } from './dto/join-room.dto';
 import { randomBytes } from 'crypto';
-import { FindRoomsQueryDto, RoomSort} from './dto/find-rooms-query.dto';
+import { FindRoomsQueryDto, RoomSort } from './dto/find-rooms-query.dto';
+import { RealtimeService } from '../realtime/realtime.service';
 
 @Injectable()
 export class RoomsService {
-    constructor(private prisma: PrismaService) {}
+    constructor(
+        private prisma: PrismaService,
+        private realtime: RealtimeService,
+    ) {}
 
     async touchActivity(roomId: string) {
         await this.prisma.room.update({
             where: { id: roomId },
-            data: { lastActivityAt: new Date() },
+            data: { lastActiveAt: new Date() },
         });
     }
+
     //create_room
     async create(dto: CreateRoomDto, ownerId: string) {
         const inviteCode = randomBytes(4).toString('hex'); 
@@ -75,7 +80,7 @@ export class RoomsService {
             case RoomSort.MEMBERS:
             return [{ members: { _count: 'desc' } }, { createdAt: 'desc' }, { id: 'asc' }];
             case RoomSort.ACTIVE:
-            return [{ lastActivityAt: 'desc' }, { createdAt: 'desc' }, { id: 'asc' }];
+            return [{ lastActiveAt: 'desc' }, { createdAt: 'desc' }, { id: 'asc' }];
             case RoomSort.NEWEST:
             default:
             return [{ createdAt: 'desc' }, { id: 'asc' }];
@@ -101,7 +106,7 @@ export class RoomsService {
             select: {
                 id: true, name: true, subject: true,
                 visibility: true, ownerId: true, createdAt: true,
-                lastActivityAt: true,_count: { select: { members: true } },
+                lastActiveAt: true,_count: { select: { members: true } },
             },
             }),
             this.prisma.room.count({ where })
@@ -114,8 +119,6 @@ export class RoomsService {
             totalPages: Math.ceil(total / limit),
         };
     }
-
-
 
 
     //leave_room
@@ -161,13 +164,16 @@ export class RoomsService {
                 });
             }
         }
-        return this.prisma.roomMember.delete({
-            where: {
-                userId_roomId: {
-                    userId,
-                    roomId,
-                },
-            },
-        })  
+        const removed = await this.prisma.roomMember.delete({
+			where: {
+				userId_roomId: {
+					userId,
+					roomId,
+				},
+			},
+		});
+		this.realtime.removeUserFromRoom(userId, roomId);
+		this.realtime.emitToRoom(roomId, 'room:member-left', { roomId, userId });
+		return removed;
     }
 }

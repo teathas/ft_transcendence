@@ -1,3 +1,6 @@
+"use client";
+
+import { useDict } from "@/i18n/client";
 import { cn } from "@/lib/utils";
 
 export function Field({ className, ...props }: React.ComponentProps<"div">) {
@@ -37,6 +40,7 @@ export function FieldError({
   messages,
   ...props
 }: React.ComponentProps<"p"> & { messages?: string[] }) {
+  const d = useDict();
   if (!messages?.length) return null;
 
   return (
@@ -45,7 +49,11 @@ export function FieldError({
       className={cn("text-sm text-destructive", className)}
       {...props}
     >
-      {messages.join(", ")}
+      {/* Schemas emit keys into `validation`; anything else — a message the
+          API wrote itself — is shown unchanged. */}
+      {messages
+        .map((m) => d.validation[m as keyof typeof d.validation] ?? m)
+        .join(", ")}
     </p>
   );
 }

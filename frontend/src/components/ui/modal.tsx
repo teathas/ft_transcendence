@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { useDict } from "@/i18n/client";
 import { cn } from "@/lib/utils";
 
 /**
@@ -25,6 +26,7 @@ export function Modal({
   children: React.ReactNode;
   className?: string;
 }) {
+  const d = useDict();
   const dialogRef = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
@@ -57,7 +59,9 @@ export function Modal({
         if (event.target === dialogRef.current) onClose();
       }}
       className={cn(
-        "m-auto w-[calc(100%-2rem)] max-w-md rounded-xl border bg-card p-0 text-foreground",
+        // `overflow-visible`: a <dialog> clips its overflow by default, which
+        // cut off the subject list — a menu taller than the form around it.
+        "m-auto w-[calc(100%-2rem)] max-w-md overflow-visible rounded-xl border bg-card p-0 text-foreground",
         "shadow-2xl shadow-black/10 backdrop:bg-black/50 dark:shadow-black/50",
         "open:animate-fade-up",
         className,
@@ -78,9 +82,9 @@ export function Modal({
         <Button
           variant="ghost"
           size="icon"
-          aria-label="Close"
+          aria-label={d.common.close}
           onClick={onClose}
-          className="-mt-1 -mr-1 shrink-0"
+          className="-me-1 -mt-1 shrink-0"
         >
           <X className="size-4" aria-hidden="true" />
         </Button>

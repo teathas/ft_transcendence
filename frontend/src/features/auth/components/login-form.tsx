@@ -12,15 +12,17 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
+import { useDict } from "@/i18n/client";
 import { useZodForm } from "@/hooks/use-zod-form";
 import { isApiError } from "@/lib/api";
 
 import { useLogin } from "../hooks/use-auth";
 import { loginSchema } from "../schemas";
 
-const INITIAL_VALUES = { username: "", password: "" };
+const INITIAL_VALUES = { email: "", password: "" };
 
 export function LoginForm() {
+  const d = useDict();
   const login = useLogin();
   const isSubmitting = login.isPending;
 
@@ -47,32 +49,34 @@ export function LoginForm() {
         <FieldGroup>
           {apiError && !hasFieldLevelApiError && (
             <Alert variant="destructive">
-              <AlertTitle>Could not sign you in</AlertTitle>
+              <AlertTitle>{d.auth.login.failed}</AlertTitle>
               <AlertDescription>{apiError.message}</AlertDescription>
             </Alert>
           )}
 
           <Field>
-            <FieldLabel {...form.getLabelProps("username")}>
-              Username
+            <FieldLabel {...form.getLabelProps("email")}>
+              {d.auth.login.email}
             </FieldLabel>
             <Input
-              {...form.getFieldProps("username")}
-              autoComplete="username"
-              placeholder="Your username"
+              {...form.getFieldProps("email")}
+              type="email"
+              inputMode="email"
+              autoComplete="email"
+              placeholder={d.auth.login.emailPlaceholder}
               autoFocus
             />
-            <FieldError {...form.getErrorProps("username")} />
+            <FieldError {...form.getErrorProps("email")} />
           </Field>
 
           <Field>
             <FieldLabel {...form.getLabelProps("password")}>
-              Password
+              {d.auth.login.password}
             </FieldLabel>
             <PasswordInput
               {...form.getFieldProps("password")}
               autoComplete="current-password"
-              placeholder="Your password"
+              placeholder={d.auth.login.passwordPlaceholder}
             />
             <FieldError {...form.getErrorProps("password")} />
           </Field>
@@ -84,7 +88,7 @@ export function LoginForm() {
                 aria-hidden="true"
               />
             )}
-            {isSubmitting ? "Signing in…" : "Sign in"}
+            {isSubmitting ? d.auth.login.submitting : d.auth.login.submit}
           </Button>
         </FieldGroup>
       </fieldset>

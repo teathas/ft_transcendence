@@ -1,18 +1,20 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSync, useSyncDemo } from "@tldraw/sync";
-import { Tldraw, type Editor } from "tldraw";
+import { Tldraw, type Editor, type TLAssetStore } from "tldraw";
 
+import { useUploadRoomFile } from "@/features/rooms/hooks/use-room";
+import { tokenStore } from "@/lib/api";
 import { env } from "@/lib/env";
 
-import { BOARD_COMPONENTS, PROTOTYPE_ASSET_STORE } from "./board-config";
+import { BOARD_COMPONENTS } from "./board-config";
 import { useBoardIdentity, type BoardIdentity } from "./use-board-identity";
 
 export type SyncStatus = "loading" | "online" | "offline" | "error";
 
 type BoardProps = {
-  roomCode: string;
+  roomId: string;
   identity: BoardIdentity;
   onStatusChange: (status: SyncStatus) => void;
 };
@@ -53,17 +55,42 @@ function SyncedTldraw({
 }
 
 /** tldraw's public demo server: real cursors, but the data is public. */
-function DemoBoard({ roomCode, ...rest }: BoardProps) {
-  const store = useSyncDemo({ roomId: `shared-room-${roomCode}` });
+function DemoBoard({ roomId, ...rest }: BoardProps) {
+  const store = useSyncDemo({ roomId: `shared-room-${roomId}` });
   return <SyncedTldraw store={store} {...rest} />;
 }
 
-/** Our own sync server, once one exists at NEXT_PUBLIC_SYNC_URL. */
-function ServerBoard({ roomCode, ...rest }: BoardProps) {
-  const store = useSync({
-    uri: `${env.syncUrl}/connect/${roomCode}`,
-    assets: PROTOTYPE_ASSET_STORE,
-  });
+/**
+ * Images dropped on the board are uploaded as room files, so the board document
+ * holds a link rather than the picture itself.
+ */
+function useRoomAssetStore(roomId: string): TLAssetStore {
+  const { mutateAsync: upload } = useUploadRoomFile(roomId);
+
+  return useMemo(
+    () => ({
+      async upload(_asset, file) {
+        const uploaded = await upload(file);
+        return { src: `${env.apiUrl}${uploaded.url}` };
+      },
+      resolve: (asset) => asset.props.src,
+    }),
+    [upload],
+  );
+}
+
+/** The API's own sync server: who may connect is decided by the token. */
+function ServerBoard({ roomId, ...rest }: BoardProps) {
+  const assets = useRoomAssetStore(roomId);
+  // A function, so a reconnect sends whatever the current token is. A browser
+  // cannot set headers on a websocket, hence the query string. It must keep
+  // the same identity between renders: a new one makes `useSync` reconnect.
+  const uri = useCallback(
+    () =>
+      `${env.syncUrl}/sync/${roomId}?token=${encodeURIComponent(tokenStore.get() ?? "")}`,
+    [roomId],
+  );
+  const store = useSync({ uri, assets });
   return <SyncedTldraw store={store} {...rest} />;
 }
 
