@@ -78,31 +78,46 @@ export class RoomsService {
     private getOrderBy(sort: RoomSort = RoomSort.NEWEST): Prisma.RoomOrderByWithRelationInput[] {
         switch (sort) {
             case RoomSort.MEMBERS:
-            return [{ members: { _count: 'desc' } }, { createdAt: 'desc' }];
+            return [{ members: { _count: 'desc' } }, { createdAt: 'desc' }, { id: 'asc' }];
             case RoomSort.ACTIVE:
-            return [{ lastActiveAt: 'desc' }, { createdAt: 'desc' }];
+            return [{ lastActiveAt: 'desc' }, { createdAt: 'desc' }, { id: 'asc' }];
             case RoomSort.NEWEST:
             default:
-            return [{ createdAt: 'desc' }];
+            return [{ createdAt: 'desc' }, { id: 'asc' }];
         }
     }
     async findPublicRooms(query: FindRoomsQueryDto  = {}) {
         const name = query.name?.trim();
         const subject = query.subject?.trim();
-
-        return this.prisma.room.findMany({
-        where: {
+        const page = query.page ?? 1;
+        const limit = query.limit ?? 10;
+        const skip = (page - 1) * limit;
+        const where: Prisma.RoomWhereInput = {
             visibility: Visibility.PUBLIC,
             ...(name && { name: { contains: name, mode: 'insensitive' } }),
             ...(subject && { subject: { contains: subject, mode: 'insensitive' } }),
-        },
-        orderBy: this.getOrderBy(query.sort),
-        select: {
-            id: true, name: true, subject: true,
-            visibility: true, ownerId: true, createdAt: true,
-            lastActiveAt: true,_count: { select: { members: true } },
-        },
-        });
+        };
+        const [items, total] = await this.prisma.$transaction([
+            this.prisma.room.findMany({
+            where,
+            orderBy: this.getOrderBy(query.sort),
+            skip,
+            take: limit,
+            select: {
+                id: true, name: true, subject: true,
+                visibility: true, ownerId: true, createdAt: true,
+                lastActiveAt: true,_count: { select: { members: true } },
+            },
+            }),
+            this.prisma.room.count({ where })
+        ])
+        return {
+            items,
+            total,
+            page,
+            limit,
+            totalPages: Math.ceil(total / limit),
+        };
     }
 
 
