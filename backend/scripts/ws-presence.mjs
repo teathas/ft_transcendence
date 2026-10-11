@@ -35,6 +35,6 @@ b1.disconnect();
 await sleep(300);
 console.log('-- B closes tab2 (B must go offline)');
 b2.disconnect();
-await sleep(500);
+await sleep(6000);
 console.log('friends list:', await friendStatuses());
 a.disconnect();
