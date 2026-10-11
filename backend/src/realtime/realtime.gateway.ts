@@ -72,7 +72,7 @@ export class RealtimeGateway
 		if (!user) return;
 
 		for (const roomId of (client.data.rooms as Set<string> | undefined) ?? []) {
-			if (!(await this.usersInRoom(roomId)).includes(user.id)) {
+			if (this.presence.leaveRoom(roomId, user.id, client.id)) {
 				this.server.to(roomChannel(roomId)).emit('room:user-left', { roomId, userId: user.id });
 			}
 		}
@@ -96,11 +96,6 @@ export class RealtimeGateway
 			this.logger.error(`status update failed for ${userId}: ${(err as Error).message}`);
 		}
 		this.server.emit('presence:update', { userId, status });
-	}
-
-	private async usersInRoom(roomId: string): Promise<string[]> {
-		const sockets = await this.server.in(roomChannel(roomId)).fetchSockets();
-		return [...new Set(sockets.map((s) => (s.data.user as SocketUser).id))];
 	}
 
 	@SubscribeMessage('health:ping')
@@ -132,16 +127,14 @@ export class RealtimeGateway
 		}
 
 		const channel = roomChannel(roomId);
-		const before = await this.usersInRoom(roomId);
-		const alreadyPresent = before.includes(user.id);
-
 		await client.join(channel);
 		(client.data.rooms ??= new Set<string>()).add(roomId);
 
-		if (!alreadyPresent) {
+		const { first, present } = this.presence.joinRoom(roomId, user.id, client.id);
+		if (first) {
 			client.to(channel).emit('room:user-joined', { roomId, userId: user.id });
 		}
-		return { ok: true, present: alreadyPresent ? before : [...before, user.id] };
+		return { ok: true, present };
 	}
 
 	@SubscribeMessage('room:leave')
@@ -161,7 +154,7 @@ export class RealtimeGateway
 		await client.leave(channel);
 		(client.data.rooms as Set<string> | undefined)?.delete(roomId);
 
-		if (!(await this.usersInRoom(roomId)).includes(user.id)) {
+		if (this.presence.leaveRoom(roomId, user.id, client.id)) {
 			this.server.to(channel).emit('room:user-left', { roomId, userId: user.id });
 		}
 		return { ok: true };
