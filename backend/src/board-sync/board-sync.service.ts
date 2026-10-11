@@ -44,11 +44,13 @@ export class BoardSyncService implements OnApplicationBootstrap, OnApplicationSh
 		private httpAdapterHost: HttpAdapterHost,
 		private jwt: JwtService,
 		private prisma: PrismaService,
-	) {}
+	) { }
 
 	onApplicationBootstrap() {
 		const server = this.httpAdapterHost.httpAdapter.getHttpServer();
 		server.on('upgrade', (req: IncomingMessage, socket: Duplex, head: Buffer) => {
+			const { pathname } = new URL(req.url ?? '', 'http://localhost');
+			if (!pathname.startsWith('/sync/')) return; // not ours: Socket.IO handles /socket.io/
 			void this.upgrade(req, socket, head);
 		});
 	}
