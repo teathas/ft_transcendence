@@ -15,11 +15,12 @@ import { MessageBody } from '@nestjs/websockets';
 import { PrismaService } from '../prisma/prisma.service';
 import { roomChannel, userChannel } from './channels';
 import { RealtimeService } from './realtime.service';
+import { PresenceService } from './presence.service';
 
 export type SocketUser = { id: string; email: string };
 
 @Public()
-@WebSocketGateway()
+@WebSocketGateway({ destroyUpgrade: false })
 export class RealtimeGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
@@ -32,6 +33,7 @@ export class RealtimeGateway
 	private readonly authService: AuthService,
 	private readonly prisma: PrismaService,
 	private readonly realtime: RealtimeService,
+	private readonly presence: PresenceService,
 	) {}
 
   afterInit(server: Server) {
@@ -53,20 +55,46 @@ export class RealtimeGateway
     });
   }
 
-  handleConnection(client: Socket) {
+  async handleConnection(client: Socket) {
     const user = client.data.user as SocketUser;
-	void client.join(userChannel(user.id));
+    void client.join(userChannel(user.id));
     this.logger.log(`connected: ${client.id} user=${user.id}`);
+
+    if (this.presence.addSocket(user.id, client.id)) {
+      await this.setStatus(user.id, 'ONLINE');
+    }
   }
 
-  handleDisconnect(client: Socket) {
+  async handleDisconnect(client: Socket) {
     const user = client.data.user as SocketUser | undefined;
     this.logger.log(`disconnected: ${client.id} user=${user?.id}`);
+    if (!user) return;
+
+    if (this.presence.removeSocket(user.id, client.id)) {
+      await this.setStatus(user.id, 'OFFLINE');
+    }
+  }
+
+  private async setStatus(userId: string, status: 'ONLINE' | 'OFFLINE') {
+	try {
+		await this.prisma.user.update({
+			where: { id: userId },
+			data: status === 'OFFLINE' ? { status, lastSeenAt: new Date() } : { status },
+		});
+	} catch (err) {
+		this.logger.error(`status update failed for ${userId}: ${(err as Error).message}`);
+	}
+	this.server.emit('presence:update', { userId, status });
   }
 
   @SubscribeMessage('health:ping')
   handlePing(@ConnectedSocket() client: Socket) {
     return { ok: true, userId: (client.data.user as SocketUser).id };
+  }
+
+  @SubscribeMessage('presence:list')
+  handlePresenceList() {
+	return { ok: true, userIds: this.presence.onlineUserIds() };
   }
 
   @SubscribeMessage('room:join')
