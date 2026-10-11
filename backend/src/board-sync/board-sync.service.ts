@@ -66,6 +66,10 @@ export class BoardSyncService implements OnApplicationBootstrap, OnApplicationSh
 	private async upgrade(req: IncomingMessage, socket: Duplex, head: Buffer) {
 		try {
 			const url = new URL(req.url ?? '', 'http://localhost');
+			// Other websockets on this server (socket.io, on /socket.io/) are not
+			// ours: leave their sockets alone.
+			if (!url.pathname.startsWith('/sync/')) return;
+
 			const match = /^\/sync\/([0-9a-f-]{36})$/i.exec(url.pathname);
 			const sessionId = url.searchParams.get('sessionId');
 			const token = url.searchParams.get('token');
@@ -90,6 +94,15 @@ export class BoardSyncService implements OnApplicationBootstrap, OnApplicationSh
 			// A bad or expired token lands here too.
 			this.logger.debug(`Refused a board connection: ${String(error)}`);
 			this.reject(socket, '401 Unauthorized');
+		}
+	}
+
+	/** Disconnects someone's board sessions, e.g. after they left the room. */
+	async kick(roomId: string, userId: string) {
+		const live = await this.rooms.get(roomId)?.catch(() => undefined);
+		if (!live) return;
+		for (const session of live.room.getSessions()) {
+			if (session.meta.userId === userId) live.room.closeSession(session.sessionId, 'PERMISSION_DENIED');
 		}
 	}
 

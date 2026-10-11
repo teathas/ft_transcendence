@@ -33,7 +33,7 @@ type MessageWire = z.infer<typeof messageWireSchema>;
 type FileWire = z.infer<typeof fileWireSchema>;
 type DetailWire = z.infer<typeof roomDetailWireSchema>;
 
-const toMessage = (wire: MessageWire): Message => ({
+export const toMessage = (wire: MessageWire): Message => ({
   id: wire.id,
   authorId: wire.author.id,
   authorUsername: wire.author.username,
@@ -56,7 +56,7 @@ const kindOf = (mimeType: string): RoomFile["kind"] =>
       ? "pdf"
       : "document";
 
-const toFile = (wire: FileWire): RoomFile => ({
+export const toFile = (wire: FileWire): RoomFile => ({
   id: wire.id,
   name: wire.name,
   sizeBytes: wire.size,
@@ -67,7 +67,7 @@ const toFile = (wire: FileWire): RoomFile => ({
   url: wire.url,
 });
 
-const toParticipant = (member: DetailWire["members"][number]): Participant => ({
+export const toParticipant = (member: DetailWire["members"][number]): Participant => ({
   id: member.id,
   username: member.username,
   avatarUrl: member.avatarUrl,

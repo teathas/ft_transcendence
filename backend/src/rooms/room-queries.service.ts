@@ -7,10 +7,14 @@ import { PUBLIC_USER_SELECT } from '../users/users.service';
 import { ListRoomsDto } from './dto/list-rooms.dto';
 import { JoinByCodeDto } from './dto/join-by-code.dto';
 import { activeSince, fileSelect, roomSelect, toRoomView, visibleTo } from './room-views';
+import { RoomsService } from './rooms.service';
 
 @Injectable()
 export class RoomQueriesService {
-	constructor(private prisma: PrismaService) {}
+	constructor(
+		private prisma: PrismaService,
+		private rooms: RoomsService,
+	) {}
 
 	/** The rooms the caller can see, filtered, sorted and paged by the API. */
 	async list(meId: string, query: ListRoomsDto): Promise<Paged<ReturnType<typeof toRoomView>>> {
@@ -82,11 +86,15 @@ export class RoomQueriesService {
 		});
 		if (!room) throw new NotFoundException('No room has this code');
 
+		const already = await this.prisma.roomMember.findUnique({
+			where: { userId_roomId: { userId: meId, roomId: room.id } },
+		});
 		await this.prisma.roomMember.upsert({
 			where: { userId_roomId: { userId: meId, roomId: room.id } },
 			update: {},
 			create: { userId: meId, roomId: room.id },
 		});
+		if (!already) void this.rooms.announceJoined(room.id, meId);
 		return this.view(meId, room.id);
 	}
 

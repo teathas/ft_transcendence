@@ -21,6 +21,10 @@ export class RealtimeService {
 		this.server.to(userChannel(userId)).emit(event, payload);
 	}
 
+	emitToUsers(userIds: string[], event: string, payload: unknown) {
+		for (const userId of new Set(userIds)) this.emitToUser(userId, event, payload);
+	}
+
 	removeUserFromRoom(userId: string, roomId: string) {
 		if (!this.server) return;
 		this.server.in(userChannel(userId)).socketsLeave(roomChannel(roomId));

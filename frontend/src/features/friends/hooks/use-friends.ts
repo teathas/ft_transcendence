@@ -8,6 +8,7 @@ import {
 } from "@tanstack/react-query";
 
 import { useToast } from "@/components/ui/toast";
+import { useRealtimeConnected } from "@/features/realtime/use-realtime-connected";
 import { useDict } from "@/i18n/client";
 import { t } from "@/i18n/translate";
 import { queryKeys } from "@/lib/query/keys";
@@ -56,12 +57,13 @@ export function usePeople(query: PeopleQuery, enabled = true) {
   });
 }
 
-/** Counts for the tabs and the sidebar badges; refreshed every 15 s. */
+/** Counts for the tabs and the sidebar badges; pushed live, polled only if that is down. */
 export function useFriendsSummary() {
+  const connected = useRealtimeConnected();
   return useQuery({
     queryKey: queryKeys.friends.summary(),
     queryFn: friendsApi.summary,
-    refetchInterval: 15_000,
+    refetchInterval: connected ? false : 15_000,
   });
 }
 

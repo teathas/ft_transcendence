@@ -7,10 +7,19 @@ import { PUBLIC_USER_SELECT } from '../users/users.service';
 import { pageArgs, Paged } from '../common/dto/page.dto';
 import { friendsOf } from './utils/friend-filters';
 import { ListFriendsDto, SearchPageDto } from './dto/list-friends.dto';
+import { RealtimeService } from '../realtime/realtime.service';
 
 @Injectable()
 export class FriendsService {
-	constructor(private prisma: PrismaService) {}
+	constructor(
+		private prisma: PrismaService,
+		private realtime: RealtimeService,
+	) {}
+
+	/** Tells someone their friends or requests changed, so their screens refresh. */
+	private notify(userId: string) {
+		this.realtime.emitToUser(userId, 'friends:changed', {});
+	}
 
 	async sendRequest(meId: string, addresseeId: string) {
 		if (meId === addresseeId) {
@@ -28,10 +37,12 @@ export class FriendsService {
 		const { lowId, highId } = toFriendPair(meId, addresseeId);
 
 		try {
-			return await this.prisma.friendship.create({
+			const created = await this.prisma.friendship.create({
 				data: { requesterId: meId, addresseeId, lowId, highId },
 				select: { id: true, status: true, addresseeId: true, createdAt: true },
 			});
+			this.notify(addresseeId);
+			return created;
 		} catch (e) {
 			if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
 				const existing = await this.prisma.friendship.findUnique({
@@ -53,23 +64,33 @@ export class FriendsService {
 	}
 
 	async acceptRequest(meId: string, id: string) {
+		const request = await this.prisma.friendship.findFirst({
+			where: { id, addresseeId: meId, status: 'PENDING' },
+			select: { requesterId: true },
+		});
 		const result = await this.prisma.friendship.updateMany({
 			where: { id, addresseeId: meId, status: 'PENDING' },
 			data: { status: 'ACCEPTED' },
 		});
-		if (result.count === 0) {
+		if (!request || result.count === 0) {
 			throw new NotFoundException('Friend request not found');
 		}
+		this.notify(request.requesterId);
 		return { id, status: 'ACCEPTED' };
 	}
 
 	async rejectRequest(meId: string, id: string) {
+		const request = await this.prisma.friendship.findFirst({
+			where: { id, addresseeId: meId, status: 'PENDING' },
+			select: { requesterId: true },
+		});
 		const result = await this.prisma.friendship.deleteMany({
 			where: { id, addresseeId: meId, status: 'PENDING' },
 		});
-		if (result.count === 0) {
+		if (!request || result.count === 0) {
 			throw new NotFoundException('Friend request not found');
 		}
+		this.notify(request.requesterId);
 	}
 
 	/** The username filter, as Prisma wants it; empty when nothing was typed. */
@@ -219,16 +240,29 @@ export class FriendsService {
 	}
 
 	async cancelRequest(meId: string, requestId: string) {
+		const request = await this.prisma.friendship.findFirst({
+			where: { id: requestId, requesterId: meId, status: 'PENDING' },
+			select: { addresseeId: true },
+		});
 		const { count } = await this.prisma.friendship.deleteMany({
 			where: { id: requestId, requesterId: meId, status: 'PENDING' },
 		});
 
-		if (count === 0) {
+		if (!request || count === 0) {
 			throw new NotFoundException('Friend request not found');
 		}
+		this.notify(request.addresseeId);
 	}
 
 	async removeFriend(meId: string, friendshipId: string) {
+		const friendship = await this.prisma.friendship.findFirst({
+			where: {
+				id: friendshipId,
+				status: 'ACCEPTED',
+				OR: [{ requesterId: meId }, { addresseeId: meId }],
+			},
+			select: { requesterId: true, addresseeId: true },
+		});
 		const { count } = await this.prisma.friendship.deleteMany({
 			where: {
 				id: friendshipId,
@@ -237,8 +271,9 @@ export class FriendsService {
 			},
 		});
 
-		if (count === 0) {
+		if (!friendship || count === 0) {
 			throw new NotFoundException('Friendship not found');
 		}
+		this.notify(friendship.requesterId === meId ? friendship.addresseeId : friendship.requesterId);
 	}
 }

@@ -8,6 +8,7 @@ import {
 	NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { RealtimeService } from '../realtime/realtime.service';
 import { assertMember } from './room-access';
 import { fileSelect } from './room-views';
 
@@ -26,7 +27,10 @@ const safeExtension = (name: string) => {
 
 @Injectable()
 export class RoomFilesService {
-	constructor(private prisma: PrismaService) {}
+	constructor(
+		private prisma: PrismaService,
+		private realtime: RealtimeService,
+	) {}
 
 	async list(roomId: string, userId: string) {
 		await assertMember(this.prisma, roomId, userId);
@@ -65,6 +69,7 @@ export class RoomFilesService {
 				}),
 				this.prisma.room.update({ where: { id: roomId }, data: { lastActiveAt: new Date() } }),
 			]);
+			this.realtime.emitToRoom(roomId, 'room:file-added', { roomId, file: created });
 			return created;
 		} catch (error) {
 			// No row, so nothing would ever point at the bytes.
@@ -88,5 +93,6 @@ export class RoomFilesService {
 
 		await this.prisma.roomFile.delete({ where: { id: file.id } });
 		await unlink(join(uploadRoot(), 'rooms', roomId, basename(file.url))).catch(() => undefined);
+		this.realtime.emitToRoom(roomId, 'room:file-removed', { roomId, fileId: file.id });
 	}
 }

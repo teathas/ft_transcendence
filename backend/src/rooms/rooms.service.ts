@@ -6,13 +6,36 @@ import { JoinRoomDto  } from './dto/join-room.dto';
 import { randomBytes } from 'crypto';
 import { FindRoomsQueryDto, RoomSort } from './dto/find-rooms-query.dto';
 import { RealtimeService } from '../realtime/realtime.service';
+import { BoardSyncService } from '../board-sync/board-sync.service';
+import { PUBLIC_USER_SELECT } from '../users/users.service';
 
 @Injectable()
 export class RoomsService {
     constructor(
         private prisma: PrismaService,
         private realtime: RealtimeService,
+        private boardSync: BoardSyncService,
     ) {}
+
+    /** Tells the people in a room that someone is now a member of it. */
+    async announceJoined(roomId: string, userId: string) {
+        const [user, room] = await Promise.all([
+            this.prisma.user.findUnique({ where: { id: userId }, select: PUBLIC_USER_SELECT }),
+            this.prisma.room.findUnique({ where: { id: roomId }, select: { ownerId: true } }),
+        ]);
+        if (!user || !room) return;
+        this.realtime.emitToRoom(roomId, 'room:member-joined', {
+            roomId,
+            member: {
+                id: user.id,
+                username: user.username,
+                avatarUrl: user.avatarUrl,
+                status: user.status,
+                role: user.id === room.ownerId ? 'host' : 'guest',
+                joinedAt: new Date().toISOString(),
+            },
+        });
+    }
 
     async touchActivity(roomId: string) {
         await this.prisma.room.update({
@@ -68,12 +91,14 @@ export class RoomsService {
         if(membership)
             throw new ConflictException('User is already a member of this room');
         await this.touchActivity(roomId);
-        return this.prisma.roomMember.create({
+        const joined = await this.prisma.roomMember.create({
             data:{
                 userId,
                 roomId,
             }
-        })
+        });
+        void this.announceJoined(roomId, userId);
+        return joined;
     }
     private getOrderBy(sort: RoomSort = RoomSort.NEWEST): Prisma.RoomOrderByWithRelationInput[] {
         switch (sort) {
@@ -147,6 +172,7 @@ export class RoomsService {
                     ownerId: nextOwner.userId,
                 },
                 });
+                this.realtime.emitToRoom(roomId, 'room:owner-changed', { roomId, ownerId: nextOwner.userId });
             }
         }
         const removed = await this.prisma.roomMember.delete({
@@ -158,6 +184,8 @@ export class RoomsService {
 			},
 		});
 		this.realtime.removeUserFromRoom(userId, roomId);
+		// Their open board goes too: membership is what lets them in.
+		void this.boardSync.kick(roomId, userId);
 		this.realtime.emitToRoom(roomId, 'room:member-left', { roomId, userId });
 		return removed;
     }

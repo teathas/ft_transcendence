@@ -15,6 +15,7 @@ import { MessageBody } from '@nestjs/websockets';
 import { PrismaService } from '../prisma/prisma.service';
 import { roomChannel, userChannel } from './channels';
 import { RealtimeService } from './realtime.service';
+import { PresenceService } from './presence.service';
 
 export type SocketUser = { id: string; email: string };
 
@@ -32,6 +33,7 @@ export class RealtimeGateway
 	private readonly authService: AuthService,
 	private readonly prisma: PrismaService,
 	private readonly realtime: RealtimeService,
+	private readonly presence: PresenceService,
 	) {}
 
   afterInit(server: Server) {
@@ -56,11 +58,13 @@ export class RealtimeGateway
   handleConnection(client: Socket) {
     const user = client.data.user as SocketUser;
 	void client.join(userChannel(user.id));
+	this.presence.connected(user.id);
     this.logger.log(`connected: ${client.id} user=${user.id}`);
   }
 
   handleDisconnect(client: Socket) {
     const user = client.data.user as SocketUser | undefined;
+    if (user) this.presence.disconnected(user.id);
     this.logger.log(`disconnected: ${client.id} user=${user?.id}`);
   }
 
@@ -88,8 +92,9 @@ export class RealtimeGateway
 	}
 
 	const channel = roomChannel(roomId);
+	// Subscribing is not joining: who is a member comes from the REST calls
+	// (`room:member-joined` / `room:member-left`), who is here from presence.
 	await client.join(channel);
-	client.to(channel).emit('room:user-joined', { roomId, userId: user.id });
 	return { ok: true };
   }
 
@@ -106,7 +111,6 @@ export class RealtimeGateway
 
 	const channel = roomChannel(roomId);
 	await client.leave(channel);
-	client.to(channel).emit('room:user-left', { roomId, userId: user.id });
 	return { ok: true };
   }
 }

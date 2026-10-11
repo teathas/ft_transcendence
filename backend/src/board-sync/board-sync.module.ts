@@ -5,5 +5,6 @@ import { BoardSyncService } from './board-sync.service';
 @Module({
 	imports: [AuthModule],
 	providers: [BoardSyncService],
+	exports: [BoardSyncService],
 })
 export class BoardSyncModule {}
