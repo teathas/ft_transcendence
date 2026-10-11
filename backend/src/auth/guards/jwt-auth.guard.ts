@@ -29,21 +29,21 @@ export class JwtAuthGuard implements CanActivate {
 			throw new UnauthorizedException('No token provided');
 		}
 
-		let playload: any;
+		let payload: any;
 		try {
-			playload = await this.JwtService.verifyAsync(token);
+			payload = await this.JwtService.verifyAsync(token);
 		} catch {
 			throw new UnauthorizedException('Invalid or expired token');
 		}
 
 		const revoked = await this.prisma.revokedToken.findUnique({
-			where: { jti: playload.jti },
+			where: { jti: payload.jti },
 		});
 		if (revoked) {
 			throw new UnauthorizedException('Token has been revoked');
 		}
 
-		request.user = playload;
+		request.user = payload;
 		return true;
 	}
 }
