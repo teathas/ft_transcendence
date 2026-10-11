@@ -71,6 +71,12 @@ export class RealtimeGateway
 		this.logger.log(`disconnected: ${client.id} user=${user?.id}`);
 		if (!user) return;
 
+		for (const roomId of (client.data.rooms as Set<string> | undefined) ?? []) {
+			if (!(await this.usersInRoom(roomId)).includes(user.id)) {
+				this.server.to(roomChannel(roomId)).emit('room:user-left', { roomId, userId: user.id });
+			}
+		}
+
 		if (this.presence.removeSocket(user.id, client.id)) {
 			this.presence.scheduleOffline(
 				user.id,
@@ -90,6 +96,11 @@ export class RealtimeGateway
 			this.logger.error(`status update failed for ${userId}: ${(err as Error).message}`);
 		}
 		this.server.emit('presence:update', { userId, status });
+	}
+
+	private async usersInRoom(roomId: string): Promise<string[]> {
+		const sockets = await this.server.in(roomChannel(roomId)).fetchSockets();
+		return [...new Set(sockets.map((s) => (s.data.user as SocketUser).id))];
 	}
 
 	@SubscribeMessage('health:ping')
@@ -121,9 +132,16 @@ export class RealtimeGateway
 		}
 
 		const channel = roomChannel(roomId);
+		const before = await this.usersInRoom(roomId);
+		const alreadyPresent = before.includes(user.id);
+
 		await client.join(channel);
-		client.to(channel).emit('room:user-joined', { roomId, userId: user.id });
-		return { ok: true };
+		(client.data.rooms ??= new Set<string>()).add(roomId);
+
+		if (!alreadyPresent) {
+			client.to(channel).emit('room:user-joined', { roomId, userId: user.id });
+		}
+		return { ok: true, present: alreadyPresent ? before : [...before, user.id] };
 	}
 
 	@SubscribeMessage('room:leave')
@@ -138,8 +156,14 @@ export class RealtimeGateway
 		}
 
 		const channel = roomChannel(roomId);
+		if (!client.rooms.has(channel)) return { ok: true };
+
 		await client.leave(channel);
-		client.to(channel).emit('room:user-left', { roomId, userId: user.id });
+		(client.data.rooms as Set<string> | undefined)?.delete(roomId);
+
+		if (!(await this.usersInRoom(roomId)).includes(user.id)) {
+			this.server.to(channel).emit('room:user-left', { roomId, userId: user.id });
+		}
 		return { ok: true };
 	}
 }
