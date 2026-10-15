@@ -10,18 +10,22 @@ import {
 
 import { queryKeys } from "@/lib/query/keys";
 
+import { useRealtimeConnected } from "@/features/realtime/use-realtime-connected";
+
 import { messagesApi } from "../api/messages.api";
 import type { ThreadPage } from "../types";
 
-// Until websockets exist, a conversation is kept fresh by asking again.
+// The live connection pushes new messages. Asking again is only the fallback
+// for while it is down.
 const THREAD_POLL = 4_000;
 const LIST_POLL = 10_000;
 
 export function useConversations() {
+  const connected = useRealtimeConnected();
   return useQuery({
     queryKey: queryKeys.messages.conversations(),
     queryFn: messagesApi.conversations,
-    refetchInterval: LIST_POLL,
+    refetchInterval: connected ? false : LIST_POLL,
   });
 }
 
@@ -34,12 +38,13 @@ export function useChatFriend(friendId: string) {
 
 /** Pages run newest to oldest: page 0 is the latest messages. */
 export function useThread(friendId: string) {
+  const connected = useRealtimeConnected();
   return useInfiniteQuery({
     queryKey: queryKeys.messages.thread(friendId),
     queryFn: ({ pageParam }) => messagesApi.thread(friendId, pageParam),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (last) => last.nextCursor ?? undefined,
-    refetchInterval: THREAD_POLL,
+    refetchInterval: connected ? false : THREAD_POLL,
   });
 }
 

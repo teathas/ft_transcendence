@@ -1,9 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { DoorOpen, TriangleAlert, X } from "lucide-react";
+import { useCallback, useMemo, useState } from "react";
+import { DoorOpen, TriangleAlert } from "lucide-react";
 
-import { Button, buttonStyles } from "@/components/ui/button";
+import { buttonStyles } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { routes } from "@/config/routes";
 import { useDict } from "@/i18n/client";
@@ -12,25 +12,48 @@ import { isApiError } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 import { useSession } from "@/features/auth/hooks/use-auth";
+import { useRoomChannel } from "@/features/realtime/use-room-channel";
 
-import { useParticipants, useRoom } from "../../hooks/use-room";
+import {
+  useParticipants,
+  useRoom,
+  useRoomFiles,
+} from "../../hooks/use-room";
 import { BoardPanel } from "./board-panel";
 import type { SyncStatus } from "./board-synced";
+import { ChatPanel } from "./chat-panel";
+import { FilesPanel } from "./files-panel";
+import { PanelFrame } from "./panel-frame";
+import { PeoplePanel } from "./people-panel";
+import { RoomDock } from "./room-dock";
 import { RoomHeader } from "./room-header";
-import { RoomRail, type RailTab } from "./room-rail";
+import type { RoomPanel } from "./room-panels";
+import { useUnreadChat } from "./use-unread-chat";
 
-/**
- * The workspace fills the viewport below the app chrome: the mobile shell adds
- * a 3.5rem bar, the desktop sidebar does not.
- */
-const FULL_HEIGHT = "h-[calc(100svh-3.5rem)] lg:h-svh";
+/** The room owns the whole screen: the app's mobile bar steps aside for it. */
+const FULL_HEIGHT = "h-dvh";
+
+function PanelBody({ panel, roomId }: { panel: RoomPanel; roomId: string }) {
+  return (
+    <>
+      {panel === "chat" && <ChatPanel roomId={roomId} />}
+      {panel === "files" && <FilesPanel roomId={roomId} />}
+      {panel === "people" && <PeoplePanel roomId={roomId} />}
+    </>
+  );
+}
 
 export function RoomWorkspace({ id }: { id: string }) {
   const d = useDict();
   const { data: room, isPending, error } = useRoom(id);
   const { data: participants } = useParticipants(id);
+  const { data: files } = useRoomFiles(id);
   const { user } = useSession();
+  useRoomChannel(id);
   const [syncStatus, setSyncStatus] = useState<SyncStatus>("loading");
+  // One panel at a time, beside the board on wide screens, in a sheet below.
+  const [panel, setPanel] = useState<RoomPanel | null>(null);
+  const unread = useUnreadChat(id, panel === "chat");
 
   // Identity travels with every cursor once a sync server is connected, so it
   // is derived here rather than inside the board.
@@ -49,18 +72,8 @@ export function RoomWorkspace({ id }: { id: string }) {
     (status: SyncStatus) => setSyncStatus(status),
     [],
   );
-  const [isRailOpen, setIsRailOpen] = useState(true);
-  const [isMobileRailOpen, setIsMobileRailOpen] = useState(false);
-  const [tab, setTab] = useState<RailTab>("chat");
-
-  useEffect(() => {
-    if (!isMobileRailOpen) return;
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setIsMobileRailOpen(false);
-    };
-    document.addEventListener("keydown", onKeyDown);
-    return () => document.removeEventListener("keydown", onKeyDown);
-  }, [isMobileRailOpen]);
+  const toggle = (next: RoomPanel) =>
+    setPanel((current) => (current === next ? null : next));
 
   if (isPending) {
     return (
@@ -103,72 +116,83 @@ export function RoomWorkspace({ id }: { id: string }) {
     );
   }
 
+  const counts = {
+    chat: unread,
+    files: files?.length,
+    people: participants?.length,
+  };
+  const close = () => setPanel(null);
+  const closeOnEscape = (event: React.KeyboardEvent) => {
+    if (event.key === "Escape") close();
+  };
+
   return (
     <div className={cn(FULL_HEIGHT, "flex flex-col")}>
       <RoomHeader
         room={room}
         syncStatus={syncStatus}
-        isRailOpen={isRailOpen}
-        onToggleRail={() => setIsRailOpen((open) => !open)}
-        onOpenMobileRail={() => setIsMobileRailOpen(true)}
+        panel={panel}
+        onToggle={toggle}
+        counts={counts}
       />
 
       <div className="flex min-h-0 flex-1">
-        <BoardPanel
-          roomId={room.id}
-          identity={identity}
-          onStatusChange={handleStatusChange}
-        />
+        <div className="relative flex min-w-0 flex-1 flex-col">
+          {/* `isolate` keeps the board's own very high z-indexes inside it, so
+              the sheet and the dock can sit above them. */}
+          <div className="isolate flex min-h-0 flex-1 flex-col">
+            <BoardPanel
+              roomId={room.id}
+              identity={identity}
+              onStatusChange={handleStatusChange}
+            />
+          </div>
+          <RoomDock panel={panel} onToggle={toggle} counts={counts} />
+        </div>
 
-        <aside
-          className={cn(
-            "hidden w-80 shrink-0 flex-col border-s bg-card xl:w-96",
-            isRailOpen && "lg:flex",
-          )}
-        >
-          <RoomRail roomId={room.id} tab={tab} onTabChange={setTab} />
-        </aside>
+        {/* Tablets and up: beside the board, which gives up the width. */}
+        {panel && (
+          <aside
+            onKeyDown={closeOnEscape}
+            className="hidden w-80 shrink-0 border-s bg-card md:flex lg:w-[22.5rem] xl:w-[25rem]"
+          >
+            <PanelFrame title={d.room[panel]} onClose={close}>
+              <PanelBody panel={panel} roomId={room.id} />
+            </PanelFrame>
+          </aside>
+        )}
       </div>
 
-      {/* Below lg the rail slides up over the board instead of squeezing it. */}
+      {/* Phones: a sheet rising over the board instead of squeezing it. */}
       <div
         aria-hidden="true"
-        onClick={() => setIsMobileRailOpen(false)}
+        onClick={close}
         className={cn(
-          "fixed inset-0 z-40 bg-black/50 transition-opacity lg:hidden",
-          isMobileRailOpen ? "opacity-100" : "pointer-events-none opacity-0",
+          "fixed inset-0 z-40 bg-black/50 transition-opacity md:hidden",
+          panel ? "opacity-100" : "pointer-events-none opacity-0",
         )}
       />
       <aside
         role="dialog"
-        aria-modal={isMobileRailOpen}
-        aria-label={d.room.panels}
-        inert={!isMobileRailOpen}
+        aria-modal={panel !== null}
+        aria-label={panel ? d.room[panel] : d.room.panels}
+        inert={panel === null}
+        onKeyDown={closeOnEscape}
         className={cn(
-          "fixed inset-x-0 bottom-0 z-50 flex h-[75svh] flex-col rounded-t-xl border-t bg-card",
-          "transition-transform duration-200 lg:hidden",
-          isMobileRailOpen ? "translate-y-0" : "translate-y-full",
+          "fixed inset-x-0 bottom-0 z-50 flex h-[85dvh] flex-col rounded-t-2xl border-t bg-card shadow-2xl",
+          "transition-transform duration-200 md:hidden",
+          panel ? "translate-y-0" : "translate-y-full",
         )}
       >
-        {/* Its own bar: floating the close button over the tabs put it on
-            top of the last tab label. */}
-        <div className="relative flex h-10 shrink-0 items-center justify-center border-b">
-          <span
-            aria-hidden="true"
-            className="h-1 w-10 rounded-full bg-border"
-          />
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label={d.room.closePanels}
-            onClick={() => setIsMobileRailOpen(false)}
-            className="absolute end-1.5"
-          >
-            <X className="size-4" aria-hidden="true" />
-          </Button>
-        </div>
-
-        <RoomRail roomId={room.id} tab={tab} onTabChange={setTab} />
+        <span
+          aria-hidden="true"
+          className="mx-auto mt-2 h-1 w-10 shrink-0 rounded-full bg-border"
+        />
+        {panel && (
+          <PanelFrame title={d.room[panel]} onClose={close}>
+            <PanelBody panel={panel} roomId={room.id} />
+          </PanelFrame>
+        )}
       </aside>
     </div>
   );
