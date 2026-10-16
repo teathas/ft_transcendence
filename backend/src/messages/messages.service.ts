@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable,NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { RoomsService } from '../rooms/rooms.service';
 import { SendMessageDto  } from './dto/send-message.dto';
@@ -59,5 +59,30 @@ export class MessagesService {
             items: items.map(toMessageView),
             nextCursor: rows.length > limit ? items[items.length - 1].id : null,
         };
+    }
+    async delete(roomId:string,messageId:string,userId:string)
+    {
+        const existing = await this.prisma.message.findUnique({
+            where:{
+                id:messageId,
+            }
+        });
+        if(!existing ||  existing.roomId !== roomId)
+            throw new NotFoundException('Message not found in this room');
+        if(existing.userId !== userId )
+        {
+            const room = await this.prisma.room.findUnique({
+            where:{
+                id:roomId,
+            }
+            }); 
+            if(!room || userId !== room.ownerId)
+            throw new ForbiddenException('You can only delete your own messages or moderate as the room owner');
+        }
+        await this.prisma.message.delete({
+            where: { id: messageId },
+        });
+
+        return { message: 'Message deleted successfully' };
     }
 }
