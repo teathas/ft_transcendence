@@ -1,6 +1,5 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { RoomsService } from '../rooms/rooms.service';
 import { SendMessageDto  } from './dto/send-message.dto';
 
 import { ListRoomMessagesDto } from './dto/list-room-messages.dto';
