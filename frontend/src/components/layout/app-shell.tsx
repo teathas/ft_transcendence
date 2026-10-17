@@ -15,6 +15,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const d = useDict();
   const [isOpen, setIsOpen] = useState(false);
   const pathname = useBarePathname();
+  // A room has its own header and wants every pixel, so the bar steps aside.
+  const inRoom = /^\/rooms\/[^/]+$/.test(pathname);
 
   // Escape closes the drawer, the way any dialog should.
   useEffect(() => {
@@ -67,7 +69,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b bg-background/80 px-4 backdrop-blur-md lg:hidden">
+        <header
+          className={cn(
+            "sticky top-0 z-30 flex h-14 items-center gap-3 border-b bg-background/80 px-4 backdrop-blur-md lg:hidden",
+            inRoom && "hidden",
+          )}
+        >
           <Button
             variant="ghost"
             size="icon"

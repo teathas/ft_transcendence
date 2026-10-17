@@ -43,7 +43,8 @@ export function SyncBadge({ status }: { status: SyncStatus }) {
       ) : (
         <WifiOff className="size-3" aria-hidden="true" />
       )}
-      {text}
+      {/* On a phone the dot and icon say enough; the word is for screen readers. */}
+      <span className="max-sm:sr-only">{text}</span>
     </span>
   );
 }

@@ -7,6 +7,7 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { ConnectionBanner } from "@/components/layout/connection-banner";
 import { ToastProvider } from "@/components/ui/toast";
+import { RealtimeProvider } from "@/features/realtime/realtime-provider";
 import { routes } from "@/config/routes";
 import { useLocaleRouter } from "@/i18n/navigation";
 import { setUnauthorizedHandler } from "@/lib/api";
@@ -48,7 +49,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
         }}
       >
         <ConnectionBanner />
-        <ToastProvider>{children}</ToastProvider>
+        <RealtimeProvider>
+          <ToastProvider>{children}</ToastProvider>
+        </RealtimeProvider>
         <ReactQueryDevtools
           initialIsOpen={false}
           buttonPosition="bottom-left"

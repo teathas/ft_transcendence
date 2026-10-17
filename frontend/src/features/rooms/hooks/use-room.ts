@@ -118,8 +118,14 @@ export function useSendMessage(id: string) {
       queryClient.setQueryData(queryKey, context?.previous);
     },
     onSuccess: (message, _body, context) => {
+      // The live echo may already have added the real message: then the
+      // pending copy is simply dropped.
       patchNewest((items) =>
-        items.map((item) => (item.id === context.pendingId ? message : item)),
+        items.some((item) => item.id === message.id)
+          ? items.filter((item) => item.id !== context.pendingId)
+          : items.map((item) =>
+              item.id === context.pendingId ? message : item,
+            ),
       );
     },
   });
