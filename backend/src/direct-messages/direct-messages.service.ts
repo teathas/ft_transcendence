@@ -92,7 +92,10 @@ export class DirectMessagesService {
 			where: { senderId: friendId, receiverId: meId, readAt: null },
 			data: { readAt: new Date() },
 		});
+		if (count > 0)
+			this.realtime.emitToUser(friendId, 'dm:read', { readerId: meId });
 		return { updated: count };
+
 	}
 
 	/**
