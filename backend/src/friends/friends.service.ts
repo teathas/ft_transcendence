@@ -7,10 +7,11 @@ import { PUBLIC_USER_SELECT } from '../users/users.service';
 import { pageArgs, Paged } from '../common/dto/page.dto';
 import { friendsOf } from './utils/friend-filters';
 import { ListFriendsDto, SearchPageDto } from './dto/list-friends.dto';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class FriendsService {
-	constructor(private prisma: PrismaService) {}
+	constructor(private prisma: PrismaService,private  notificationsService: NotificationsService) {}
 
 	async sendRequest(meId: string, addresseeId: string) {
 		if (meId === addresseeId) {
@@ -28,10 +29,17 @@ export class FriendsService {
 		const { lowId, highId } = toFriendPair(meId, addresseeId);
 
 		try {
-			return await this.prisma.friendship.create({
+			const friendship = await this.prisma.friendship.create({
 				data: { requesterId: meId, addresseeId, lowId, highId },
 				select: { id: true, status: true, addresseeId: true, createdAt: true },
 			});
+			await this.notificationsService.createNotification({
+				recipientId: addresseeId,
+				actorId: meId,
+				type: 'FRIEND_REQUEST',
+				data: { friendshipId: friendship.id },
+			});
+			return friendship;
 		} catch (e) {
 			if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
 				const existing = await this.prisma.friendship.findUnique({
@@ -50,6 +58,7 @@ export class FriendsService {
 			}
 			throw e;
 		}
+
 	}
 
 	async acceptRequest(meId: string, id: string) {

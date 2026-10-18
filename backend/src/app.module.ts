@@ -15,6 +15,7 @@ import { MessagesModule } from './messages/messages.module';
 import { RealtimeModule } from './realtime/realtime.module';
 import { DirectMessagesModule } from './direct-messages/direct-messages.module';
 import { BoardSyncModule } from './board-sync/board-sync.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
 	imports: [
@@ -42,6 +43,7 @@ import { BoardSyncModule } from './board-sync/board-sync.module';
 		RealtimeModule,
 		DirectMessagesModule,
 		BoardSyncModule,
+		NotificationsModule,
 	],
 	controllers: [AppController],
 	providers: [
