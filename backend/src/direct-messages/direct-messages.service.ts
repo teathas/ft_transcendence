@@ -9,6 +9,7 @@ import { friendsOf } from '../friends/utils/friend-filters';
 import { toFriendPair } from '../friends/utils/friend-pair';
 import { SendDirectMessageDto } from './dto/send-direct-message.dto';
 import { ListDirectMessagesDto } from './dto/list-direct-messages.dto';
+import { RealtimeService } from '../realtime/realtime.service';
 
 const DEFAULT_LIMIT = 30;
 
@@ -24,7 +25,7 @@ const MESSAGE_SELECT = {
 
 @Injectable()
 export class DirectMessagesService {
-	constructor(private prisma: PrismaService) {}
+	constructor(private prisma: PrismaService, private realtime: RealtimeService) {}
 
 	/** Only accepted friends can talk to each other. */
 	private async assertFriends(meId: string, otherId: string) {
@@ -45,10 +46,13 @@ export class DirectMessagesService {
 	async send(meId: string, friendId: string, dto: SendDirectMessageDto) {
 		await this.assertFriends(meId, friendId);
 
-		return this.prisma.directMessage.create({
+		const message = await this.prisma.directMessage.create({
 			data: { content: dto.content, senderId: meId, receiverId: friendId },
 			select: MESSAGE_SELECT,
 		});
+		this.realtime.emitToUser(friendId, 'dm:message', { message });
+		this.realtime.emitToUser(meId, 'dm:message', { message });
+		return message;	
 	}
 
 	/**
@@ -88,7 +92,10 @@ export class DirectMessagesService {
 			where: { senderId: friendId, receiverId: meId, readAt: null },
 			data: { readAt: new Date() },
 		});
+		if (count > 0)
+			this.realtime.emitToUser(friendId, 'dm:read', { readerId: meId });
 		return { updated: count };
+
 	}
 
 	/**
