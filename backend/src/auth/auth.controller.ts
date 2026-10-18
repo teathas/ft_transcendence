@@ -2,7 +2,6 @@ import { Controller, Post, Body, HttpCode, HttpStatus, Req, UnauthorizedExceptio
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
-import { Request } from 'express';
 import { extractBearerToken } from './utils/extract-token.uitl';
 import { Public } from './decorators/public.decorator'
 

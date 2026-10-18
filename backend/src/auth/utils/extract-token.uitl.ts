@@ -1,5 +1,3 @@
-import { Request } from 'express';
-
 export function extractBearerToken(request: { headers: { authorization?: string } }): string | undefined {
   const authHeader = request.headers.authorization;
   if (!authHeader) return undefined;
