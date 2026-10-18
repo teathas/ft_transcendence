@@ -24,6 +24,8 @@
 | `room:user-left` | `{ roomId, userId }` | others in the room (last tab of the user) |
 | `room:member-left` | `{ roomId, userId }` | the room, when someone leaves it via REST |
 | `room:message` | `{ roomId, message: { id, content, userId, roomId, createdAt, author: { id, username, avatarUrl } } }` | the room, including the sender's tabs, after the message is saved |
+| `room:message-deleted` | `{ roomId, messageId }` | the room, after the author or the room owner deletes a message (REST `DELETE /rooms/:roomId/messages/:messageId`) |
+
 
 ## Rules
 - A user is ONLINE with at least one socket. OFFLINE comes 5 seconds after the last socket closes.
