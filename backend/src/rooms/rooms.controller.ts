@@ -1,14 +1,13 @@
 
 import { FindRoomsQueryDto } from './dto/find-rooms-query.dto';
 
-import { Controller, Post, Put, Body, Req, UseGuards, Param, Delete, Get, Query, ParseUUIDPipe, UploadedFile, UseInterceptors, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Body, Req, UseGuards, Param, Delete, Get, Query, ParseUUIDPipe, UploadedFile, UseInterceptors, HttpCode, HttpStatus } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { RoomsService } from './rooms.service';
 import { CreateRoomDto  } from './dto/create-room.dto';
 import { JoinRoomDto  } from './dto/join-room.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { Public } from '../auth/decorators/public.decorator'
 import { ListRoomsDto } from './dto/list-rooms.dto';
 import { JoinByCodeDto } from './dto/join-by-code.dto';
 import { RoomQueriesService } from './room-queries.service';
