@@ -53,6 +53,21 @@ export function useFormat() {
 
       /** "10:04" */
       time: (iso: string) => time.format(new Date(iso)),
+
+      /** "today", "yesterday", or the date — for separating a conversation by day. */
+      dayLabel(iso: string, now = Date.now()): string {
+        const startOfDay = (value: number) => {
+          const day = new Date(value);
+          day.setHours(0, 0, 0, 0);
+          return day.getTime();
+        };
+        const days = Math.round(
+          (startOfDay(new Date(iso).getTime()) - startOfDay(now)) / 86_400_000,
+        );
+        return days === 0 || days === -1
+          ? relative.format(days, "day")
+          : date.format(new Date(iso));
+      },
     };
   }, [locale]);
 }

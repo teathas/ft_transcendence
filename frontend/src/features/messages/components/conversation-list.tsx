@@ -3,6 +3,7 @@
 import { MessagesSquare, TriangleAlert, Users } from "lucide-react";
 
 import { Avatar } from "@/components/ui/avatar";
+import { PresenceDot } from "@/components/ui/presence-dot";
 import { buttonStyles } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { routes } from "@/config/routes";
@@ -88,11 +89,14 @@ export function ConversationList({ activeId }: { activeId?: string }) {
                         : "border-transparent hover:bg-accent/60",
                     )}
                   >
-                    <Avatar
-                      src={friend.avatarUrl}
-                      name={friend.username}
-                      className="size-11"
-                    />
+                    <span className="relative shrink-0">
+                      <Avatar
+                        src={friend.avatarUrl}
+                        name={friend.username}
+                        className="size-11"
+                      />
+                      <PresenceDot online={friend.status === "ONLINE"} />
+                    </span>
                     <span className="min-w-0 flex-1">
                       <span className="flex items-baseline justify-between gap-2">
                         <span

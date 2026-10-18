@@ -1,4 +1,3 @@
-import { PrismaClientKnownRequestError } from '@prisma/client-runtime-utils';
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { toFriendPair } from './utils/friend-pair';
