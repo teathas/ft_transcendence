@@ -1,4 +1,4 @@
-import { Controller, Body, Get, ParseUUIDPipe, Post, Param, Query} from '@nestjs/common';
+import { Controller, Body, Get, ParseUUIDPipe, Post, Param, Query, Delete, HttpCode, HttpStatus} from '@nestjs/common';
 import { MessagesService } from './messages.service';
 import { SendMessageDto  } from './dto/send-message.dto';
 import { ListRoomMessagesDto } from './dto/list-room-messages.dto';
@@ -21,5 +21,10 @@ export class MessagesController {
         return this.messagesService.list(roomId, user.sub, query);
     }
 
-    
+   @Delete(':roomId/messages/:messageId')
+   @HttpCode(HttpStatus.NO_CONTENT)
+   async remove(@Param('roomId', ParseUUIDPipe) roomId: string, @Param('messageId', ParseUUIDPipe) messageId: string, @CurrentUser() user: { sub: string })
+   {
+        await this.messagesService.remove(roomId, messageId, user.sub);
+   }
 }

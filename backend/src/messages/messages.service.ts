@@ -1,7 +1,7 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { SendMessageDto  } from './dto/send-message.dto';
-
+import { assertMember as assertRoomMember } from '../rooms/room-access';
 import { ListRoomMessagesDto } from './dto/list-room-messages.dto';
 import { MESSAGE_SELECT, MESSAGES_PAGE, toMessageView } from './message-view';
 import { RealtimeService } from '../realtime/realtime.service';
@@ -37,6 +37,21 @@ export class MessagesService {
         const view = toMessageView(message);
         this.realtime.emitToRoom(roomId, 'room:message', { roomId, message: view });
         return view;
+    }
+
+	/** the author, or the room owner can delete a message */
+    async remove(roomId: string, messageId: string, userId: string)
+    {
+		const { ownerId } = await assertRoomMember(this.prisma, roomId, userId);
+		const isOwner = ownerId === userId;
+
+        const { count } = await this.prisma.message.deleteMany({
+            where: isOwner ? { id: messageId, roomId } : { id: messageId, roomId, userId},
+        });
+        if (count === 0)
+            throw new NotFoundException('Message not found');
+
+        this.realtime.emitToRoom(roomId, 'room:message-deleted', { roomId, messageId });
     }
 
     /**
