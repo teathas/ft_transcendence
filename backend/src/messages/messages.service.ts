@@ -88,8 +88,6 @@ export class MessagesService {
         await this.prisma.message.delete({
             where: { id: messageId },
         });
-
-
-        return { message: 'Message deleted successfully' };
+		this.realtime.emitToRoom(roomId, 'room:message-deleted', { roomId, messageId });
     }
 }
