@@ -89,10 +89,6 @@ export class MessagesService {
             where: { id: messageId },
         });
 
-        this.realtime.emitToRoom(roomId, 'room:message-deleted', {
-            roomId,
-            messageId,
-        });
 
         return { message: 'Message deleted successfully' };
     }
