@@ -93,7 +93,7 @@ export const roomFileSchema = z.object({
 // Mapped to the shapes above in `rooms.api.ts`, so the screens do not depend
 // on how the backend names things.
 
-const memberWireSchema = z.object({
+export const memberWireSchema = z.object({
   id: z.uuid(),
   username: z.string(),
   avatarUrl: z.string().nullable(),

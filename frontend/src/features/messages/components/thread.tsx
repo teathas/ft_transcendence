@@ -4,6 +4,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, CheckCheck, LoaderCircle, SendHorizonal } from "lucide-react";
 
 import { Avatar } from "@/components/ui/avatar";
+import { PresenceDot } from "@/components/ui/presence-dot";
 import { Button, buttonStyles } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
@@ -112,11 +113,14 @@ export function Thread({ friendId }: { friendId: string }) {
 
         {friend.data ? (
           <>
-            <Avatar
-              src={friend.data.avatarUrl}
-              name={friend.data.username}
-              className="size-10"
-            />
+            <span className="relative shrink-0">
+              <Avatar
+                src={friend.data.avatarUrl}
+                name={friend.data.username}
+                className="size-10"
+              />
+              <PresenceDot online={friend.data.status === "ONLINE"} />
+            </span>
             <div className="min-w-0">
               <h2 className="truncate font-semibold">{friend.data.username}</h2>
               <p className="truncate text-xs text-muted-foreground">

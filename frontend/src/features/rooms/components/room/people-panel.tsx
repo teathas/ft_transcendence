@@ -1,68 +1,144 @@
 "use client";
 
-import { Avatar } from "@/components/ui/avatar";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useDict } from "@/i18n/client";
-import { cn } from "@/lib/utils";
+import { useState } from "react";
+import { Check, Copy } from "lucide-react";
 
-import { useParticipants } from "../../hooks/use-room";
+import { Avatar } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { PresenceDot } from "@/components/ui/presence-dot";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useSession } from "@/features/auth/hooks/use-auth";
+import { useDict } from "@/i18n/client";
+import { t } from "@/i18n/translate";
+
+import { useParticipants, useRoom } from "../../hooks/use-room";
+import type { Participant } from "../../types";
+
+function Person({ person, isMe }: { person: Participant; isMe: boolean }) {
+  const d = useDict();
+
+  return (
+    <li className="flex items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-accent/50">
+      <span className="relative shrink-0">
+        <Avatar src={person.avatarUrl} name={person.username} className="size-9" />
+        <PresenceDot online={person.online} />
+      </span>
+
+      <span className="min-w-0 flex-1">
+        <span className="flex items-center gap-1.5">
+          <span className="truncate text-sm font-medium">{person.username}</span>
+          {isMe && (
+            <span className="shrink-0 text-xs text-muted-foreground">
+              ({d.room.you})
+            </span>
+          )}
+        </span>
+        <span className="block text-xs text-muted-foreground">
+          {person.online ? d.room.online : d.room.offline}
+        </span>
+      </span>
+
+      {person.role === "host" && (
+        <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary">
+          {d.room.host}
+        </span>
+      )}
+    </li>
+  );
+}
+
+function Group({
+  label,
+  people,
+  myId,
+}: {
+  label: string;
+  people: Participant[];
+  myId?: string;
+}) {
+  if (people.length === 0) return null;
+
+  return (
+    <section aria-label={label}>
+      <h3 className="px-2 pb-1 text-xs font-medium tracking-wide text-muted-foreground uppercase">
+        {label}
+      </h3>
+      <ul className="flex flex-col">
+        {people.map((person) => (
+          <Person key={person.id} person={person} isMe={person.id === myId} />
+        ))}
+      </ul>
+    </section>
+  );
+}
 
 export function PeoplePanel({ roomId }: { roomId: string }) {
   const d = useDict();
+  const { user } = useSession();
+  const { data: room } = useRoom(roomId);
   const { data: participants, isPending } = useParticipants(roomId);
+  const [copied, setCopied] = useState(false);
 
-  if (isPending) {
-    return (
-      <div className="flex flex-col gap-2 p-4">
-        {[0, 1, 2].map((index) => (
-          <Skeleton key={index} className="h-11" />
-        ))}
-      </div>
-    );
+  async function copy() {
+    if (!room?.inviteCode) return;
+    try {
+      await navigator.clipboard.writeText(room.inviteCode);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Clipboard can be blocked; the code stays readable above.
+    }
   }
 
+  const online = participants?.filter((person) => person.online) ?? [];
+  const offline = participants?.filter((person) => !person.online) ?? [];
+
   return (
-    <ul className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto p-3">
-      {participants?.map((person) => (
-        <li
-          key={person.id}
-          className="flex items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-accent/50"
-        >
-          <span className="relative">
-            <Avatar
-              src={person.avatarUrl}
-              name={person.username}
-              className="size-8"
-            />
-            {/* The dot doubles as the cursor colour on the board. */}
-            <span
-              aria-hidden="true"
-              className={cn(
-                "absolute -end-0.5 -bottom-0.5 size-3 rounded-full ring-2 ring-card",
-                !person.online && "bg-muted-foreground/40",
+    <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-3">
+      {room?.inviteCode && (
+        <section className="flex flex-col gap-3 rounded-xl border bg-muted/40 p-4">
+          <div>
+            <h3 className="text-sm font-semibold">{d.room.inviteTitle}</h3>
+            <p className="mt-0.5 text-xs text-pretty text-muted-foreground">
+              {d.room.inviteBody}
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <code className="min-w-0 flex-1 truncate rounded-lg border bg-background px-3 py-2 text-center font-mono text-sm tracking-widest uppercase">
+              {room.inviteCode}
+            </code>
+            <Button variant="outline" onClick={copy}>
+              {copied ? (
+                <Check className="size-4 text-emerald-500" aria-hidden="true" />
+              ) : (
+                <Copy className="size-4" aria-hidden="true" />
               )}
-              style={
-                person.online ? { backgroundColor: person.color } : undefined
-              }
-            />
-          </span>
+              {copied ? d.room.copied : d.room.copyInviteCode}
+            </Button>
+          </div>
+        </section>
+      )}
 
-          <span className="min-w-0 flex-1">
-            <span className="block truncate text-sm font-medium">
-              {person.username}
-            </span>
-            <span className="block text-xs text-muted-foreground">
-              {person.online ? d.room.onBoard : d.room.away}
-            </span>
-          </span>
-
-          {person.role === "host" && (
-            <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">
-              {d.room.host}
-            </span>
-          )}
-        </li>
-      ))}
-    </ul>
+      {isPending ? (
+        <div className="flex flex-col gap-2">
+          {[0, 1, 2].map((index) => (
+            <Skeleton key={index} className="h-12" />
+          ))}
+        </div>
+      ) : (
+        <>
+          <Group
+            label={t(d.room.peopleOnline, { count: online.length })}
+            people={online}
+            myId={user?.id}
+          />
+          <Group
+            label={t(d.room.peopleOffline, { count: offline.length })}
+            people={offline}
+            myId={user?.id}
+          />
+        </>
+      )}
+    </div>
   );
 }

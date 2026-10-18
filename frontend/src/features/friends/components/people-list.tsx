@@ -1,6 +1,7 @@
 "use client";
 
 import { Avatar } from "@/components/ui/avatar";
+import { PresenceDot } from "@/components/ui/presence-dot";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
@@ -35,11 +36,17 @@ function PersonCard({ row }: { row: PersonRow }) {
   return (
     <article className="group flex flex-col gap-4 rounded-xl border bg-card p-5 transition-all duration-200 hover:border-primary/40 hover:shadow-md hover:shadow-black/[0.05] dark:hover:shadow-black/25">
       <div className="flex items-center gap-4">
-        <Avatar
-          src={row.user.avatarUrl}
-          name={row.user.username}
-          className="size-14 text-lg"
-        />
+        <span className="relative shrink-0">
+          <Avatar
+            src={row.user.avatarUrl}
+            name={row.user.username}
+            className="size-14 text-lg"
+          />
+          <PresenceDot
+            online={row.user.status === "ONLINE"}
+            className="size-3.5"
+          />
+        </span>
         <div className="min-w-0">
           <h3 className="truncate font-semibold">{row.user.username}</h3>
           <p className="mt-0.5 truncate text-xs text-muted-foreground">
@@ -106,7 +113,10 @@ export function PeopleList({
           <TableRow key={row.id}>
             <TableCell>
               <div className="flex items-center gap-3">
-                <Avatar src={row.user.avatarUrl} name={row.user.username} />
+                <span className="relative shrink-0">
+                  <Avatar src={row.user.avatarUrl} name={row.user.username} />
+                  <PresenceDot online={row.user.status === "ONLINE"} />
+                </span>
                 <span className="truncate font-medium">
                   {row.user.username}
                 </span>
