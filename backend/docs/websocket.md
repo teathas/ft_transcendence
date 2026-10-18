@@ -24,6 +24,8 @@
 | `room:user-left` | `{ roomId, userId }` | others in the room (last tab of the user) |
 | `room:member-left` | `{ roomId, userId }` | the room, when someone leaves it via REST |
 | `room:message` | `{ roomId, message: { id, content, userId, roomId, createdAt, author: { id, username, avatarUrl } } }` | the room, including the sender's tabs, after the message is saved |
+| `room:file-added` | `{ roomId, file: { id, name, url, size, mimeType, createdAt, uploader: { id, username } \| null } }` | the room, after the file is saved |
+| `room:file-removed` | `{ roomId, fileId }` | the room, after the uploader or the room owner deletes a file |
 
 ## Rules
 - A user is ONLINE with at least one socket. OFFLINE comes 5 seconds after the last socket closes.

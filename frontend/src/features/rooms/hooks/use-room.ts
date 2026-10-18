@@ -146,7 +146,9 @@ export function useUploadRoomFile(id: string) {
 
   return useMutation({
     mutationFn: (file: File) => roomsApi.uploadFile(id, file),
-    onSuccess: (file) => patchFiles((files) => [file, ...files]),
+    // The live 'room:file-added' echo may already have added it
+    onSuccess: (file) =>
+      patchFiles((files) => (files.some((f) => f.id === file.id) ? files : [file, ...files])),
   });
 }
 
