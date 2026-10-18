@@ -1,15 +1,15 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { RoomsService } from '../rooms/rooms.service';
 import { SendMessageDto  } from './dto/send-message.dto';
 
 import { ListRoomMessagesDto } from './dto/list-room-messages.dto';
 import { MESSAGE_SELECT, MESSAGES_PAGE, toMessageView } from './message-view';
+import { RealtimeService } from '../realtime/realtime.service';
 
 
 @Injectable()
 export class MessagesService {
-    constructor(private prisma: PrismaService,private roomsService: RoomsService,) {}
+    constructor(private prisma: PrismaService, private realtime: RealtimeService) {}
 
 
     private async assertMember(roomId: string, userId: string) {
@@ -34,7 +34,9 @@ export class MessagesService {
                 data: { lastActiveAt: new Date() },
             }),
         ]);
-        return toMessageView(message);
+        const view = toMessageView(message);
+        this.realtime.emitToRoom(roomId, 'room:message', { roomId, message: view });
+        return view;
     }
 
     /**

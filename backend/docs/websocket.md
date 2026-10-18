@@ -23,9 +23,11 @@
 | `room:user-joined` | `{ roomId, userId }` | others in the room (first tab of the user) |
 | `room:user-left` | `{ roomId, userId }` | others in the room (last tab of the user) |
 | `room:member-left` | `{ roomId, userId }` | the room, when someone leaves it via REST |
+| `room:message` | `{ roomId, message: { id, content, userId, roomId, createdAt, author: { id, username, avatarUrl } } }` | the room, including the sender's tabs, after the message is saved |
 
 ## Rules
 - A user is ONLINE with at least one socket. OFFLINE comes 5 seconds after the last socket closes.
 - Joining a room channel needs a room membership (REST `POST /rooms/:id/join` first).
 - **After every reconnect, join your rooms again.** A new connection has no rooms.
 - New events use the form `domain:action`.
+- Events about saved data are sent only after the database write succeeds.

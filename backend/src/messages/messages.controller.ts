@@ -1,24 +1,24 @@
-import { Controller, Body, Get, ParseUUIDPipe, Post, UseGuards, Param, Query, Req } from '@nestjs/common';
+import { Controller, Body, Get, ParseUUIDPipe, Post, Param, Query} from '@nestjs/common';
 import { MessagesService } from './messages.service';
 import { SendMessageDto  } from './dto/send-message.dto';
 import { ListRoomMessagesDto } from './dto/list-room-messages.dto';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
 
 @Controller('rooms')
 export class MessagesController {
     constructor(private messagesService:MessagesService){}
 
     @Post(':roomId/messages')
-    async send(@Param('roomId') roomId:string,@Body() dto:SendMessageDto ,@Req() req: any)
+    async send(@Param('roomId', ParseUUIDPipe) roomId:string, @Body() dto:SendMessageDto ,@CurrentUser() user: { sub: string })
     {
-        const userId = req.user.sub;
-        return this.messagesService.send(roomId, userId, dto);
+        return this.messagesService.send(roomId, user.sub, dto);
 
     }
 
     @Get(':roomId/messages')
-    async list(@Param('roomId', ParseUUIDPipe) roomId: string, @Query() query: ListRoomMessagesDto, @Req() req: any)
+    async list(@Param('roomId', ParseUUIDPipe) roomId: string, @Query() query: ListRoomMessagesDto, @CurrentUser() user: { sub: string })
     {
-        return this.messagesService.list(roomId, req.user.sub, query);
+        return this.messagesService.list(roomId, user.sub, query);
     }
 
     
