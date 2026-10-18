@@ -26,6 +26,7 @@
 | `room:message` | `{ roomId, message: { id, content, userId, roomId, createdAt, author: { id, username, avatarUrl } } }` | the room, including the sender's tabs, after the message is saved |
 | `dm:message` | `{ message: { id, content, senderId, receiverId, createdAt, readAt } }` | the receiver and the sender (all their tabs), after the DM is saved |
 | `dm:read` | `{ readerId }` | the friend whose messages were just read, only if at least one was unread |
+| `room:message-deleted` | `{ roomId, messageId }` | the room, after the author or the room owner deletes a message |
 
 
 ## Rules
