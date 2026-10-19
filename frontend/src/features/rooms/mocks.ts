@@ -356,6 +356,11 @@ export const roomDetailMocks = {
   },
   messages: (): Promise<MessagePage> =>
     settle({ items: [], nextCursor: null }, 300),
+  deleteMessage: (id: string) => {
+    const index = sentMessages.findIndex((message) => message.id === id);
+    if (index >= 0) sentMessages.splice(index, 1);
+    return settle(undefined, 200);
+  },
   deleteFile: (id: string) => {
     const index = uploadedFiles.findIndex((file) => file.id === id);
     if (index >= 0) uploadedFiles.splice(index, 1);

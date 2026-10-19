@@ -469,6 +469,7 @@ export const ar = {
     placeholder: "اكتب رسالة…",
     composerLabel: "رسالة",
     send: "إرسال",
+    deleteMessage: "حذف الرسالة",
     error: {
       list: "تعذّر تحميل المحادثات.",
       thread: "تعذّر تحميل هذه المحادثة.",

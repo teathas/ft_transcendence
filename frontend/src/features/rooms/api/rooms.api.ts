@@ -67,7 +67,9 @@ export const toFile = (wire: FileWire): RoomFile => ({
   url: wire.url,
 });
 
-export const toParticipant = (member: DetailWire["members"][number]): Participant => ({
+export const toParticipant = (
+  member: DetailWire["members"][number],
+): Participant => ({
   id: member.id,
   username: member.username,
   avatarUrl: member.avatarUrl,
@@ -138,6 +140,12 @@ export const roomsApi = {
     return toMessage(
       parseResponse(messageWireSchema, data, "POST /rooms/:id/messages"),
     );
+  },
+
+  async deleteMessage(id: string, messageId: string): Promise<void> {
+    if (env.enableMocks) return roomDetailMocks.deleteMessage(messageId);
+
+    await api.delete(`/rooms/${id}/messages/${messageId}`);
   },
 
   async uploadFile(id: string, file: File): Promise<RoomFile> {

@@ -1,7 +1,13 @@
 "use client";
 
 import { useLayoutEffect, useMemo, useRef, useState } from "react";
-import { ArrowDown, LoaderCircle, MessageSquare, SendHorizonal } from "lucide-react";
+import {
+  ArrowDown,
+  LoaderCircle,
+  MessageSquare,
+  SendHorizonal,
+  Trash2,
+} from "lucide-react";
 
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -14,8 +20,10 @@ import { cn } from "@/lib/utils";
 
 import {
   flattenMessages,
+  useDeleteMessage,
   useMessages,
   useParticipants,
+  useRoom,
   useSendMessage,
 } from "../../hooks/use-room";
 import type { Message } from "../../types";
@@ -34,11 +42,13 @@ export function ChatPanel({ roomId }: { roomId: string }) {
   const d = useDict();
   const { time, dayLabel } = useFormat();
   const { user } = useSession();
+  const { data: room } = useRoom(roomId);
   const { data: people } = useParticipants(roomId);
   const { data, isPending, hasNextPage, isFetchingNextPage, fetchNextPage } =
     useMessages(roomId);
   const messages = useMemo(() => flattenMessages(data), [data]);
   const send = useSendMessage(roomId);
+  const remove = useDeleteMessage(roomId);
 
   const [draft, setDraft] = useState("");
   const [atBottom, setAtBottom] = useState(true);
@@ -62,7 +72,8 @@ export function ChatPanel({ roomId }: { roomId: string }) {
       const before = messages[index - 1];
       const day = dayLabel(message.sentAt);
       const newDay = !before || dayLabel(before.sentAt) !== day;
-      if (newDay) result.push({ kind: "day", key: `day-${message.id}`, label: day });
+      if (newDay)
+        result.push({ kind: "day", key: `day-${message.id}`, label: day });
 
       const heading =
         newDay ||
@@ -89,8 +100,10 @@ export function ChatPanel({ roomId }: { roomId: string }) {
     } else if (oldest !== before.oldest) {
       box.scrollTop += box.scrollHeight - before.height;
     } else if (newest.id !== before.newest) {
-      const mine = newest.authorId === user?.id || newest.authorId === "pending";
-      const near = before.height - box.scrollTop - box.clientHeight < NEAR_BOTTOM;
+      const mine =
+        newest.authorId === user?.id || newest.authorId === "pending";
+      const near =
+        before.height - box.scrollTop - box.clientHeight < NEAR_BOTTOM;
       if (mine || near) box.scrollTop = box.scrollHeight;
     }
 
@@ -108,10 +121,13 @@ export function ChatPanel({ roomId }: { roomId: string }) {
   function onScroll() {
     const box = scroller.current;
     if (!box) return;
-    const near = box.scrollHeight - box.scrollTop - box.clientHeight < NEAR_BOTTOM;
+    const near =
+      box.scrollHeight - box.scrollTop - box.clientHeight < NEAR_BOTTOM;
     setAtBottom(near);
     // Remember what was newest when the reader left the bottom.
-    setLeftAt((before) => (near ? null : (before ?? messages.at(-1)?.id ?? null)));
+    setLeftAt((before) =>
+      near ? null : (before ?? messages.at(-1)?.id ?? null),
+    );
   }
 
   function jumpToLatest() {
@@ -174,7 +190,10 @@ export function ChatPanel({ roomId }: { roomId: string }) {
                     className="rounded-full"
                   >
                     {isFetchingNextPage && (
-                      <LoaderCircle className="size-3.5 animate-spin" aria-hidden="true" />
+                      <LoaderCircle
+                        className="size-3.5 animate-spin"
+                        aria-hidden="true"
+                      />
                     )}
                     {d.messages.loadEarlier}
                   </Button>
@@ -183,7 +202,10 @@ export function ChatPanel({ roomId }: { roomId: string }) {
 
               {rows.map((row) =>
                 row.kind === "day" ? (
-                  <li key={row.key} className="my-3 flex items-center gap-3 px-4">
+                  <li
+                    key={row.key}
+                    className="my-3 flex items-center gap-3 px-4"
+                  >
                     <span className="h-px flex-1 bg-border" />
                     <span className="text-[11px] font-medium text-muted-foreground first-letter:uppercase">
                       {row.label}
@@ -199,6 +221,15 @@ export function ChatPanel({ roomId }: { roomId: string }) {
                     avatarUrl={avatars.get(row.message.authorId) ?? null}
                     time={time(row.message.sentAt)}
                     youLabel={d.room.you}
+                    canDelete={
+                      row.message.authorId === user?.id ||
+                      room?.ownerId === user?.id
+                    }
+                    deleteLabel={d.messages.deleteMessage}
+                    deleting={
+                      remove.isPending && remove.variables === row.message.id
+                    }
+                    onDelete={() => remove.mutate(row.message.id)}
                   />
                 ),
               )}
@@ -212,7 +243,7 @@ export function ChatPanel({ roomId }: { roomId: string }) {
             onClick={jumpToLatest}
             className={cn(
               "absolute start-1/2 bottom-3 -translate-x-1/2 rounded-full shadow-lg rtl:translate-x-1/2",
-              !hasNew && "bg-card text-foreground hover:bg-accent border",
+              !hasNew && "border bg-card text-foreground hover:bg-accent",
             )}
           >
             <ArrowDown className="size-3.5" aria-hidden="true" />
@@ -231,7 +262,11 @@ export function ChatPanel({ roomId }: { roomId: string }) {
             onChange={(event) => setDraft(event.target.value)}
             onKeyDown={(event) => {
               // Enter sends; Shift+Enter makes a new line.
-              if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing) {
+              if (
+                event.key === "Enter" &&
+                !event.shiftKey &&
+                !event.nativeEvent.isComposing
+              ) {
                 event.preventDefault();
                 submit();
               }
@@ -247,7 +282,10 @@ export function ChatPanel({ roomId }: { roomId: string }) {
             disabled={!draft.trim()}
             className="rounded-full"
           >
-            <SendHorizonal className="size-4 rtl:rotate-180" aria-hidden="true" />
+            <SendHorizonal
+              className="size-4 rtl:rotate-180"
+              aria-hidden="true"
+            />
           </Button>
         </div>
         <p className="mt-1.5 hidden px-2 text-[11px] text-muted-foreground lg:block">
@@ -265,6 +303,10 @@ function MessageRow({
   avatarUrl,
   time,
   youLabel,
+  canDelete,
+  deleteLabel,
+  deleting,
+  onDelete,
 }: {
   message: Message;
   heading: boolean;
@@ -272,6 +314,10 @@ function MessageRow({
   avatarUrl: string | null;
   time: string;
   youLabel: string;
+  canDelete: boolean;
+  deleteLabel: string;
+  deleting: boolean;
+  onDelete: () => void;
 }) {
   const pending = message.id.startsWith("pending-");
 
@@ -285,7 +331,11 @@ function MessageRow({
     >
       <span className="w-8 shrink-0 pt-0.5">
         {heading ? (
-          <Avatar src={avatarUrl} name={message.authorUsername} className="size-8" />
+          <Avatar
+            src={avatarUrl}
+            name={message.authorUsername}
+            className="size-8"
+          />
         ) : (
           <span className="hidden pt-1 text-[10px] text-muted-foreground tabular-nums group-hover:block">
             {time}
@@ -314,11 +364,32 @@ function MessageRow({
         )}
         <p
           dir="auto"
-          className="text-sm leading-relaxed whitespace-pre-wrap [overflow-wrap:anywhere]"
+          className="text-sm leading-relaxed [overflow-wrap:anywhere] whitespace-pre-wrap"
         >
           {linkify(message.body)}
         </p>
       </div>
+      {canDelete && !pending && (
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          aria-label={deleteLabel}
+          title={deleteLabel}
+          disabled={deleting}
+          onClick={onDelete}
+          className="size-8 shrink-0 text-muted-foreground hover:text-destructive"
+        >
+          {deleting ? (
+            <LoaderCircle
+              className="size-3.5 animate-spin"
+              aria-hidden="true"
+            />
+          ) : (
+            <Trash2 className="size-3.5" aria-hidden="true" />
+          )}
+        </Button>
+      )}
     </li>
   );
 }

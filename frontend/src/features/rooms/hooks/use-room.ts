@@ -89,7 +89,10 @@ export function useSendMessage(id: string) {
     queryClient.setQueryData<Pages>(queryKey, (data) => {
       if (!data) return data;
       const [first, ...rest] = data.pages;
-      return { ...data, pages: [{ ...first, items: change(first.items) }, ...rest] };
+      return {
+        ...data,
+        pages: [{ ...first, items: change(first.items) }, ...rest],
+      };
     });
 
   return useMutation({
@@ -131,6 +134,27 @@ export function useSendMessage(id: string) {
   });
 }
 
+export function useDeleteMessage(id: string) {
+  const queryClient = useQueryClient();
+  const queryKey = queryKeys.rooms.messages(id);
+
+  return useMutation({
+    mutationFn: (messageId: string) => roomsApi.deleteMessage(id, messageId),
+    onSuccess: (_void, messageId) =>
+      queryClient.setQueryData<Pages>(
+        queryKey,
+        (data) =>
+          data && {
+            ...data,
+            pages: data.pages.map((page) => ({
+              ...page,
+              items: page.items.filter((message) => message.id !== messageId),
+            })),
+          },
+      ),
+  });
+}
+
 /** Both go through the room's cache directly: no refetch of the whole room. */
 function useFilesCache(id: string) {
   const queryClient = useQueryClient();
@@ -148,7 +172,9 @@ export function useUploadRoomFile(id: string) {
     mutationFn: (file: File) => roomsApi.uploadFile(id, file),
     // The live 'room:file-added' echo may already have added it
     onSuccess: (file) =>
-      patchFiles((files) => (files.some((f) => f.id === file.id) ? files : [file, ...files])),
+      patchFiles((files) =>
+        files.some((f) => f.id === file.id) ? files : [file, ...files],
+      ),
   });
 }
 

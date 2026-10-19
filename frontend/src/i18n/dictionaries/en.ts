@@ -473,6 +473,7 @@ export const en = {
     placeholder: "Write a message…",
     composerLabel: "Message",
     send: "Send",
+    deleteMessage: "Delete message",
     error: {
       list: "Conversations couldn’t be loaded.",
       thread: "This conversation couldn’t be loaded.",

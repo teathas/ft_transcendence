@@ -479,6 +479,7 @@ export const fr = {
     placeholder: "Écrire un message…",
     composerLabel: "Message",
     send: "Envoyer",
+    deleteMessage: "Supprimer le message",
     error: {
       list: "Impossible de charger les conversations.",
       thread: "Impossible de charger cette conversation.",
