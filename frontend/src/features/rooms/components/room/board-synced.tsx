@@ -70,8 +70,9 @@ function useRoomAssetStore(roomId: string): TLAssetStore {
   return useMemo(
     () => ({
       async upload(_asset, file) {
-        const uploaded = await upload(file);
-        return { src: `${env.apiUrl}${uploaded.url}` };
+        const uploaded = await upload({ file });
+        const token = encodeURIComponent(tokenStore.get() ?? "");
+        return { src: `${env.apiUrl}${uploaded.url}?token=${token}&preview=1` };
       },
       resolve: (asset) => asset.props.src,
     }),

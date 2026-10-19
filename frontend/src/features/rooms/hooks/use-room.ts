@@ -169,7 +169,13 @@ export function useUploadRoomFile(id: string) {
   const patchFiles = useFilesCache(id);
 
   return useMutation({
-    mutationFn: (file: File) => roomsApi.uploadFile(id, file),
+    mutationFn: ({
+      file,
+      onProgress,
+    }: {
+      file: File;
+      onProgress?: (percent: number) => void;
+    }) => roomsApi.uploadFile(id, file, onProgress),
     // The live 'room:file-added' echo may already have added it
     onSuccess: (file) =>
       patchFiles((files) =>

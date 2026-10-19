@@ -24,8 +24,9 @@ import { BoardSyncModule } from './board-sync/board-sync.module';
 		UsersModule,
 		RoomsModule,
 		ServeStaticModule.forRoot({
-			// Only avatars are public. Room files through RoomFilesController,
-			// which check the tocken and the membership
+
+			// Avatars are public. Room files go through RoomFilesController,
+			// which validates the token and current room membership.
 			rootPath: join(process.env.UPLOAD_DIR ?? '/app/uploads', 'avatars'),
 			serveRoot: '/uploads/avatars',
 			serveStaticOptions: {
