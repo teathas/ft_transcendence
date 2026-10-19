@@ -30,7 +30,7 @@ import { BoardSyncModule } from './board-sync/board-sync.module';
 			serveRoot: '/uploads/avatars',
 			serveStaticOptions: {
 				setHeaders: (res) => {
-					res.setHeader('X-Content-Type-Options', 'noniff');
+					res.setHeader('X-Content-Type-Options', 'nosniff');
 				},
 			},
 		}),

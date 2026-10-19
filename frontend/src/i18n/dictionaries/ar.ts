@@ -323,7 +323,8 @@ export const ar = {
       public: "عامة",
       private: "خاصة",
       publicHint: "يراها الجميع في القائمة ويمكنهم الانضمام إليها.",
-      privateHint: "لا ينضم إليها إلا من لديه الرمز، ولا تظهر في القائمة لغيرهم.",
+      privateHint:
+        "لا ينضم إليها إلا من لديه الرمز، ولا تظهر في القائمة لغيرهم.",
     },
     join: {
       title: "الانضمام إلى غرفة",
@@ -416,7 +417,8 @@ export const ar = {
     },
     find: {
       promptTitle: "ابحث عن شخص",
-      promptBody: "اكتب جزءًا من اسم مستخدم في الأعلى للبحث بين كل أعضاء Shared Room.",
+      promptBody:
+        "اكتب جزءًا من اسم مستخدم في الأعلى للبحث بين كل أعضاء Shared Room.",
     },
     empty: {
       filteredTitle: "لا أحد يطابق البحث",
@@ -570,7 +572,6 @@ export const ar = {
     },
   },
 
-
   room: {
     metaTitle: "غرفة",
     back: "العودة إلى الغرف",
@@ -600,6 +601,7 @@ export const ar = {
     download: "تنزيل {name}",
     deleteFile: "حذف {name}",
     fileTooBig: "{name} يتجاوز {size} ولم تتم مشاركته.",
+    fileTypeNotAllowed: "نوع الملف {name} غير مدعوم.",
     invite: "دعوة",
     inviteTitle: "دعوة أشخاص",
     inviteBody: "يمكن لأي شخص لديه هذا الرمز الانضمام إلى الغرفة.",

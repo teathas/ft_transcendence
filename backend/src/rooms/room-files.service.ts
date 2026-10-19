@@ -16,6 +16,21 @@ import { AuthService } from '../auth/auth.service';
 
 export const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
+const ALLOWED_FILE_TYPES: Record<string, readonly string[]> = {
+	'.pdf': ['application/pdf'],
+	'.png': ['image/png'],
+	'.jpg': ['image/jpeg'],
+	'.jpeg': ['image/jpeg'],
+	'.webp': ['image/webp'],
+	'.txt': ['text/plain'],
+	'.doc': ['application/msword'],
+	'.docx': ['application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
+	'.xls': ['application/vnd.ms-excel'],
+	'.xlsx': ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'],
+	'.ppt': ['application/vnd.ms-powerpoint'],
+	'.pptx': ['application/vnd.openxmlformats-officedocument.presentationml.presentation'],
+};
+
 const uploadRoot = () => process.env.UPLOAD_DIR ?? join(process.cwd(), 'uploads');
 
 /** multer reads names as latin1; browsers send UTF-8, so "é" arrives as "Ã©". */
@@ -41,13 +56,17 @@ export class RoomFilesService {
 		});
 	}
 
-	/** Any type, up to 10 MB. The answer carries the `url` the file is served at. */
+	/** A supported document or image, up to 10 MB. */
 	async upload(roomId: string, userId: string, file: Express.Multer.File | undefined) {
 		await assertMember(this.prisma, roomId, userId);
 		if (!file) throw new BadRequestException('A file is required');
 		if (file.size > MAX_FILE_SIZE) throw new BadRequestException('The file is larger than 10 MB');
 
 		const name = basename(decodeName(file.originalname)).slice(0, 200) || 'file';
+		const extension = extname(name).toLowerCase();
+		if (!ALLOWED_FILE_TYPES[extension]?.includes(file.mimetype)) {
+			throw new BadRequestException('This file type is not allowed');
+		}
 		const filename = `${randomUUID()}${safeExtension(name)}`;
 		const dir = join(uploadRoot(), 'rooms', roomId);
 		await mkdir(dir, { recursive: true });
