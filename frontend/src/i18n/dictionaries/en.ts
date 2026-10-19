@@ -474,6 +474,12 @@ export const en = {
     composerLabel: "Message",
     send: "Send",
     deleteMessage: "Delete message",
+    deleteConfirm: {
+      title: "Delete this message?",
+      description:
+        "This message will be removed for everyone. This cannot be undone.",
+      confirm: "Delete message",
+    },
     error: {
       list: "Conversations couldn’t be loaded.",
       thread: "This conversation couldn’t be loaded.",

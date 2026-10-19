@@ -480,6 +480,12 @@ export const fr = {
     composerLabel: "Message",
     send: "Envoyer",
     deleteMessage: "Supprimer le message",
+    deleteConfirm: {
+      title: "Supprimer ce message ?",
+      description:
+        "Ce message sera supprimé pour tout le monde. Cette action est irréversible.",
+      confirm: "Supprimer le message",
+    },
     error: {
       list: "Impossible de charger les conversations.",
       thread: "Impossible de charger cette conversation.",

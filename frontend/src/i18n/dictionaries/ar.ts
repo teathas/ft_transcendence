@@ -470,6 +470,11 @@ export const ar = {
     composerLabel: "رسالة",
     send: "إرسال",
     deleteMessage: "حذف الرسالة",
+    deleteConfirm: {
+      title: "هل تريد حذف هذه الرسالة؟",
+      description: "ستُحذف هذه الرسالة لدى الجميع ولا يمكن التراجع عن ذلك.",
+      confirm: "حذف الرسالة",
+    },
     error: {
       list: "تعذّر تحميل المحادثات.",
       thread: "تعذّر تحميل هذه المحادثة.",

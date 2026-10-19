@@ -29,6 +29,7 @@ import {
   useSendMessage,
   useThread,
 } from "../hooks/use-messages";
+import { DeleteMessageModal } from "./delete-message-modal";
 
 const MAX_LENGTH = 2000;
 /** Within this many pixels of the bottom counts as "following along". */
@@ -44,6 +45,7 @@ export function Thread({ friendId }: { friendId: string }) {
   const remove = useDeleteMessage(friendId);
 
   const [draft, setDraft] = useState("");
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const scroller = useRef<HTMLDivElement>(null);
   const last = useRef({ newest: "", oldest: "", height: 0, count: 0 });
 
@@ -236,21 +238,10 @@ export function Thread({ friendId }: { friendId: string }) {
                           type="button"
                           aria-label={d.messages.deleteMessage}
                           title={d.messages.deleteMessage}
-                          disabled={
-                            remove.isPending && remove.variables === message.id
-                          }
-                          onClick={() => remove.mutate(message.id)}
-                          className="ms-1 inline-flex size-5 items-center justify-center rounded-sm hover:text-destructive disabled:opacity-50"
+                          onClick={() => setDeletingId(message.id)}
+                          className="ms-1 inline-flex size-5 items-center justify-center rounded-sm hover:text-destructive"
                         >
-                          {remove.isPending &&
-                          remove.variables === message.id ? (
-                            <LoaderCircle
-                              className="size-3 animate-spin"
-                              aria-hidden="true"
-                            />
-                          ) : (
-                            <Trash2 className="size-3" aria-hidden="true" />
-                          )}
+                          <Trash2 className="size-3" aria-hidden="true" />
                         </button>
                       )}
                     </p>
@@ -295,6 +286,22 @@ export function Thread({ friendId }: { friendId: string }) {
           </Button>
         </div>
       </form>
+      <DeleteMessageModal
+        open={deletingId !== null}
+        pending={remove.isPending}
+        error={remove.error}
+        onClose={() => {
+          if (remove.isPending) return;
+          remove.reset();
+          setDeletingId(null);
+        }}
+        onConfirm={() => {
+          if (!deletingId) return;
+          remove.mutate(deletingId, {
+            onSuccess: () => setDeletingId(null),
+          });
+        }}
+      />
     </>
   );
 }

@@ -13,6 +13,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSession } from "@/features/auth/hooks/use-auth";
+import { DeleteMessageModal } from "@/features/messages/components/delete-message-modal";
 import { useDict } from "@/i18n/client";
 import { useFormat } from "@/lib/format";
 import { linkify } from "@/lib/linkify";
@@ -51,6 +52,7 @@ export function ChatPanel({ roomId }: { roomId: string }) {
   const remove = useDeleteMessage(roomId);
 
   const [draft, setDraft] = useState("");
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [atBottom, setAtBottom] = useState(true);
   // The newest message when the reader scrolled away, to tell "new" from "latest".
   const [leftAt, setLeftAt] = useState<string | null>(null);
@@ -226,10 +228,7 @@ export function ChatPanel({ roomId }: { roomId: string }) {
                       room?.ownerId === user?.id
                     }
                     deleteLabel={d.messages.deleteMessage}
-                    deleting={
-                      remove.isPending && remove.variables === row.message.id
-                    }
-                    onDelete={() => remove.mutate(row.message.id)}
+                    onDelete={() => setDeletingId(row.message.id)}
                   />
                 ),
               )}
@@ -292,6 +291,22 @@ export function ChatPanel({ roomId }: { roomId: string }) {
           {d.room.sendHint}
         </p>
       </form>
+      <DeleteMessageModal
+        open={deletingId !== null}
+        pending={remove.isPending}
+        error={remove.error}
+        onClose={() => {
+          if (remove.isPending) return;
+          remove.reset();
+          setDeletingId(null);
+        }}
+        onConfirm={() => {
+          if (!deletingId) return;
+          remove.mutate(deletingId, {
+            onSuccess: () => setDeletingId(null),
+          });
+        }}
+      />
     </div>
   );
 }
@@ -305,7 +320,6 @@ function MessageRow({
   youLabel,
   canDelete,
   deleteLabel,
-  deleting,
   onDelete,
 }: {
   message: Message;
@@ -316,7 +330,6 @@ function MessageRow({
   youLabel: string;
   canDelete: boolean;
   deleteLabel: string;
-  deleting: boolean;
   onDelete: () => void;
 }) {
   const pending = message.id.startsWith("pending-");
@@ -376,18 +389,10 @@ function MessageRow({
           size="icon"
           aria-label={deleteLabel}
           title={deleteLabel}
-          disabled={deleting}
           onClick={onDelete}
           className="size-8 shrink-0 text-muted-foreground hover:text-destructive"
         >
-          {deleting ? (
-            <LoaderCircle
-              className="size-3.5 animate-spin"
-              aria-hidden="true"
-            />
-          ) : (
-            <Trash2 className="size-3.5" aria-hidden="true" />
-          )}
+          <Trash2 className="size-3.5" aria-hidden="true" />
         </Button>
       )}
     </li>
