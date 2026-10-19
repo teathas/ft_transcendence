@@ -6,13 +6,30 @@ import {
 	ForbiddenException,
 	Injectable,
 	NotFoundException,
+	UnauthorizedException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { assertMember } from './room-access';
 import { fileSelect } from './room-views';
 import { RealtimeService } from '../realtime/realtime.service';
+import { AuthService } from '../auth/auth.service';
 
 export const MAX_FILE_SIZE = 10 * 1024 * 1024;
+
+const ALLOWED_FILE_TYPES: Record<string, readonly string[]> = {
+	'.pdf': ['application/pdf'],
+	'.png': ['image/png'],
+	'.jpg': ['image/jpeg'],
+	'.jpeg': ['image/jpeg'],
+	'.webp': ['image/webp'],
+	'.txt': ['text/plain'],
+	'.doc': ['application/msword'],
+	'.docx': ['application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
+	'.xls': ['application/vnd.ms-excel'],
+	'.xlsx': ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'],
+	'.ppt': ['application/vnd.ms-powerpoint'],
+	'.pptx': ['application/vnd.openxmlformats-officedocument.presentationml.presentation'],
+};
 
 const uploadRoot = () => process.env.UPLOAD_DIR ?? join(process.cwd(), 'uploads');
 
@@ -27,7 +44,7 @@ const safeExtension = (name: string) => {
 
 @Injectable()
 export class RoomFilesService {
-	constructor(private prisma: PrismaService, private realtime: RealtimeService) {}
+	constructor(private prisma: PrismaService, private realtime: RealtimeService, private auth: AuthService) {}
 
 	async list(roomId: string, userId: string) {
 		await assertMember(this.prisma, roomId, userId);
@@ -39,13 +56,17 @@ export class RoomFilesService {
 		});
 	}
 
-	/** Any type, up to 10 MB. The answer carries the `url` the file is served at. */
+	/** A supported document or image, up to 10 MB. */
 	async upload(roomId: string, userId: string, file: Express.Multer.File | undefined) {
 		await assertMember(this.prisma, roomId, userId);
 		if (!file) throw new BadRequestException('A file is required');
 		if (file.size > MAX_FILE_SIZE) throw new BadRequestException('The file is larger than 10 MB');
 
 		const name = basename(decodeName(file.originalname)).slice(0, 200) || 'file';
+		const extension = extname(name).toLowerCase();
+		if (!ALLOWED_FILE_TYPES[extension]?.includes(file.mimetype)) {
+			throw new BadRequestException('This file type is not allowed');
+		}
 		const filename = `${randomUUID()}${safeExtension(name)}`;
 		const dir = join(uploadRoot(), 'rooms', roomId);
 		await mkdir(dir, { recursive: true });
@@ -91,5 +112,20 @@ export class RoomFilesService {
 		await this.prisma.roomFile.delete({ where: { id: file.id } });
 		await unlink(join(uploadRoot(), 'rooms', roomId, basename(file.url))).catch(() => undefined);
 		this.realtime.emitToRoom(roomId, 'room:file-removed', { roomId, fileId: file.id });
+	}
+
+	/** Checks the token and the membership, then gives the file's path on disk */
+	async resolveDownload(roomId: string, filename: string, token: string | undefined) {
+		if (!token) throw new UnauthorizedException('No token provided');
+		const { sub } = await this.auth.verifyAccessToken(token);
+		await assertMember(this.prisma, roomId, sub);
+
+		const safe = basename(filename);
+		const file = await this.prisma.roomFile.findFirst({
+			where: { roomId, url: `/uploads/rooms/${roomId}/${safe}` },
+			select: { id: true },
+		});
+		if (!file) throw new NotFoundException('File not found');
+		return join(uploadRoot(), 'rooms', roomId, safe);
 	}
 }

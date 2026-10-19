@@ -17,6 +17,7 @@ import { useSession } from "@/features/auth/hooks/use-auth";
 import { useDict } from "@/i18n/client";
 import { t } from "@/i18n/translate";
 import { isApiError } from "@/lib/api";
+import { tokenStore } from "@/lib/api";
 import { env } from "@/lib/env";
 import { useFormat } from "@/lib/format";
 import { formatBytes } from "@/lib/image";
@@ -31,14 +32,36 @@ import {
 import type { RoomFile } from "../../types";
 
 const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
+const ALLOWED_EXTENSIONS = [
+  ".pdf",
+  ".png",
+  ".jpg",
+  ".jpeg",
+  ".webp",
+  ".txt",
+  ".doc",
+  ".docx",
+  ".xls",
+  ".xlsx",
+  ".ppt",
+  ".pptx",
+] as const;
+const FILE_ACCEPT = ALLOWED_EXTENSIONS.join(",");
+
+function protectedUrl(file: RoomFile) {
+  const token = tokenStore.get();
+  if (!file.url || !token) return null;
+  return `${env.apiUrl}${file.url}?token=${encodeURIComponent(token)}`;
+}
 
 /**
  * The API serves files as downloads under a random name. Fetching the bytes
  * and saving them gives the file its own name back.
  */
 async function download(file: RoomFile) {
-  if (!file.url) return;
-  const response = await fetch(`${env.apiUrl}${file.url}`);
+  const url = protectedUrl(file);
+  if (!url) throw new Error("Missing file URL or access token");
+  const response = await fetch(url);
   if (!response.ok) throw new Error(String(response.status));
 
   const link = document.createElement("a");
@@ -49,13 +72,22 @@ async function download(file: RoomFile) {
 }
 
 const KIND_STYLE = {
-  pdf: { icon: FileText, tile: "bg-rose-500/10 text-rose-600 dark:text-rose-400" },
-  image: { icon: ImageIcon, tile: "bg-sky-500/10 text-sky-600 dark:text-sky-400" },
-  document: { icon: FileIcon, tile: "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400" },
+  pdf: {
+    icon: FileText,
+    tile: "bg-rose-500/10 text-rose-600 dark:text-rose-400",
+  },
+  image: {
+    icon: ImageIcon,
+    tile: "bg-sky-500/10 text-sky-600 dark:text-sky-400",
+  },
+  document: {
+    icon: FileIcon,
+    tile: "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400",
+  },
 } as const;
 
 /** Where a file's bytes are, or nothing for mock files that have no address. */
-const urlOf = (file: RoomFile) => (file.url ? `${env.apiUrl}${file.url}` : null);
+const urlOf = (file: RoomFile) => protectedUrl(file);
 
 export function FilesPanel({ roomId }: { roomId: string }) {
   const d = useDict();
@@ -74,6 +106,14 @@ export function FilesPanel({ roomId }: { roomId: string }) {
     if (!list?.length) return;
 
     const chosen = [...list];
+    const unsupported = chosen.find((file) => {
+      const extension = `.${file.name.split(".").pop()?.toLowerCase() ?? ""}`;
+      return !ALLOWED_EXTENSIONS.some((allowed) => allowed === extension);
+    });
+    if (unsupported) {
+      setError(t(d.room.fileTypeNotAllowed, { name: unsupported.name }));
+      return;
+    }
     const tooBig = chosen.find((file) => file.size > MAX_UPLOAD_BYTES);
     if (tooBig) {
       setError(
@@ -125,6 +165,7 @@ export function FilesPanel({ roomId }: { roomId: string }) {
           id={inputId}
           type="file"
           multiple
+          accept={FILE_ACCEPT}
           disabled={upload.isPending}
           onChange={(event) => {
             accept(event.target.files);
@@ -135,7 +176,11 @@ export function FilesPanel({ roomId }: { roomId: string }) {
         <label
           htmlFor={inputId}
           className={cn(
-            buttonStyles({ variant: "primary", size: "md", className: "w-full cursor-pointer" }),
+            buttonStyles({
+              variant: "primary",
+              size: "md",
+              className: "w-full cursor-pointer",
+            }),
             "peer-focus-visible:ring-[3px] peer-focus-visible:ring-ring/40",
             "peer-disabled:pointer-events-none peer-disabled:opacity-50",
           )}

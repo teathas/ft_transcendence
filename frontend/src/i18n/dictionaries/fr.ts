@@ -329,14 +329,16 @@ export const fr = {
       public: "Publique",
       private: "Privée",
       publicHint: "Tout le monde la voit dans la liste et peut la rejoindre.",
-      privateHint: "Seules les personnes ayant le code peuvent la rejoindre. Elle n’apparaît pas dans la liste des autres.",
+      privateHint:
+        "Seules les personnes ayant le code peuvent la rejoindre. Elle n’apparaît pas dans la liste des autres.",
     },
     join: {
       title: "Rejoindre une salle",
       description: "Saisissez le code qu’on vous a partagé.",
       code: "Code de la salle",
       codePlaceholder: "A3F9C21B",
-      codeHint: "Un code se compose de huit lettres et chiffres, comme A3F9C21B.",
+      codeHint:
+        "Un code se compose de huit lettres et chiffres, comme A3F9C21B.",
       submit: "Rejoindre",
     },
     empty: {
@@ -362,9 +364,11 @@ export const fr = {
 
   friends: {
     metaTitle: "Amis",
-    metaDescription: "Trouvez des personnes, gérez vos amis et répondez aux demandes.",
+    metaDescription:
+      "Trouvez des personnes, gérez vos amis et répondez aux demandes.",
     title: "Amis",
-    subtitle: "Trouvez des personnes, répondez aux demandes et gardez vos amis près de vous.",
+    subtitle:
+      "Trouvez des personnes, répondez aux demandes et gardez vos amis près de vous.",
     tabsLabel: "Sections des amis",
     tabs: {
       friends: "Mes amis",
@@ -582,7 +586,6 @@ export const fr = {
     },
   },
 
-
   room: {
     metaTitle: "Salle",
     back: "Retour aux salles",
@@ -612,6 +615,7 @@ export const fr = {
     download: "Télécharger {name}",
     deleteFile: "Supprimer {name}",
     fileTooBig: "{name} dépasse {size} et n’a pas été partagé.",
+    fileTypeNotAllowed: "Le type de fichier de {name} n’est pas accepté.",
     invite: "Inviter",
     inviteTitle: "Inviter des participants",
     inviteBody: "Toute personne ayant ce code peut rejoindre la salle.",

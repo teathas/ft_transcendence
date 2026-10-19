@@ -326,7 +326,8 @@ export const en = {
       public: "Public",
       private: "Private",
       publicHint: "Anyone can see it in the list and join it.",
-      privateHint: "Only people with the code can join. It stays out of the list for everyone else.",
+      privateHint:
+        "Only people with the code can join. It stays out of the list for everyone else.",
     },
     join: {
       title: "Join a room",
@@ -420,7 +421,8 @@ export const en = {
     },
     find: {
       promptTitle: "Find someone",
-      promptBody: "Type part of a username above to search everyone on Shared Room.",
+      promptBody:
+        "Type part of a username above to search everyone on Shared Room.",
     },
     empty: {
       filteredTitle: "Nobody matches",
@@ -575,7 +577,6 @@ export const en = {
     },
   },
 
-
   room: {
     metaTitle: "Room",
     back: "Back to rooms",
@@ -605,6 +606,7 @@ export const en = {
     download: "Download {name}",
     deleteFile: "Delete {name}",
     fileTooBig: "{name} is over {size} and was not shared.",
+    fileTypeNotAllowed: "{name} is not a supported file type.",
     invite: "Invite",
     inviteTitle: "Invite people",
     inviteBody: "Anyone with this code can join the room.",
