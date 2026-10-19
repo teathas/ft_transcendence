@@ -14,6 +14,12 @@ import { RealtimeService } from '../realtime/realtime.service';
 
 export const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
+const ALLOWED_EXTENSIONS = new Set([
+	'.png', '.jpg', '.jpeg', '.gif', '.webp', '.avif',
+	'.pdf', '.txt', '.md',
+	'.doc', '.docx', '.ppt', '.pptx', '.xls', '.xlsx', '.odt', '.odp', '.ods',
+]);
+
 const uploadRoot = () => process.env.UPLOAD_DIR ?? join(process.cwd(), 'uploads');
 
 /** multer reads names as latin1; browsers send UTF-8, so "é" arrives as "Ã©". */
@@ -46,6 +52,8 @@ export class RoomFilesService {
 		if (file.size > MAX_FILE_SIZE) throw new BadRequestException('The file is larger than 10 MB');
 
 		const name = basename(decodeName(file.originalname)).slice(0, 200) || 'file';
+		if (!ALLOWED_EXTENSIONS.has(extname(name).toLowerCase()))
+			throw new BadRequestException('This file type is not allowed');
 		const filename = `${randomUUID()}${safeExtension(name)}`;
 		const dir = join(uploadRoot(), 'rooms', roomId);
 		await mkdir(dir, { recursive: true });
