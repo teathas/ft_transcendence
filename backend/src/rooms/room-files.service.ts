@@ -6,11 +6,13 @@ import {
 	ForbiddenException,
 	Injectable,
 	NotFoundException,
+	UnauthorizedException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { assertMember } from './room-access';
 import { fileSelect } from './room-views';
 import { RealtimeService } from '../realtime/realtime.service';
+import { AuthService } from '../auth/auth.service';
 
 export const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
@@ -27,7 +29,7 @@ const safeExtension = (name: string) => {
 
 @Injectable()
 export class RoomFilesService {
-	constructor(private prisma: PrismaService, private realtime: RealtimeService) {}
+	constructor(private prisma: PrismaService, private realtime: RealtimeService, private auth: AuthService) {}
 
 	async list(roomId: string, userId: string) {
 		await assertMember(this.prisma, roomId, userId);
@@ -91,5 +93,20 @@ export class RoomFilesService {
 		await this.prisma.roomFile.delete({ where: { id: file.id } });
 		await unlink(join(uploadRoot(), 'rooms', roomId, basename(file.url))).catch(() => undefined);
 		this.realtime.emitToRoom(roomId, 'room:file-removed', { roomId, fileId: file.id });
+	}
+
+	/** Checks the token and the membership, then gives the file's path on disk */
+	async resolveDownload(roomId: string, filename: string, token: string | undefined) {
+		if (!token) throw new UnauthorizedException('No token provided');
+		const { sub } = await this.auth.verifyAccessToken(token);
+		await assertMember(this.prisma, roomId, sub);
+
+		const safe = basename(filename);
+		const file = await this.prisma.roomFile.findFirst({
+			where: { roomId, url: `/uploads/rooms/${roomId}/${safe}` },
+			select: { id: true },
+		});
+		if (!file) throw new NotFoundException('File not found');
+		return join(uploadRoot(), 'rooms', roomId, safe);
 	}
 }
