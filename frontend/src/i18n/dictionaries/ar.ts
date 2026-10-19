@@ -516,6 +516,18 @@ export const ar = {
     recentRooms: "الغرف الأخيرة",
   },
 
+  publicProfile: {
+    metaTitle: "الملف الشخصي",
+    metaDescription: "عرض الملف الشخصي العام لعضو في Shared Room.",
+    back: "العودة إلى المستخدمين",
+    backToPeople: "تصفح المستخدمين",
+    about: "نبذة",
+    noBio: "لم يضف هذا الشخص نبذة بعد.",
+    unavailable: {
+      title: "الملف الشخصي غير متاح",
+      body: "هذا الحساب غير موجود أو لم يعد متاحًا.",
+    },
+  },
   profile: {
     metaTitle: "الملف الشخصي",
     metaDescription: "أدِر صورتك وبيانات حسابك وكلمة مرورك.",

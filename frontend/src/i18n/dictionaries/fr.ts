@@ -526,6 +526,18 @@ export const fr = {
     recentRooms: "Salles récentes",
   },
 
+  publicProfile: {
+    metaTitle: "Profil utilisateur",
+    metaDescription: "Consultez le profil public d’un membre de Shared Room.",
+    back: "Retour aux utilisateurs",
+    backToPeople: "Voir les utilisateurs",
+    about: "Présentation",
+    noBio: "Cette personne n’a pas encore ajouté de présentation.",
+    unavailable: {
+      title: "Profil indisponible",
+      body: "Ce compte n’existe pas ou n’est plus disponible.",
+    },
+  },
   profile: {
     metaTitle: "Profil",
     metaDescription:

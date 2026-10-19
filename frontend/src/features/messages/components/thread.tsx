@@ -123,16 +123,20 @@ export function Thread({ friendId }: { friendId: string }) {
 
         {friend.data ? (
           <>
-            <span className="relative shrink-0">
+            <Link href={routes.user(friendId)} className="relative shrink-0">
               <Avatar
                 src={friend.data.avatarUrl}
                 name={friend.data.username}
                 className="size-10"
               />
               <PresenceDot online={friend.data.status === "ONLINE"} />
-            </span>
+            </Link>
             <div className="min-w-0">
-              <h2 className="truncate font-semibold">{friend.data.username}</h2>
+              <h2 className="truncate font-semibold">
+                <Link href={routes.user(friendId)} className="hover:underline">
+                  {friend.data.username}
+                </Link>
+              </h2>
               <p className="truncate text-xs text-muted-foreground">
                 {friend.data.bio ?? d.friends.noBio}
               </p>

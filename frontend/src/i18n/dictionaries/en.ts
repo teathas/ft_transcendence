@@ -520,6 +520,18 @@ export const en = {
     recentRooms: "Recent rooms",
   },
 
+  publicProfile: {
+    metaTitle: "User profile",
+    metaDescription: "View a Shared Room member’s public profile.",
+    back: "Back to people",
+    backToPeople: "Browse people",
+    about: "About",
+    noBio: "This person has not added a bio yet.",
+    unavailable: {
+      title: "Profile unavailable",
+      body: "This account does not exist or is no longer available.",
+    },
+  },
   profile: {
     metaTitle: "Profile",
     metaDescription: "Manage your photo, account details and password.",
