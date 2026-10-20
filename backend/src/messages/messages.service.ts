@@ -5,11 +5,10 @@ import { SendMessageDto  } from './dto/send-message.dto';
 import { ListRoomMessagesDto } from './dto/list-room-messages.dto';
 import { MESSAGE_SELECT, MESSAGES_PAGE, toMessageView } from './message-view';
 import { RealtimeService } from '../realtime/realtime.service';
-
-
+import { NotificationsService } from '../notifications/notifications.service';
 @Injectable()
 export class MessagesService {
-    constructor(private prisma: PrismaService, private realtime: RealtimeService) {}
+    constructor(private prisma: PrismaService, private realtime: RealtimeService,  private notificationsService: NotificationsService) {}
 
 
     private async assertMember(roomId: string, userId: string) {
@@ -36,6 +35,26 @@ export class MessagesService {
         ]);
         const view = toMessageView(message);
         this.realtime.emitToRoom(roomId, 'room:message', { roomId, message: view });
+        const members = await this.prisma.roomMember.findMany({
+            where: {
+            roomId,
+            userId: { not: userId },
+            },
+            select: { userId: true },
+        });
+        await Promise.all(
+            members.map((member) =>
+            this.notificationsService.createNotification({
+                recipientId: member.userId,
+                actorId: userId,
+                type: 'NEW_ROOM_MESSAGE',
+                data: {
+                roomId,
+                messageId: message.id,
+                },
+            }),
+            ),
+        );
         return view;
     }
 
@@ -84,7 +103,15 @@ export class MessagesService {
         await this.prisma.message.delete({
             where: { id: messageId },
         });
-
+        await this.prisma.notification.deleteMany({
+        where: {
+            type: 'NEW_ROOM_MESSAGE',
+            data: {
+            path: ['messageId'],
+            equals: messageId,
+            },
+        },
+        });
         return { message: 'Message deleted successfully' };
     }
 }

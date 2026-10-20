@@ -16,7 +16,6 @@ export class FriendsService {
 		if (meId === addresseeId) {
 			throw new BadRequestException('You cannot send a friend request to yourself');
 		}
-
 		const target = await this.prisma.user.findUnique({
 			where: { id: addresseeId },
 			select: { id: true },
@@ -61,6 +60,13 @@ export class FriendsService {
 	}
 
 	async acceptRequest(meId: string, id: string) {
+		const request = await this.prisma.friendship.findFirst({
+			where: { id, addresseeId: meId, status: 'PENDING' },
+			select: { requesterId: true },
+		});
+		if (!request) {
+			throw new NotFoundException('Friend request not found');
+		}
 		const result = await this.prisma.friendship.updateMany({
 			where: { id, addresseeId: meId, status: 'PENDING' },
 			data: { status: 'ACCEPTED' },
@@ -68,16 +74,43 @@ export class FriendsService {
 		if (result.count === 0) {
 			throw new NotFoundException('Friend request not found');
 		}
+		await this.notificationsService.createNotification({
+			recipientId: request.requesterId,
+			actorId: meId,
+			type: 'FRIEND_REQUEST_ACCEPTED',
+			data: { friendshipId: id },
+		});
+		await this.prisma.notification.deleteMany({
+			where: {
+				type: 'FRIEND_REQUEST',
+				recipientId: meId,
+				actorId: request.requesterId,
+			},
+		});
 		return { id, status: 'ACCEPTED' };
 	}
 
 	async rejectRequest(meId: string, id: string) {
+		const request = await this.prisma.friendship.findFirst({
+			where: { id, addresseeId: meId, status: 'PENDING' },
+			select: { requesterId: true },
+		});
+		if (!request) {
+			throw new NotFoundException('Friend request not found');
+		}
 		const result = await this.prisma.friendship.deleteMany({
 			where: { id, addresseeId: meId, status: 'PENDING' },
 		});
 		if (result.count === 0) {
 			throw new NotFoundException('Friend request not found');
 		}
+		await this.prisma.notification.deleteMany({
+			where: {
+				type: 'FRIEND_REQUEST',
+				recipientId: meId,
+				actorId: request.requesterId,
+			},
+		});
 	}
 
 	/** The username filter, as Prisma wants it; empty when nothing was typed. */
@@ -227,6 +260,14 @@ export class FriendsService {
 	}
 
 	async cancelRequest(meId: string, requestId: string) {
+		const request = await this.prisma.friendship.findFirst({
+			where: { id: requestId, requesterId: meId, status: 'PENDING' },
+			select: { addresseeId: true },
+		});
+		if (!request) {
+			throw new NotFoundException('Friend request not found');
+		}
+
 		const { count } = await this.prisma.friendship.deleteMany({
 			where: { id: requestId, requesterId: meId, status: 'PENDING' },
 		});
@@ -234,6 +275,14 @@ export class FriendsService {
 		if (count === 0) {
 			throw new NotFoundException('Friend request not found');
 		}
+		await this.prisma.notification.deleteMany({
+			where: {
+				type: 'FRIEND_REQUEST',
+				recipientId: request.addresseeId,
+				actorId: meId,
+			},
+		});
+
 	}
 
 	async removeFriend(meId: string, friendshipId: string) {
@@ -248,5 +297,11 @@ export class FriendsService {
 		if (count === 0) {
 			throw new NotFoundException('Friendship not found');
 		}
+		await this.prisma.notification.deleteMany({
+			where: {
+				type: { in: ['FRIEND_REQUEST', 'FRIEND_REQUEST_ACCEPTED'] },
+				data: { path: ['friendshipId'], equals: friendshipId },
+			},
+		});
 	}
 }

@@ -9,6 +9,7 @@ import { friendsOf } from '../friends/utils/friend-filters';
 import { toFriendPair } from '../friends/utils/friend-pair';
 import { SendDirectMessageDto } from './dto/send-direct-message.dto';
 import { ListDirectMessagesDto } from './dto/list-direct-messages.dto';
+import { NotificationsService } from '../notifications/notifications.service';
 
 const DEFAULT_LIMIT = 30;
 
@@ -24,7 +25,7 @@ const MESSAGE_SELECT = {
 
 @Injectable()
 export class DirectMessagesService {
-	constructor(private prisma: PrismaService) {}
+	constructor(private prisma: PrismaService,private  notificationsService: NotificationsService) {}
 
 	/** Only accepted friends can talk to each other. */
 	private async assertFriends(meId: string, otherId: string) {
@@ -45,10 +46,17 @@ export class DirectMessagesService {
 	async send(meId: string, friendId: string, dto: SendDirectMessageDto) {
 		await this.assertFriends(meId, friendId);
 
-		return this.prisma.directMessage.create({
+		const msg = await  this.prisma.directMessage.create({
 			data: { content: dto.content, senderId: meId, receiverId: friendId },
 			select: MESSAGE_SELECT,
 		});
+		await this.notificationsService.createNotification({
+			recipientId: friendId,
+			actorId: meId,
+			type: 'NEW_DIRECT_MESSAGE',
+			data: { messageId: msg.id },
+		});
+		return msg;
 	}
 
 	/**
@@ -86,6 +94,15 @@ export class DirectMessagesService {
 	async markRead(meId: string, friendId: string) {
 		const { count } = await this.prisma.directMessage.updateMany({
 			where: { senderId: friendId, receiverId: meId, readAt: null },
+			data: { readAt: new Date() },
+		});
+		await this.prisma.notification.updateMany({
+			where: {
+				recipientId: meId,
+				actorId: friendId,
+				type: 'NEW_DIRECT_MESSAGE',
+				readAt: null,
+			},
 			data: { readAt: new Date() },
 		});
 		return { updated: count };

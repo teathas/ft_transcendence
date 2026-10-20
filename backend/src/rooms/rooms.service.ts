@@ -6,12 +6,14 @@ import { JoinRoomDto  } from './dto/join-room.dto';
 import { randomBytes } from 'crypto';
 import { FindRoomsQueryDto, RoomSort } from './dto/find-rooms-query.dto';
 import { RealtimeService } from '../realtime/realtime.service';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class RoomsService {
     constructor(
         private prisma: PrismaService,
         private realtime: RealtimeService,
+        private notificationsService: NotificationsService
     ) {}
 
     async touchActivity(roomId: string) {
@@ -67,13 +69,29 @@ export class RoomsService {
         });
         if(membership)
             throw new ConflictException('User is already a member of this room');
-        await this.touchActivity(roomId);
-        return this.prisma.roomMember.create({
+        const existingMembers = await this.prisma.roomMember.findMany({
+            where: { roomId },
+            select: { userId: true },
+        });
+        const newMember = await this.prisma.roomMember.create({
             data:{
                 userId,
                 roomId,
             }
         })
+        await this.touchActivity(roomId);
+
+        await Promise.all(
+        existingMembers.map((member) =>
+            this.notificationsService.createNotification({
+            recipientId: member.userId,
+            actorId: userId,
+            type: 'ROOM_MEMBER_JOINED',
+            data: { roomId },
+        }),
+        ),
+        );
+        return newMember;
     }
     private getOrderBy(sort: RoomSort = RoomSort.NEWEST): Prisma.RoomOrderByWithRelationInput[] {
         switch (sort) {
@@ -164,6 +182,13 @@ export class RoomsService {
                 });
             }
         }
+        const remainingMembers = await this.prisma.roomMember.findMany({
+            where: {
+                roomId,
+                userId: { not: userId },
+            },
+            select: { userId: true },
+        });
         const removed = await this.prisma.roomMember.delete({
 			where: {
 				userId_roomId: {
@@ -174,6 +199,16 @@ export class RoomsService {
 		});
 		this.realtime.removeUserFromRoom(userId, roomId);
 		this.realtime.emitToRoom(roomId, 'room:member-left', { roomId, userId });
+        await Promise.all(
+        remainingMembers.map((member) =>
+            this.notificationsService.createNotification({
+            recipientId: member.userId,
+            actorId: userId,
+            type: 'ROOM_MEMBER_LEFT',
+            data: { roomId },
+            }),
+        ),
+        );
 		return removed;
     }
 }
