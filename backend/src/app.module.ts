@@ -9,45 +9,48 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { UsersModule } from './users/users.module';
 import { RoomsModule } from './rooms/rooms.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
-import { join } from 'path'
+import { join } from 'path';
 import { FriendsModule } from './friends/friends.module';
 import { MessagesModule } from './messages/messages.module';
 import { RealtimeModule } from './realtime/realtime.module';
 import { DirectMessagesModule } from './direct-messages/direct-messages.module';
 import { BoardSyncModule } from './board-sync/board-sync.module';
+import { ApiKeysModule } from './api-keys/api-keys.module';
+import { PublicApiModule } from './public-api/public-api.module';
 
 @Module({
-	imports: [
-		ConfigModule.forRoot({ isGlobal: true }),
-		PrismaModule,
-		AuthModule,
-		UsersModule,
-		RoomsModule,
-		ServeStaticModule.forRoot({
-
-			// Avatars are public. Room files go through RoomFilesController,
-			// which validates the token and current room membership.
-			rootPath: join(process.env.UPLOAD_DIR ?? '/app/uploads', 'avatars'),
-			serveRoot: '/uploads/avatars',
-			serveStaticOptions: {
-				setHeaders: (res) => {
-					res.setHeader('X-Content-Type-Options', 'nosniff');
-				},
-			},
-		}),
-		MessagesModule,
-		FriendsModule,
-		RealtimeModule,
-		DirectMessagesModule,
-		BoardSyncModule,
-	],
-	controllers: [AppController],
-	providers: [
-		AppService,
-		{
-			provide: APP_GUARD,
-			useClass: JwtAuthGuard,
-		},
-	],
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
+    PrismaModule,
+    AuthModule,
+    UsersModule,
+    RoomsModule,
+    ServeStaticModule.forRoot({
+      // Only avatars are public. Room files through RoomFilesController,
+      // which check the tocken and the membership
+      rootPath: join(process.env.UPLOAD_DIR ?? '/app/uploads', 'avatars'),
+      serveRoot: '/uploads/avatars',
+      serveStaticOptions: {
+        setHeaders: (res) => {
+          res.setHeader('X-Content-Type-Options', 'nosniff');
+        },
+      },
+    }),
+    MessagesModule,
+    FriendsModule,
+    RealtimeModule,
+    DirectMessagesModule,
+    BoardSyncModule,
+    ApiKeysModule,
+    PublicApiModule,
+  ],
+  controllers: [AppController],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+  ],
 })
-export class AppModule { }
+export class AppModule {}

@@ -7,6 +7,7 @@ import { useSession } from "@/features/auth/hooks/use-auth";
 import { useDict } from "@/i18n/client";
 
 import { AccountForm } from "./account-form";
+import { ApiKeysSection } from "./api-keys-section";
 import { DangerZone } from "./danger-zone";
 import { PasswordForm } from "./password-form";
 import { ProfileHeader } from "./profile-header";
@@ -47,6 +48,7 @@ export function ProfileView() {
       <ProfileHeader user={user} />
       <AccountForm user={user} />
       <PasswordForm />
+      <ApiKeysSection />
       <DangerZone username={user.username} />
     </div>
   );
