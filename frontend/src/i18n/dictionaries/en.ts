@@ -69,6 +69,9 @@ export const en = {
       createRoom: "Create a Room",
       joinRoom: "Join a Room",
       login: "Login",
+      legal: "Legal",
+      privacy: "Privacy Policy",
+      terms: "Terms of Service",
       viewOnGithub: "View on GitHub",
       copyright: "© {year} {name}. A 42 school project.",
     },
@@ -202,6 +205,74 @@ export const en = {
     },
   },
 
+  legal: {
+    lastUpdated: "Last updated: October 20, 2026",
+    privacy: {
+      title: "Privacy Policy",
+      description: "How Shared Room collects, uses and protects your data.",
+      intro:
+        "This policy explains what information Shared Room processes when you create an account and use its collaborative features.",
+      sections: [
+        {
+          title: "Information we collect",
+          body: "We process the account details you provide, such as your username, email address, password in hashed form, biography and profile picture. We also store the rooms, messages, friendships, drawings and files you create or share.",
+        },
+        {
+          title: "How we use information",
+          body: "Your information is used to operate your account, provide real-time rooms, messages and file sharing, display your public profile, maintain security and diagnose technical problems.",
+        },
+        {
+          title: "Sharing and visibility",
+          body: "Your username, profile picture, biography and presence may be visible to other users. Room content is shared with members of that room. Direct messages are available to their participants. We do not sell your personal information.",
+        },
+        {
+          title: "Storage and security",
+          body: "We use reasonable technical measures to protect stored information. No online service can guarantee absolute security, so avoid sharing sensitive personal information in rooms, messages, files or drawings.",
+        },
+        {
+          title: "Your choices",
+          body: "You can update your profile and password, delete messages where the service permits it, and delete your account from your profile settings. Account deletion may remove or anonymize associated content where required to preserve shared conversations.",
+        },
+        {
+          title: "Changes to this policy",
+          body: "We may update this policy when the service changes. The date shown above indicates the latest revision. Continued use after an update means the revised policy applies.",
+        },
+      ],
+    },
+    terms: {
+      title: "Terms of Service",
+      description: "The rules that apply when using Shared Room.",
+      intro:
+        "By creating an account or using Shared Room, you agree to these terms. If you do not agree, do not use the service.",
+      sections: [
+        {
+          title: "Using the service",
+          body: "Shared Room provides collaborative rooms, whiteboards, messaging and file sharing. You must provide accurate account information, keep your credentials secure and take responsibility for activity performed through your account.",
+        },
+        {
+          title: "Acceptable use",
+          body: "Do not use the service to break the law, harass others, impersonate someone, distribute malware, access accounts or rooms without permission, disrupt the service, or upload content that infringes another person's rights.",
+        },
+        {
+          title: "Your content",
+          body: "You keep ownership of content you submit. You grant the service the limited permission needed to store, process and display that content to provide the features you request. You are responsible for having the right to share it.",
+        },
+        {
+          title: "Rooms and moderation",
+          body: "Room owners may manage their rooms and remove messages from other members. We may restrict or remove accounts or content when necessary to protect users, enforce these terms or comply with legal obligations.",
+        },
+        {
+          title: "Availability and liability",
+          body: "This educational project is provided as available, without a guarantee that it will always be uninterrupted or error-free. To the extent permitted by law, we are not responsible for indirect loss caused by use of, or inability to use, the service.",
+        },
+        {
+          title: "Changes and termination",
+          body: "Features and these terms may change over time. The date above identifies the latest revision. You may stop using the service or delete your account at any time, and access may be suspended for serious or repeated violations.",
+        },
+      ],
+    },
+  },
+
   auth: {
     login: {
       metaTitle: "Sign in",
@@ -326,7 +397,8 @@ export const en = {
       public: "Public",
       private: "Private",
       publicHint: "Anyone can see it in the list and join it.",
-      privateHint: "Only people with the code can join. It stays out of the list for everyone else.",
+      privateHint:
+        "Only people with the code can join. It stays out of the list for everyone else.",
     },
     join: {
       title: "Join a room",
@@ -420,7 +492,8 @@ export const en = {
     },
     find: {
       promptTitle: "Find someone",
-      promptBody: "Type part of a username above to search everyone on Shared Room.",
+      promptBody:
+        "Type part of a username above to search everyone on Shared Room.",
     },
     empty: {
       filteredTitle: "Nobody matches",
@@ -471,6 +544,13 @@ export const en = {
     placeholder: "Write a message…",
     composerLabel: "Message",
     send: "Send",
+    deleteMessage: "Delete message",
+    deleteConfirm: {
+      title: "Delete this message?",
+      description:
+        "This message will be removed for everyone. This cannot be undone.",
+      confirm: "Delete message",
+    },
     error: {
       list: "Conversations couldn’t be loaded.",
       thread: "This conversation couldn’t be loaded.",
@@ -517,6 +597,18 @@ export const en = {
     recentRooms: "Recent rooms",
   },
 
+  publicProfile: {
+    metaTitle: "User profile",
+    metaDescription: "View a Shared Room member’s public profile.",
+    back: "Back to people",
+    backToPeople: "Browse people",
+    about: "About",
+    noBio: "This person has not added a bio yet.",
+    unavailable: {
+      title: "Profile unavailable",
+      body: "This account does not exist or is no longer available.",
+    },
+  },
   profile: {
     metaTitle: "Profile",
     metaDescription: "Manage your photo, account details and password.",
@@ -575,7 +667,6 @@ export const en = {
     },
   },
 
-
   room: {
     metaTitle: "Room",
     back: "Back to rooms",
@@ -605,6 +696,10 @@ export const en = {
     download: "Download {name}",
     deleteFile: "Delete {name}",
     fileTooBig: "{name} is over {size} and was not shared.",
+    fileTypeNotAllowed: "{name} is not a supported file type.",
+    uploadProgress: "File upload progress",
+    previewFile: "Preview {name}",
+    pdfPreview: "PDF preview",
     invite: "Invite",
     inviteTitle: "Invite people",
     inviteBody: "Anyone with this code can join the room.",

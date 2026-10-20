@@ -71,6 +71,9 @@ export const fr = {
       createRoom: "Créer une salle",
       joinRoom: "Rejoindre une salle",
       login: "Connexion",
+      legal: "Informations légales",
+      privacy: "Politique de confidentialité",
+      terms: "Conditions d’utilisation",
       viewOnGithub: "Voir sur GitHub",
       copyright: "© {year} {name}. Un projet de l’école 42.",
     },
@@ -204,6 +207,75 @@ export const fr = {
     },
   },
 
+  legal: {
+    lastUpdated: "Dernière mise à jour : 20 octobre 2026",
+    privacy: {
+      title: "Politique de confidentialité",
+      description:
+        "Comment Shared Room collecte, utilise et protège vos données.",
+      intro:
+        "Cette politique explique quelles informations Shared Room traite lorsque vous créez un compte et utilisez ses fonctions collaboratives.",
+      sections: [
+        {
+          title: "Informations collectées",
+          body: "Nous traitons les informations de compte que vous fournissez, notamment votre nom d’utilisateur, votre adresse e-mail, votre mot de passe sous forme hachée, votre biographie et votre photo de profil. Nous conservons également les salles, messages, amitiés, dessins et fichiers que vous créez ou partagez.",
+        },
+        {
+          title: "Utilisation des informations",
+          body: "Vos informations servent à gérer votre compte, fournir les salles en temps réel, la messagerie et le partage de fichiers, afficher votre profil public, assurer la sécurité et diagnostiquer les problèmes techniques.",
+        },
+        {
+          title: "Partage et visibilité",
+          body: "Votre nom d’utilisateur, votre photo, votre biographie et votre présence peuvent être visibles par les autres utilisateurs. Le contenu d’une salle est partagé avec ses membres. Les messages privés sont accessibles à leurs participants. Nous ne vendons pas vos données personnelles.",
+        },
+        {
+          title: "Conservation et sécurité",
+          body: "Nous appliquons des mesures techniques raisonnables pour protéger les informations conservées. Aucun service en ligne ne peut garantir une sécurité absolue ; évitez donc de partager des informations sensibles dans les salles, messages, fichiers ou dessins.",
+        },
+        {
+          title: "Vos choix",
+          body: "Vous pouvez modifier votre profil et votre mot de passe, supprimer vos messages lorsque le service le permet et supprimer votre compte depuis les paramètres du profil. Certains contenus associés peuvent être supprimés ou anonymisés afin de préserver les conversations partagées.",
+        },
+        {
+          title: "Modification de cette politique",
+          body: "Cette politique peut évoluer avec le service. La date ci-dessus correspond à sa dernière révision. En continuant à utiliser le service après une mise à jour, vous acceptez la politique révisée.",
+        },
+      ],
+    },
+    terms: {
+      title: "Conditions d’utilisation",
+      description: "Les règles applicables à l’utilisation de Shared Room.",
+      intro:
+        "En créant un compte ou en utilisant Shared Room, vous acceptez ces conditions. Si vous ne les acceptez pas, n’utilisez pas le service.",
+      sections: [
+        {
+          title: "Utilisation du service",
+          body: "Shared Room propose des salles collaboratives, des tableaux blancs, une messagerie et le partage de fichiers. Vous devez fournir des informations exactes, protéger vos identifiants et répondre des activités réalisées depuis votre compte.",
+        },
+        {
+          title: "Utilisation acceptable",
+          body: "Vous ne devez pas utiliser le service pour enfreindre la loi, harceler autrui, usurper une identité, diffuser des logiciels malveillants, accéder sans autorisation à un compte ou une salle, perturber le service ou publier du contenu portant atteinte aux droits d’autrui.",
+        },
+        {
+          title: "Votre contenu",
+          body: "Vous restez propriétaire du contenu que vous publiez. Vous accordez au service l’autorisation limitée nécessaire pour le stocker, le traiter et l’afficher afin de fournir les fonctions demandées. Vous devez disposer du droit de le partager.",
+        },
+        {
+          title: "Salles et modération",
+          body: "Les propriétaires peuvent gérer leurs salles et supprimer les messages des autres membres. Nous pouvons restreindre ou supprimer un compte ou un contenu afin de protéger les utilisateurs, faire respecter ces conditions ou respecter une obligation légale.",
+        },
+        {
+          title: "Disponibilité et responsabilité",
+          body: "Ce projet pédagogique est fourni selon sa disponibilité, sans garantie de fonctionnement continu ni d’absence d’erreur. Dans les limites autorisées par la loi, nous ne sommes pas responsables des pertes indirectes liées à l’utilisation ou à l’impossibilité d’utiliser le service.",
+        },
+        {
+          title: "Modifications et résiliation",
+          body: "Les fonctionnalités et ces conditions peuvent évoluer. La date ci-dessus indique la dernière révision. Vous pouvez cesser d’utiliser le service ou supprimer votre compte à tout moment ; l’accès peut être suspendu en cas de violation grave ou répétée.",
+        },
+      ],
+    },
+  },
+
   auth: {
     login: {
       metaTitle: "Connexion",
@@ -329,14 +401,16 @@ export const fr = {
       public: "Publique",
       private: "Privée",
       publicHint: "Tout le monde la voit dans la liste et peut la rejoindre.",
-      privateHint: "Seules les personnes ayant le code peuvent la rejoindre. Elle n’apparaît pas dans la liste des autres.",
+      privateHint:
+        "Seules les personnes ayant le code peuvent la rejoindre. Elle n’apparaît pas dans la liste des autres.",
     },
     join: {
       title: "Rejoindre une salle",
       description: "Saisissez le code qu’on vous a partagé.",
       code: "Code de la salle",
       codePlaceholder: "A3F9C21B",
-      codeHint: "Un code se compose de huit lettres et chiffres, comme A3F9C21B.",
+      codeHint:
+        "Un code se compose de huit lettres et chiffres, comme A3F9C21B.",
       submit: "Rejoindre",
     },
     empty: {
@@ -362,9 +436,11 @@ export const fr = {
 
   friends: {
     metaTitle: "Amis",
-    metaDescription: "Trouvez des personnes, gérez vos amis et répondez aux demandes.",
+    metaDescription:
+      "Trouvez des personnes, gérez vos amis et répondez aux demandes.",
     title: "Amis",
-    subtitle: "Trouvez des personnes, répondez aux demandes et gardez vos amis près de vous.",
+    subtitle:
+      "Trouvez des personnes, répondez aux demandes et gardez vos amis près de vous.",
     tabsLabel: "Sections des amis",
     tabs: {
       friends: "Mes amis",
@@ -475,6 +551,13 @@ export const fr = {
     placeholder: "Écrire un message…",
     composerLabel: "Message",
     send: "Envoyer",
+    deleteMessage: "Supprimer le message",
+    deleteConfirm: {
+      title: "Supprimer ce message ?",
+      description:
+        "Ce message sera supprimé pour tout le monde. Cette action est irréversible.",
+      confirm: "Supprimer le message",
+    },
     error: {
       list: "Impossible de charger les conversations.",
       thread: "Impossible de charger cette conversation.",
@@ -521,6 +604,18 @@ export const fr = {
     recentRooms: "Salles récentes",
   },
 
+  publicProfile: {
+    metaTitle: "Profil utilisateur",
+    metaDescription: "Consultez le profil public d’un membre de Shared Room.",
+    back: "Retour aux utilisateurs",
+    backToPeople: "Voir les utilisateurs",
+    about: "Présentation",
+    noBio: "Cette personne n’a pas encore ajouté de présentation.",
+    unavailable: {
+      title: "Profil indisponible",
+      body: "Ce compte n’existe pas ou n’est plus disponible.",
+    },
+  },
   profile: {
     metaTitle: "Profil",
     metaDescription:
@@ -582,7 +677,6 @@ export const fr = {
     },
   },
 
-
   room: {
     metaTitle: "Salle",
     back: "Retour aux salles",
@@ -612,6 +706,10 @@ export const fr = {
     download: "Télécharger {name}",
     deleteFile: "Supprimer {name}",
     fileTooBig: "{name} dépasse {size} et n’a pas été partagé.",
+    fileTypeNotAllowed: "Le type de fichier de {name} n’est pas accepté.",
+    uploadProgress: "Progression de l’envoi du fichier",
+    previewFile: "Prévisualiser {name}",
+    pdfPreview: "Aperçu du PDF",
     invite: "Inviter",
     inviteTitle: "Inviter des participants",
     inviteBody: "Toute personne ayant ce code peut rejoindre la salle.",

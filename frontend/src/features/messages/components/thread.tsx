@@ -1,7 +1,13 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft, CheckCheck, LoaderCircle, SendHorizonal } from "lucide-react";
+import {
+  ArrowLeft,
+  CheckCheck,
+  LoaderCircle,
+  SendHorizonal,
+  Trash2,
+} from "lucide-react";
 
 import { Avatar } from "@/components/ui/avatar";
 import { PresenceDot } from "@/components/ui/presence-dot";
@@ -18,10 +24,12 @@ import { cn } from "@/lib/utils";
 
 import {
   useChatFriend,
+  useDeleteMessage,
   useMarkRead,
   useSendMessage,
   useThread,
 } from "../hooks/use-messages";
+import { DeleteMessageModal } from "./delete-message-modal";
 
 const MAX_LENGTH = 2000;
 /** Within this many pixels of the bottom counts as "following along". */
@@ -34,8 +42,10 @@ export function Thread({ friendId }: { friendId: string }) {
   const thread = useThread(friendId);
   const send = useSendMessage(friendId);
   const markRead = useMarkRead(friendId);
+  const remove = useDeleteMessage(friendId);
 
   const [draft, setDraft] = useState("");
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const scroller = useRef<HTMLDivElement>(null);
   const last = useRef({ newest: "", oldest: "", height: 0, count: 0 });
 
@@ -48,7 +58,9 @@ export function Thread({ friendId }: { friendId: string }) {
   const hasUnread = messages.some(
     (message) => message.senderId === friendId && !message.readAt,
   );
-  const lastMine = messages.findLast((message) => message.senderId !== friendId);
+  const lastMine = messages.findLast(
+    (message) => message.senderId !== friendId,
+  );
 
   // Opening a conversation reads it, and so does a message arriving while open.
   const { mutate: readAll, isPending: isReading } = markRead;
@@ -113,16 +125,20 @@ export function Thread({ friendId }: { friendId: string }) {
 
         {friend.data ? (
           <>
-            <span className="relative shrink-0">
+            <Link href={routes.user(friendId)} className="relative shrink-0">
               <Avatar
                 src={friend.data.avatarUrl}
                 name={friend.data.username}
                 className="size-10"
               />
               <PresenceDot online={friend.data.status === "ONLINE"} />
-            </span>
+            </Link>
             <div className="min-w-0">
-              <h2 className="truncate font-semibold">{friend.data.username}</h2>
+              <h2 className="truncate font-semibold">
+                <Link href={routes.user(friendId)} className="hover:underline">
+                  {friend.data.username}
+                </Link>
+              </h2>
               <p className="truncate text-xs text-muted-foreground">
                 {friend.data.bio ?? d.friends.noBio}
               </p>
@@ -217,6 +233,17 @@ export function Thread({ friendId }: { friendId: string }) {
                           {d.messages.seen}
                         </span>
                       )}
+                      {mine && (
+                        <button
+                          type="button"
+                          aria-label={d.messages.deleteMessage}
+                          title={d.messages.deleteMessage}
+                          onClick={() => setDeletingId(message.id)}
+                          className="ms-1 inline-flex size-5 items-center justify-center rounded-sm hover:text-destructive"
+                        >
+                          <Trash2 className="size-3" aria-hidden="true" />
+                        </button>
+                      )}
                     </p>
                   </div>
                 </div>
@@ -252,10 +279,29 @@ export function Thread({ friendId }: { friendId: string }) {
             aria-label={d.messages.send}
             disabled={!draft.trim() || send.isPending}
           >
-            <SendHorizonal className="size-4 rtl:rotate-180" aria-hidden="true" />
+            <SendHorizonal
+              className="size-4 rtl:rotate-180"
+              aria-hidden="true"
+            />
           </Button>
         </div>
       </form>
+      <DeleteMessageModal
+        open={deletingId !== null}
+        pending={remove.isPending}
+        error={remove.error}
+        onClose={() => {
+          if (remove.isPending) return;
+          remove.reset();
+          setDeletingId(null);
+        }}
+        onConfirm={() => {
+          if (!deletingId) return;
+          remove.mutate(deletingId, {
+            onSuccess: () => setDeletingId(null),
+          });
+        }}
+      />
     </>
   );
 }

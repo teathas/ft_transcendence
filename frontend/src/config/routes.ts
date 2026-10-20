@@ -8,6 +8,9 @@ import type { Route } from "next";
  */
 export const routes = {
   home: "/" as Route,
+  features: "/#features" as Route,
+  classroom: "/#classroom" as Route,
+  howItWorks: "/#how-it-works" as Route,
   login: "/login" as Route,
   register: "/register" as Route,
   dashboard: "/dashboard" as Route,
@@ -15,8 +18,11 @@ export const routes = {
   profile: "/profile" as Route,
   friends: "/friends" as Route,
   messages: "/messages" as Route,
+  privacy: "/privacy" as Route,
+  terms: "/terms" as Route,
   room: (id: string) => `/rooms/${id}` as Route,
   thread: (friendId: string) => `/messages/${friendId}` as Route,
+  user: (userId: string) => `/users/${userId}` as Route,
 
   createRoom: "/register" as Route,
   joinRoom: "/login" as Route,

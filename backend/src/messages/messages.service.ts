@@ -1,7 +1,6 @@
 import { ForbiddenException, Injectable,NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { SendMessageDto  } from './dto/send-message.dto';
-
 import { ListRoomMessagesDto } from './dto/list-room-messages.dto';
 import { MESSAGE_SELECT, MESSAGES_PAGE, toMessageView } from './message-view';
 import { RealtimeService } from '../realtime/realtime.service';
@@ -12,7 +11,6 @@ export class MessagesService {
 
 
     private async assertMember(roomId: string, userId: string) {
-
         const member = await this.prisma.roomMember.findUnique({
             where: { userId_roomId: { userId, roomId } },
         });
@@ -81,25 +79,33 @@ export class MessagesService {
             nextCursor: rows.length > limit ? items[items.length - 1].id : null,
         };
     }
-    async delete(roomId:string,messageId:string,userId:string)
-    {
-        const existing = await this.prisma.message.findUnique({
-            where:{
-                id:messageId,
-            }
+    async delete(roomId: string, messageId: string, userId: string) {
+        await this.assertMember(roomId, userId);
+        const existing = await this.prisma.message.findFirst({
+            where: {
+                id: messageId,
+                roomId,
+            },
+            select: {
+                id: true,
+                userId: true,
+            },
         });
-        if(!existing ||  existing.roomId !== roomId)
+
+        if (!existing) {
             throw new NotFoundException('Message not found in this room');
-        if(existing.userId !== userId )
-        {
-            const room = await this.prisma.room.findUnique({
-            where:{
-                id:roomId,
-            }
-            }); 
-            if(!room || userId !== room.ownerId)
-            throw new ForbiddenException('You can only delete your own messages or moderate as the room owner');
         }
+
+        if (existing.userId !== userId) {
+            const room = await this.prisma.room.findUnique({
+                where: { id: roomId },
+                select: { ownerId: true },
+            });
+
+            if (!room || room.ownerId !== userId) 
+                throw new ForbiddenException('You can only delete your own messages or moderate as the room owner');
+        }
+
         await this.prisma.message.delete({
             where: { id: messageId },
         });
@@ -112,6 +118,7 @@ export class MessagesService {
             },
         },
         });
+		this.realtime.emitToRoom(roomId, 'room:message-deleted', { roomId, messageId });
         return { message: 'Message deleted successfully' };
     }
 }

@@ -33,6 +33,10 @@ export const messagesApi = {
     return parseResponse(messageSchema, data, "POST /dm/:id/messages");
   },
 
+  async delete(friendId: string, messageId: string): Promise<void> {
+    await api.delete(`/dm/${friendId}/messages/${messageId}`);
+  },
+
   async markRead(friendId: string): Promise<void> {
     await api.post(`/dm/${friendId}/read`);
   },

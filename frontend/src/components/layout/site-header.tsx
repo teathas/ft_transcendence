@@ -11,9 +11,9 @@ export async function SiteHeader() {
   const d = await getDict();
 
   const sections = [
-    { label: d.landing.sections.features, href: "#features" },
-    { label: d.landing.sections.classroom, href: "#classroom" },
-    { label: d.landing.sections.howItWorks, href: "#how-it-works" },
+    { label: d.landing.sections.features, href: routes.features },
+    { label: d.landing.sections.classroom, href: routes.classroom },
+    { label: d.landing.sections.howItWorks, href: routes.howItWorks },
   ];
 
   return (
@@ -23,16 +23,15 @@ export async function SiteHeader() {
           <BrandWordmark />
         </Link>
 
-        {/* In-page anchors, so plain <a> rather than typed <Link>. */}
         <nav className="hidden items-center gap-1 md:flex">
           {sections.map((section) => (
-            <a
+            <Link
               key={section.href}
               href={section.href}
               className="rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
             >
               {section.label}
-            </a>
+            </Link>
           ))}
         </nav>
 

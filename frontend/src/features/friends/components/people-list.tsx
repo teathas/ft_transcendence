@@ -12,6 +12,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useDict } from "@/i18n/client";
+import { Link } from "@/i18n/navigation";
+import { routes } from "@/config/routes";
 
 import type { PublicUser } from "../types";
 
@@ -36,7 +38,7 @@ function PersonCard({ row }: { row: PersonRow }) {
   return (
     <article className="group flex flex-col gap-4 rounded-xl border bg-card p-5 transition-all duration-200 hover:border-primary/40 hover:shadow-md hover:shadow-black/[0.05] dark:hover:shadow-black/25">
       <div className="flex items-center gap-4">
-        <span className="relative shrink-0">
+        <Link href={routes.user(row.user.id)} className="relative shrink-0">
           <Avatar
             src={row.user.avatarUrl}
             name={row.user.username}
@@ -46,9 +48,13 @@ function PersonCard({ row }: { row: PersonRow }) {
             online={row.user.status === "ONLINE"}
             className="size-3.5"
           />
-        </span>
+        </Link>
         <div className="min-w-0">
-          <h3 className="truncate font-semibold">{row.user.username}</h3>
+          <h3 className="truncate font-semibold">
+            <Link href={routes.user(row.user.id)} className="hover:underline">
+              {row.user.username}
+            </Link>
+          </h3>
           <p className="mt-0.5 truncate text-xs text-muted-foreground">
             {row.meta}
           </p>
@@ -113,13 +119,19 @@ export function PeopleList({
           <TableRow key={row.id}>
             <TableCell>
               <div className="flex items-center gap-3">
-                <span className="relative shrink-0">
+                <Link
+                  href={routes.user(row.user.id)}
+                  className="relative shrink-0"
+                >
                   <Avatar src={row.user.avatarUrl} name={row.user.username} />
                   <PresenceDot online={row.user.status === "ONLINE"} />
-                </span>
-                <span className="truncate font-medium">
+                </Link>
+                <Link
+                  href={routes.user(row.user.id)}
+                  className="truncate font-medium hover:underline"
+                >
                   {row.user.username}
-                </span>
+                </Link>
               </div>
             </TableCell>
             <TableCell className="hidden max-w-xs truncate text-muted-foreground lg:table-cell">

@@ -7,6 +7,7 @@ import {
   friendsSummarySchema,
   pageOf,
   personSchema,
+  publicUserSchema,
   requestSchema,
   sentRequestSchema,
 } from "../schemas";
@@ -20,6 +21,7 @@ import type {
   PeopleQuery,
   Person,
   RequestKind,
+  PublicUser,
 } from "../types";
 
 /** An empty search is left out of the URL rather than sent as `search=`. */
@@ -27,6 +29,11 @@ const text = (search: string) => search.trim() || undefined;
 
 /** One function per backend route; the shapes come from `../schemas`. */
 export const friendsApi = {
+  async profile(userId: string): Promise<PublicUser> {
+    const { data } = await api.get(`/users/${userId}`);
+    return parseResponse(publicUserSchema, data, "GET /users/:id");
+  },
+
   async list(query: FriendsQuery): Promise<Page<Friend>> {
     const { data } = await api.get("/friends", {
       params: { ...query, search: text(query.search) },

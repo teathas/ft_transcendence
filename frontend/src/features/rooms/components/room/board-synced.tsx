@@ -70,10 +70,18 @@ function useRoomAssetStore(roomId: string): TLAssetStore {
   return useMemo(
     () => ({
       async upload(_asset, file) {
-        const uploaded = await upload(file);
+        const uploaded = await upload({ file });
+        // Persist no credential in the shared board document. Every viewer
+        // supplies their own current token from `resolve` below.
         return { src: `${env.apiUrl}${uploaded.url}` };
       },
-      resolve: (asset) => asset.props.src,
+      resolve: (asset) => {
+        if (!asset.props.src) return null;
+        const url = new URL(asset.props.src, window.location.origin);
+        url.searchParams.set("token", tokenStore.get() ?? "");
+        url.searchParams.set("preview", "1");
+        return url.toString();
+      },
     }),
     [upload],
   );

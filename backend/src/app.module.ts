@@ -9,7 +9,7 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { UsersModule } from './users/users.module';
 import { RoomsModule } from './rooms/rooms.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
-import { join, sep } from 'path'
+import { join } from 'path'
 import { FriendsModule } from './friends/friends.module';
 import { MessagesModule } from './messages/messages.module';
 import { RealtimeModule } from './realtime/realtime.module';
@@ -25,16 +25,14 @@ import { NotificationsModule } from './notifications/notifications.module';
 		UsersModule,
 		RoomsModule,
 		ServeStaticModule.forRoot({
-			rootPath: join(process.env.UPLOAD_DIR ?? '/app/uploads'),
-			serveRoot: '/uploads',
+
+			// Avatars are public. Room files go through RoomFilesController,
+			// which validates the token and current room membership.
+			rootPath: join(process.env.UPLOAD_DIR ?? '/app/uploads', 'avatars'),
+			serveRoot: '/uploads/avatars',
 			serveStaticOptions: {
-				// Room files are anyone's bytes: download them, never render them
-				// from our address, and never let the browser guess a type.
-				setHeaders: (res, path) => {
+				setHeaders: (res) => {
 					res.setHeader('X-Content-Type-Options', 'nosniff');
-					if (path.includes(`${sep}rooms${sep}`)) {
-						res.setHeader('Content-Disposition', 'attachment');
-					}
 				},
 			},
 		}),

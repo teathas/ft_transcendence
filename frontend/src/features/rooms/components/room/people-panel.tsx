@@ -9,7 +9,9 @@ import { PresenceDot } from "@/components/ui/presence-dot";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSession } from "@/features/auth/hooks/use-auth";
 import { useDict } from "@/i18n/client";
+import { Link } from "@/i18n/navigation";
 import { t } from "@/i18n/translate";
+import { routes } from "@/config/routes";
 
 import { useParticipants, useRoom } from "../../hooks/use-room";
 import type { Participant } from "../../types";
@@ -19,14 +21,23 @@ function Person({ person, isMe }: { person: Participant; isMe: boolean }) {
 
   return (
     <li className="flex items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-accent/50">
-      <span className="relative shrink-0">
-        <Avatar src={person.avatarUrl} name={person.username} className="size-9" />
+      <Link href={routes.user(person.id)} className="relative shrink-0">
+        <Avatar
+          src={person.avatarUrl}
+          name={person.username}
+          className="size-9"
+        />
         <PresenceDot online={person.online} />
-      </span>
+      </Link>
 
       <span className="min-w-0 flex-1">
         <span className="flex items-center gap-1.5">
-          <span className="truncate text-sm font-medium">{person.username}</span>
+          <Link
+            href={routes.user(person.id)}
+            className="truncate text-sm font-medium hover:underline"
+          >
+            {person.username}
+          </Link>
           {isMe && (
             <span className="shrink-0 text-xs text-muted-foreground">
               ({d.room.you})

@@ -74,6 +74,30 @@ export function useSendMessage(friendId: string) {
   });
 }
 
+export function useDeleteMessage(friendId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (messageId: string) => messagesApi.delete(friendId, messageId),
+    onSuccess: (_void, messageId) => {
+      queryClient.setQueryData<InfiniteData<ThreadPage, string | undefined>>(
+        queryKeys.messages.thread(friendId),
+        (data) =>
+          data && {
+            ...data,
+            pages: data.pages.map((page) => ({
+              ...page,
+              items: page.items.filter((message) => message.id !== messageId),
+            })),
+          },
+      );
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.messages.conversations(),
+      });
+    },
+  });
+}
+
 /** Opening a conversation reads it; the badges then drop. */
 export function useMarkRead(friendId: string) {
   const queryClient = useQueryClient();

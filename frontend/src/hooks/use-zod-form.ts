@@ -158,6 +158,13 @@ export function useZodForm<S extends ZodType, V extends FieldValues>({
     [schema, values, onSubmit, schemaErrors, fieldNames, fieldId],
   );
 
+  const reset = useCallback(() => {
+    setValues(initialValues);
+    setTouched({});
+    setSubmitAttempted(false);
+    setEditedSinceSubmit({});
+  }, [initialValues]);
+
   return {
     values,
     /** Errors that should be displayed right now, keyed by field. */
@@ -169,5 +176,6 @@ export function useZodForm<S extends ZodType, V extends FieldValues>({
     getFieldProps,
     getErrorProps,
     handleSubmit,
+    reset,
   };
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { LoaderCircle } from "lucide-react";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -43,6 +44,11 @@ export function PasswordForm() {
       changePassword.mutate({ currentPassword, newPassword });
     },
   });
+
+  const { reset } = form;
+  useEffect(() => {
+    if (changePassword.isSuccess) reset();
+  }, [changePassword.isSuccess, reset]);
 
   return (
     <SectionCard
