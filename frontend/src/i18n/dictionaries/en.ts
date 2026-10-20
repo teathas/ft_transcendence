@@ -629,6 +629,42 @@ export const en = {
       submit: "Change password",
       changed: "Your password has been changed.",
     },
+    apiKeys: {
+      title: "API keys",
+      description:
+        "Connect external applications to the rooms you own without sharing your password.",
+      documentation: "Open API documentation",
+      create: "Create API key",
+      loadError: "Could not load your API keys.",
+      empty: "No API keys yet",
+      emptyHint: "Create a key when an external application needs access.",
+      active: "Active",
+      expired: "Expired",
+      revoked: "Revoked",
+      lastUsed: "Last used",
+      neverUsed: "Never used",
+      expires: "Expires",
+      revoke: "Revoke",
+      createTitle: "Create an API key",
+      createDescription:
+        "Give the key a recognizable name and, optionally, an expiration date.",
+      name: "Key name",
+      namePlaceholder: "CI integration",
+      nameHint: "This name is only used to help you identify the key.",
+      expiration: "Expiration date",
+      expirationHint:
+        "Optional. Leave empty for a key without an expiration date.",
+      createdTitle: "API key created",
+      createdDescription:
+        "This is the only time the complete key will be displayed.",
+      copyWarning:
+        "Copy and store this key securely before closing this window.",
+      copy: "Copy API key",
+      revokeTitle: "Revoke this API key?",
+      revokeDescription:
+        "Applications using it will immediately lose access. This cannot be undone.",
+      confirmRevoke: "Revoke key",
+    },
     changePhoto: "Change profile photo",
     removePhoto: "Remove profile photo",
     account: {
