@@ -8,8 +8,6 @@ import { NotificationsService } from '../notifications/notifications.service';
 @Injectable()
 export class MessagesService {
     constructor(private prisma: PrismaService, private realtime: RealtimeService,  private notificationsService: NotificationsService) {}
-
-
     private async assertMember(roomId: string, userId: string) {
         const member = await this.prisma.roomMember.findUnique({
             where: { userId_roomId: { userId, roomId } },
@@ -62,7 +60,6 @@ export class MessagesService {
      */
     async list(roomId: string, userId: string, query: ListRoomMessagesDto) {
         await this.assertMember(roomId, userId);
-
         const limit = query.limit ?? MESSAGES_PAGE;
         const rows = await this.prisma.message.findMany({
             where: { roomId },
@@ -109,14 +106,12 @@ export class MessagesService {
         await this.prisma.message.delete({
             where: { id: messageId },
         });
-        await this.prisma.notification.deleteMany({
-        where: {
+        await this.notificationsService.deleteMatchingNotifications({
             type: 'NEW_ROOM_MESSAGE',
             data: {
-            path: ['messageId'],
-            equals: messageId,
+                path: ['messageId'],
+                equals: messageId,
             },
-        },
         });
 		this.realtime.emitToRoom(roomId, 'room:message-deleted', { roomId, messageId });
         return { message: 'Message deleted successfully' };

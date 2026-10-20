@@ -1,4 +1,4 @@
-import { Controller, Get, Patch, Param, Query, ParseUUIDPipe } from '@nestjs/common';
+import { Controller, Get, Patch,Delete, Param, Query, ParseUUIDPipe } from '@nestjs/common';
 import { ListNotificationsDto } from './dto/list-notifications.dto';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { NotificationsService } from './notifications.service';
@@ -26,5 +26,13 @@ export class NotificationsController {
     @CurrentUser() user: { sub: string },
   ) {
     return this.notificationsService.markRead(user.sub, id);
+  }
+
+  @Delete(':id')
+  deleteNotification(
+    @CurrentUser() user: { sub: string },
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
+    return this.notificationsService.deleteNotification(user.sub, id);
   }
 }

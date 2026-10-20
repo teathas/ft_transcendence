@@ -106,15 +106,18 @@ export class DirectMessagesService {
     });
     if (count > 0)
       this.realtime.emitToUser(friendId, 'dm:read', { readerId: meId });
-    await this.prisma.notification.updateMany({
-			where: {
-				recipientId: meId,
-				actorId: friendId,
-				type: 'NEW_DIRECT_MESSAGE',
-				readAt: null,
-			},
-			data: { readAt: new Date() },
-		});
+    const notification = await this.prisma.notification.findFirst({
+      where: {
+        recipientId: meId,
+        actorId: friendId,
+        type: 'NEW_DIRECT_MESSAGE',
+        readAt: null,
+      },
+      select: { id: true },
+    });
+
+    if (notification)
+      await this.notificationsService.markRead(meId,notification.id);
     return { updated: count };
   }
 
@@ -139,6 +142,13 @@ export class DirectMessagesService {
     }
 
     await this.prisma.directMessage.delete({ where: { id: messageId } });
+
+    await this.notificationsService.deleteMatchingNotifications({
+      type: 'NEW_DIRECT_MESSAGE',
+      recipientId: friendId,
+      actorId: meId,
+      data: { path: ['messageId'], equals: messageId },
+    });
     this.realtime.emitToUser(meId, 'dm:message-deleted', {
       friendId,
       messageId,
@@ -147,6 +157,7 @@ export class DirectMessagesService {
       friendId: meId,
       messageId,
     });
+
   }
 
   /**

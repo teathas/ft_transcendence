@@ -80,12 +80,10 @@ export class FriendsService {
 			type: 'FRIEND_REQUEST_ACCEPTED',
 			data: { friendshipId: id },
 		});
-		await this.prisma.notification.deleteMany({
-			where: {
-				type: 'FRIEND_REQUEST',
-				recipientId: meId,
-				actorId: request.requesterId,
-			},
+		await this.notificationsService.markMatchingNotificationsRead({
+			type: 'FRIEND_REQUEST',
+			recipientId: meId,
+			actorId: request.requesterId,
 		});
 		return { id, status: 'ACCEPTED' };
 	}
@@ -104,13 +102,12 @@ export class FriendsService {
 		if (result.count === 0) {
 			throw new NotFoundException('Friend request not found');
 		}
-		await this.prisma.notification.deleteMany({
-			where: {
-				type: 'FRIEND_REQUEST',
-				recipientId: meId,
-				actorId: request.requesterId,
-			},
+		await this.notificationsService.markMatchingNotificationsRead({
+			type: 'FRIEND_REQUEST',
+			recipientId: meId,
+			actorId: request.requesterId,
 		});
+		
 	}
 
 	/** The username filter, as Prisma wants it; empty when nothing was typed. */
@@ -275,12 +272,10 @@ export class FriendsService {
 		if (count === 0) {
 			throw new NotFoundException('Friend request not found');
 		}
-		await this.prisma.notification.deleteMany({
-			where: {
-				type: 'FRIEND_REQUEST',
-				recipientId: request.addresseeId,
-				actorId: meId,
-			},
+		await this.notificationsService.deleteMatchingNotifications({
+			type: 'FRIEND_REQUEST',
+			actorId: meId,
+			recipientId: request.addresseeId,
 		});
 
 	}
@@ -297,10 +292,13 @@ export class FriendsService {
 		if (count === 0) {
 			throw new NotFoundException('Friendship not found');
 		}
-		await this.prisma.notification.deleteMany({
-			where: {
-				type: { in: ['FRIEND_REQUEST', 'FRIEND_REQUEST_ACCEPTED'] },
-				data: { path: ['friendshipId'], equals: friendshipId },
+		await this.notificationsService.deleteMatchingNotifications({
+			type: {
+				in: ['FRIEND_REQUEST', 'FRIEND_REQUEST_ACCEPTED'],
+			},
+			data: {
+				path: ['friendshipId'],
+				equals: friendshipId,
 			},
 		});
 	}
