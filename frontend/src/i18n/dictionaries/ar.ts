@@ -469,6 +469,12 @@ export const ar = {
     placeholder: "اكتب رسالة…",
     composerLabel: "رسالة",
     send: "إرسال",
+    deleteMessage: "حذف الرسالة",
+    deleteConfirm: {
+      title: "هل تريد حذف هذه الرسالة؟",
+      description: "ستُحذف هذه الرسالة لدى الجميع ولا يمكن التراجع عن ذلك.",
+      confirm: "حذف الرسالة",
+    },
     error: {
       list: "تعذّر تحميل المحادثات.",
       thread: "تعذّر تحميل هذه المحادثة.",
@@ -515,6 +521,18 @@ export const ar = {
     recentRooms: "الغرف الأخيرة",
   },
 
+  publicProfile: {
+    metaTitle: "الملف الشخصي",
+    metaDescription: "عرض الملف الشخصي العام لعضو في Shared Room.",
+    back: "العودة إلى المستخدمين",
+    backToPeople: "تصفح المستخدمين",
+    about: "نبذة",
+    noBio: "لم يضف هذا الشخص نبذة بعد.",
+    unavailable: {
+      title: "الملف الشخصي غير متاح",
+      body: "هذا الحساب غير موجود أو لم يعد متاحًا.",
+    },
+  },
   profile: {
     metaTitle: "الملف الشخصي",
     metaDescription: "أدِر صورتك وبيانات حسابك وكلمة مرورك.",
@@ -602,6 +620,9 @@ export const ar = {
     deleteFile: "حذف {name}",
     fileTooBig: "{name} يتجاوز {size} ولم تتم مشاركته.",
     fileTypeNotAllowed: "نوع الملف {name} غير مدعوم.",
+    uploadProgress: "تقدم رفع الملف",
+    previewFile: "معاينة {name}",
+    pdfPreview: "معاينة ملف PDF",
     invite: "دعوة",
     inviteTitle: "دعوة أشخاص",
     inviteBody: "يمكن لأي شخص لديه هذا الرمز الانضمام إلى الغرفة.",

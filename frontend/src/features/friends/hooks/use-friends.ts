@@ -56,6 +56,14 @@ export function usePeople(query: PeopleQuery, enabled = true) {
   });
 }
 
+export function usePublicProfile(userId: string) {
+  return useQuery({
+    queryKey: queryKeys.users.detail(userId),
+    queryFn: () => friendsApi.profile(userId),
+    retry: false,
+  });
+}
+
 /** Counts for the tabs and the sidebar badges; refreshed every 15 s. */
 export function useFriendsSummary() {
   return useQuery({

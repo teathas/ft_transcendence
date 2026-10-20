@@ -67,7 +67,9 @@ export const toFile = (wire: FileWire): RoomFile => ({
   url: wire.url,
 });
 
-export const toParticipant = (member: DetailWire["members"][number]): Participant => ({
+export const toParticipant = (
+  member: DetailWire["members"][number],
+): Participant => ({
   id: member.id,
   username: member.username,
   avatarUrl: member.avatarUrl,
@@ -140,8 +142,22 @@ export const roomsApi = {
     );
   },
 
-  async uploadFile(id: string, file: File): Promise<RoomFile> {
-    if (env.enableMocks) return roomDetailMocks.uploadFile(file);
+  async deleteMessage(id: string, messageId: string): Promise<void> {
+    if (env.enableMocks) return roomDetailMocks.deleteMessage(messageId);
+
+    await api.delete(`/rooms/${id}/messages/${messageId}`);
+  },
+
+  async uploadFile(
+    id: string,
+    file: File,
+    onProgress?: (percent: number) => void,
+  ): Promise<RoomFile> {
+    if (env.enableMocks) {
+      const uploaded = await roomDetailMocks.uploadFile(file);
+      onProgress?.(100);
+      return uploaded;
+    }
 
     const body = new FormData();
     body.append("file", file, file.name);
@@ -149,6 +165,12 @@ export const roomsApi = {
     const { data } = await api.post(`/rooms/${id}/files`, body, {
       // Let the browser set multipart with its boundary.
       headers: { "Content-Type": "multipart/form-data" },
+      // Large files on slow connections must not inherit the global 15 s limit.
+      timeout: 0,
+      onUploadProgress: ({ loaded, total }) => {
+        if (total)
+          onProgress?.(Math.min(100, Math.round((loaded / total) * 100)));
+      },
     });
     return toFile(parseResponse(fileWireSchema, data, "POST /rooms/:id/files"));
   },

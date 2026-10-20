@@ -473,6 +473,13 @@ export const en = {
     placeholder: "Write a message…",
     composerLabel: "Message",
     send: "Send",
+    deleteMessage: "Delete message",
+    deleteConfirm: {
+      title: "Delete this message?",
+      description:
+        "This message will be removed for everyone. This cannot be undone.",
+      confirm: "Delete message",
+    },
     error: {
       list: "Conversations couldn’t be loaded.",
       thread: "This conversation couldn’t be loaded.",
@@ -519,6 +526,18 @@ export const en = {
     recentRooms: "Recent rooms",
   },
 
+  publicProfile: {
+    metaTitle: "User profile",
+    metaDescription: "View a Shared Room member’s public profile.",
+    back: "Back to people",
+    backToPeople: "Browse people",
+    about: "About",
+    noBio: "This person has not added a bio yet.",
+    unavailable: {
+      title: "Profile unavailable",
+      body: "This account does not exist or is no longer available.",
+    },
+  },
   profile: {
     metaTitle: "Profile",
     metaDescription: "Manage your photo, account details and password.",
@@ -607,6 +626,9 @@ export const en = {
     deleteFile: "Delete {name}",
     fileTooBig: "{name} is over {size} and was not shared.",
     fileTypeNotAllowed: "{name} is not a supported file type.",
+    uploadProgress: "File upload progress",
+    previewFile: "Preview {name}",
+    pdfPreview: "PDF preview",
     invite: "Invite",
     inviteTitle: "Invite people",
     inviteBody: "Anyone with this code can join the room.",

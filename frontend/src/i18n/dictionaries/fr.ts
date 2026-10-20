@@ -479,6 +479,13 @@ export const fr = {
     placeholder: "Écrire un message…",
     composerLabel: "Message",
     send: "Envoyer",
+    deleteMessage: "Supprimer le message",
+    deleteConfirm: {
+      title: "Supprimer ce message ?",
+      description:
+        "Ce message sera supprimé pour tout le monde. Cette action est irréversible.",
+      confirm: "Supprimer le message",
+    },
     error: {
       list: "Impossible de charger les conversations.",
       thread: "Impossible de charger cette conversation.",
@@ -525,6 +532,18 @@ export const fr = {
     recentRooms: "Salles récentes",
   },
 
+  publicProfile: {
+    metaTitle: "Profil utilisateur",
+    metaDescription: "Consultez le profil public d’un membre de Shared Room.",
+    back: "Retour aux utilisateurs",
+    backToPeople: "Voir les utilisateurs",
+    about: "Présentation",
+    noBio: "Cette personne n’a pas encore ajouté de présentation.",
+    unavailable: {
+      title: "Profil indisponible",
+      body: "Ce compte n’existe pas ou n’est plus disponible.",
+    },
+  },
   profile: {
     metaTitle: "Profil",
     metaDescription:
@@ -616,6 +635,9 @@ export const fr = {
     deleteFile: "Supprimer {name}",
     fileTooBig: "{name} dépasse {size} et n’a pas été partagé.",
     fileTypeNotAllowed: "Le type de fichier de {name} n’est pas accepté.",
+    uploadProgress: "Progression de l’envoi du fichier",
+    previewFile: "Prévisualiser {name}",
+    pdfPreview: "Aperçu du PDF",
     invite: "Inviter",
     inviteTitle: "Inviter des participants",
     inviteBody: "Toute personne ayant ce code peut rejoindre la salle.",

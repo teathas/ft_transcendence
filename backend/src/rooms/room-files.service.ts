@@ -114,7 +114,7 @@ export class RoomFilesService {
 		this.realtime.emitToRoom(roomId, 'room:file-removed', { roomId, fileId: file.id });
 	}
 
-	/** Checks the token and the membership, then gives the file's path on disk */
+	/** Validates the query token and room membership before exposing bytes. */
 	async resolveDownload(roomId: string, filename: string, token: string | undefined) {
 		if (!token) throw new UnauthorizedException('No token provided');
 		const { sub } = await this.auth.verifyAccessToken(token);
@@ -123,9 +123,14 @@ export class RoomFilesService {
 		const safe = basename(filename);
 		const file = await this.prisma.roomFile.findFirst({
 			where: { roomId, url: `/uploads/rooms/${roomId}/${safe}` },
-			select: { id: true },
+			select: { name: true, mimeType: true },
 		});
 		if (!file) throw new NotFoundException('File not found');
-		return join(uploadRoot(), 'rooms', roomId, safe);
+
+		return {
+			path: join(uploadRoot(), 'rooms', roomId, safe),
+			name: file.name,
+			mimeType: file.mimeType,
+		};
 	}
 }

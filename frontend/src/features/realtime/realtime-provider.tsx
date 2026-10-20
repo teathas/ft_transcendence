@@ -67,7 +67,10 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
             if (data.pages.some((p) => p.items.some((m) => m.id === dm.id))) {
               return data;
             }
-            return { ...data, pages: [{ ...first, items: [dm, ...first.items] }, ...rest] };
+            return {
+              ...data,
+              pages: [{ ...first, items: [dm, ...first.items] }, ...rest],
+            };
           },
         );
         void queryClient.invalidateQueries({
@@ -88,8 +91,37 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
         });
       },
 
+      "dm:message-deleted": ({
+        friendId,
+        messageId,
+      }: {
+        friendId: string;
+        messageId: string;
+      }) => {
+        queryClient.setQueryData<InfiniteData<ThreadPage, string | undefined>>(
+          queryKeys.messages.thread(friendId),
+          (data) =>
+            data && {
+              ...data,
+              pages: data.pages.map((page) => ({
+                ...page,
+                items: page.items.filter((message) => message.id !== messageId),
+              })),
+            },
+        );
+        void queryClient.invalidateQueries({
+          queryKey: queryKeys.messages.conversations(),
+        });
+      },
+
       // ---- rooms
-      "room:message": ({ roomId, message }: { roomId: string; message: unknown }) => {
+      "room:message": ({
+        roomId,
+        message,
+      }: {
+        roomId: string;
+        message: unknown;
+      }) => {
         const parsed = messageWireSchema.safeParse(message);
         if (!parsed.success) return;
         const incoming = toMessage(parsed.data);
@@ -98,17 +130,52 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
           queryKeys.rooms.messages(roomId),
           (data) => {
             if (!data) return data;
-            if (data.pages.some((p) => p.items.some((m) => m.id === incoming.id))) {
+            if (
+              data.pages.some((p) => p.items.some((m) => m.id === incoming.id))
+            ) {
               return data;
             }
             const [first, ...rest] = data.pages;
-            return { ...data, pages: [{ ...first, items: [incoming, ...first.items] }, ...rest] };
+            return {
+              ...data,
+              pages: [{ ...first, items: [incoming, ...first.items] }, ...rest],
+            };
           },
         );
-        void queryClient.invalidateQueries({ queryKey: queryKeys.rooms.all, predicate: (q) => q.queryKey[1] === "list" || q.queryKey[1] === "recent" });
+        void queryClient.invalidateQueries({
+          queryKey: queryKeys.rooms.all,
+          predicate: (q) =>
+            q.queryKey[1] === "list" || q.queryKey[1] === "recent",
+        });
       },
 
-      "room:file-added": ({ roomId, file }: { roomId: string; file: unknown }) => {
+      "room:message-deleted": ({
+        roomId,
+        messageId,
+      }: {
+        roomId: string;
+        messageId: string;
+      }) => {
+        queryClient.setQueryData<InfiniteData<MessagePage, string | undefined>>(
+          queryKeys.rooms.messages(roomId),
+          (data) =>
+            data && {
+              ...data,
+              pages: data.pages.map((page) => ({
+                ...page,
+                items: page.items.filter((message) => message.id !== messageId),
+              })),
+            },
+        );
+      },
+
+      "room:file-added": ({
+        roomId,
+        file,
+      }: {
+        roomId: string;
+        file: unknown;
+      }) => {
         const parsed = fileWireSchema.safeParse(file);
         if (!parsed.success) return;
         const added = toFile(parsed.data);
@@ -119,7 +186,13 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
         );
       },
 
-      "room:file-removed": ({ roomId, fileId }: { roomId: string; fileId: string }) =>
+      "room:file-removed": ({
+        roomId,
+        fileId,
+      }: {
+        roomId: string;
+        fileId: string;
+      }) =>
         patchRoom(roomId, (detail) => ({
           ...detail,
           files: detail.files.filter((f) => f.id !== fileId),
@@ -127,30 +200,67 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
 
       // Someone opened the room. If they are not in the list yet they have just
       // joined it, so the room is read again to get them (and their role).
-      "room:user-joined": ({ roomId, userId }: { roomId: string; userId: string }) => {
-        const detail = queryClient.getQueryData<RoomDetail>(queryKeys.rooms.detail(roomId));
+      "room:user-joined": ({
+        roomId,
+        userId,
+      }: {
+        roomId: string;
+        userId: string;
+      }) => {
+        const detail = queryClient.getQueryData<RoomDetail>(
+          queryKeys.rooms.detail(roomId),
+        );
         if (detail && !detail.participants.some((p) => p.id === userId)) {
-          void queryClient.invalidateQueries({ queryKey: queryKeys.rooms.detail(roomId), exact: true });
+          void queryClient.invalidateQueries({
+            queryKey: queryKeys.rooms.detail(roomId),
+            exact: true,
+          });
         }
       },
 
-      "room:member-left": ({ roomId, userId }: { roomId: string; userId: string }) => {
-        const detail = queryClient.getQueryData<RoomDetail>(queryKeys.rooms.detail(roomId));
-        const wasHost = detail?.participants.some((p) => p.id === userId && p.role === "host");
+      "room:member-left": ({
+        roomId,
+        userId,
+      }: {
+        roomId: string;
+        userId: string;
+      }) => {
+        const detail = queryClient.getQueryData<RoomDetail>(
+          queryKeys.rooms.detail(roomId),
+        );
+        const wasHost = detail?.participants.some(
+          (p) => p.id === userId && p.role === "host",
+        );
         patchRoom(roomId, (current) => ({
           ...current,
           participants: current.participants.filter((p) => p.id !== userId),
-          room: { ...current.room, participantCount: Math.max(0, current.room.participantCount - 1) },
+          room: {
+            ...current.room,
+            participantCount: Math.max(0, current.room.participantCount - 1),
+          },
         }));
         // The room goes to its oldest member when the host leaves: read it again.
         if (wasHost) {
-          void queryClient.invalidateQueries({ queryKey: queryKeys.rooms.detail(roomId), exact: true });
+          void queryClient.invalidateQueries({
+            queryKey: queryKeys.rooms.detail(roomId),
+            exact: true,
+          });
         }
-        void queryClient.invalidateQueries({ queryKey: queryKeys.rooms.all, predicate: (q) => q.queryKey[1] === "list" || q.queryKey[1] === "recent" });
+        void queryClient.invalidateQueries({
+          queryKey: queryKeys.rooms.all,
+          predicate: (q) =>
+            q.queryKey[1] === "list" || q.queryKey[1] === "recent",
+        });
       },
 
       // ---- who is online (the server tells everyone when someone's status changes)
-      "presence:update": ({ userId, status }: { userId: string; status: "ONLINE" | "OFFLINE" }) => {
+      "presence:update": ({
+        userId,
+        status,
+      }: {
+        userId: string;
+        status: "ONLINE" | "OFFLINE";
+      }) => {
         queryClient.setQueriesData<RoomDetail>(
           {
             queryKey: [...queryKeys.rooms.all, "detail"],
@@ -166,8 +276,12 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
             },
         );
         void queryClient.invalidateQueries({ queryKey: queryKeys.friends.all });
-        void queryClient.invalidateQueries({ queryKey: queryKeys.messages.conversations() });
-        void queryClient.invalidateQueries({ queryKey: queryKeys.users.detail(userId) });
+        void queryClient.invalidateQueries({
+          queryKey: queryKeys.messages.conversations(),
+        });
+        void queryClient.invalidateQueries({
+          queryKey: queryKeys.users.detail(userId),
+        });
       },
     };
 
