@@ -23,14 +23,14 @@ export async function SiteFooter() {
   const d = await getDict();
 
   const productLinks = [
-    { label: d.landing.sections.features, href: "#features" },
-    { label: d.landing.sections.classroom, href: "#classroom" },
-    { label: d.landing.sections.howItWorks, href: "#how-it-works" },
+    { label: d.landing.sections.features, href: routes.features },
+    { label: d.landing.sections.classroom, href: routes.classroom },
+    { label: d.landing.sections.howItWorks, href: routes.howItWorks },
   ];
 
   return (
     <footer className="border-t">
-      <Container className="grid gap-10 py-12 sm:grid-cols-2 lg:grid-cols-4 lg:py-16">
+      <Container className="grid gap-10 py-12 sm:grid-cols-2 lg:grid-cols-5 lg:py-16">
         <div className="lg:col-span-2">
           <BrandWordmark />
           <p className="mt-3 max-w-xs text-sm text-pretty text-muted-foreground">
@@ -52,12 +52,12 @@ export async function SiteFooter() {
           <ul className="mt-3 flex flex-col gap-2">
             {productLinks.map((link) => (
               <li key={link.href}>
-                <a
+                <Link
                   href={link.href}
                   className="text-sm text-muted-foreground transition-colors hover:text-foreground"
                 >
                   {link.label}
-                </a>
+                </Link>
               </li>
             ))}
           </ul>
@@ -88,6 +88,28 @@ export async function SiteFooter() {
                 className="text-sm text-muted-foreground transition-colors hover:text-foreground"
               >
                 {d.landing.footer.login}
+              </Link>
+            </li>
+          </ul>
+        </div>
+
+        <div>
+          <p className="text-sm font-semibold">{d.landing.footer.legal}</p>
+          <ul className="mt-3 flex flex-col gap-2">
+            <li>
+              <Link
+                href={routes.privacy}
+                className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+              >
+                {d.landing.footer.privacy}
+              </Link>
+            </li>
+            <li>
+              <Link
+                href={routes.terms}
+                className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+              >
+                {d.landing.footer.terms}
               </Link>
             </li>
           </ul>
