@@ -637,6 +637,42 @@ export const fr = {
       submit: "Changer le mot de passe",
       changed: "Votre mot de passe a été changé.",
     },
+    apiKeys: {
+      title: "Clés API",
+      description:
+        "Connectez des applications externes aux salles dont vous êtes propriétaire sans partager votre mot de passe.",
+      documentation: "Ouvrir la documentation API",
+      create: "Créer une clé API",
+      loadError: "Impossible de charger vos clés API.",
+      empty: "Aucune clé API",
+      emptyHint:
+        "Créez une clé lorsqu’une application externe a besoin d’un accès.",
+      active: "Active",
+      expired: "Expirée",
+      revoked: "Révoquée",
+      lastUsed: "Dernière utilisation",
+      neverUsed: "Jamais utilisée",
+      expires: "Expire le",
+      revoke: "Révoquer",
+      createTitle: "Créer une clé API",
+      createDescription:
+        "Donnez-lui un nom reconnaissable et, si nécessaire, une date d’expiration.",
+      name: "Nom de la clé",
+      namePlaceholder: "Intégration CI",
+      nameHint: "Ce nom sert uniquement à reconnaître la clé.",
+      expiration: "Date d’expiration",
+      expirationHint: "Facultatif. Laissez vide pour une clé sans expiration.",
+      createdTitle: "Clé API créée",
+      createdDescription:
+        "C’est la seule fois où la clé complète sera affichée.",
+      copyWarning:
+        "Copiez et conservez cette clé en lieu sûr avant de fermer cette fenêtre.",
+      copy: "Copier la clé API",
+      revokeTitle: "Révoquer cette clé API ?",
+      revokeDescription:
+        "Les applications qui l’utilisent perdront immédiatement leur accès. Cette action est irréversible.",
+      confirmRevoke: "Révoquer la clé",
+    },
     changePhoto: "Changer la photo de profil",
     removePhoto: "Supprimer la photo de profil",
     account: {

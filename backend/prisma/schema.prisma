@@ -44,26 +44,45 @@ model Room {
 }
 
 model User {
-  id                     String       @id @default(uuid())
-  email                  String       @unique
-  username               String       @unique
+  id                     String          @id @default(uuid())
+  email                  String          @unique
+  username               String          @unique
   passwordHash           String
   avatarUrl              String?
   bio                    String?
-  status                 UserStatus   @default(OFFLINE)
+  status                 UserStatus      @default(OFFLINE)
   lastSeenAt             DateTime?
-  createdAt              DateTime     @default(now())
-  updatedAt              DateTime     @updatedAt
+  createdAt              DateTime        @default(now())
+  updatedAt              DateTime        @updatedAt
   rooms                  Room[]
   roomMemberships        RoomMember[]
-  sentFriendRequests     Friendship[] @relation("FriendshipRequester")
-  receivedFriendRequests Friendship[] @relation("FriendshipAddressee")
+  sentFriendRequests     Friendship[]    @relation("FriendshipRequester")
+  receivedFriendRequests Friendship[]    @relation("FriendshipAddressee")
   messages               Message[]
   sentDirectMessages     DirectMessage[] @relation("DirectMessageSent")
   receivedDirectMessages DirectMessage[] @relation("DirectMessageReceived")
   roomFiles              RoomFile[]
   notificationsReceived Notification[] @relation("NotificationRecipient")
   notificationsSent     Notification[] @relation("NotificationActor")
+  apiKeys                ApiKey[]
+}
+
+/// Credentials for third-party clients. Only a SHA-256 digest is stored; the
+/// plaintext key is returned once, when it is created.
+model ApiKey {
+  id         String    @id @default(uuid())
+  name       String
+  prefix     String
+  keyHash    String    @unique
+  userId     String
+  createdAt  DateTime  @default(now())
+  lastUsedAt DateTime?
+  expiresAt  DateTime?
+  revokedAt  DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
 }
 
 enum UserStatus {
