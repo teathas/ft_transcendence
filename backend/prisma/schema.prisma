@@ -65,6 +65,22 @@ model User {
   notificationsReceived Notification[] @relation("NotificationRecipient")
   notificationsSent     Notification[] @relation("NotificationActor")
   apiKeys                ApiKey[]
+  refreshSessions        RefreshSession[]
+}
+
+/// Server-side refresh sessions. The browser only receives the opaque token;
+/// the database keeps its SHA-256 digest so a database leak cannot replay it.
+model RefreshSession {
+  id        String   @id @default(uuid())
+  tokenHash String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
 }
 
 /// Credentials for third-party clients. Only a SHA-256 digest is stored; the

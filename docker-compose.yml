@@ -45,6 +45,9 @@ services:
       UPLOAD_DIR: ${UPLOAD_DIR}
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN}
+      REFRESH_TOKEN_EXPIRES_IN: ${REFRESH_TOKEN_EXPIRES_IN}
+      REFRESH_COOKIE_PATH: ${REFRESH_COOKIE_PATH}
+      NODE_ENV: ${NODE_ENV:-production}
     depends_on:
       pgdb:
         condition: service_healthy

@@ -1,6 +1,6 @@
 /**
- * Access token store, kept in `localStorage` so a reload does not sign the user
- * out — the backend issues no refresh cookie to get a new one from.
+ * Access token store. The HttpOnly refresh cookie cannot be read by JavaScript;
+ * it is used automatically by the API client when this short-lived token expires.
  *
  * Every storage access is wrapped: it throws on the server (there is no
  * `localStorage` there) and in private windows with storage blocked, and the
