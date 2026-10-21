@@ -6,9 +6,10 @@ import { RealtimeModule } from '../realtime/realtime.module';
 import { RoomQueriesService } from './room-queries.service';
 import { RoomFilesService } from './room-files.service';
 import { RoomFilesController } from './room-files.controller';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
-  imports: [AuthModule, RealtimeModule],
+  imports: [AuthModule, RealtimeModule,NotificationsModule],
   controllers: [RoomsController, RoomFilesController],
   exports: [RoomsService], 
   providers: [RoomsService, RoomQueriesService, RoomFilesService]

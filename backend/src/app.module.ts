@@ -17,6 +17,7 @@ import { DirectMessagesModule } from './direct-messages/direct-messages.module';
 import { BoardSyncModule } from './board-sync/board-sync.module';
 import { ApiKeysModule } from './api-keys/api-keys.module';
 import { PublicApiModule } from './public-api/public-api.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { PublicApiModule } from './public-api/public-api.module';
     RealtimeModule,
     DirectMessagesModule,
     BoardSyncModule,
+    NotificationsModule,
     ApiKeysModule,
     PublicApiModule,
   ],

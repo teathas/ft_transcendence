@@ -11,6 +11,7 @@ import { toFriendPair } from '../friends/utils/friend-pair';
 import { SendDirectMessageDto } from './dto/send-direct-message.dto';
 import { ListDirectMessagesDto } from './dto/list-direct-messages.dto';
 import { RealtimeService } from '../realtime/realtime.service';
+import { NotificationsService } from '../notifications/notifications.service';
 
 const DEFAULT_LIMIT = 30;
 
@@ -29,6 +30,7 @@ export class DirectMessagesService {
   constructor(
     private prisma: PrismaService,
     private realtime: RealtimeService,
+    private  notificationsService: NotificationsService
   ) {}
 
   /** Only accepted friends can talk to each other. */
@@ -56,6 +58,12 @@ export class DirectMessagesService {
     });
     this.realtime.emitToUser(friendId, 'dm:message', { message });
     this.realtime.emitToUser(meId, 'dm:message', { message });
+    await this.notificationsService.createNotification({
+			recipientId: friendId,
+			actorId: meId,
+			type: 'NEW_DIRECT_MESSAGE',
+			data: { messageId: message.id },
+		});
     return message;
   }
 
@@ -98,6 +106,18 @@ export class DirectMessagesService {
     });
     if (count > 0)
       this.realtime.emitToUser(friendId, 'dm:read', { readerId: meId });
+    const notification = await this.prisma.notification.findFirst({
+      where: {
+        recipientId: meId,
+        actorId: friendId,
+        type: 'NEW_DIRECT_MESSAGE',
+        readAt: null,
+      },
+      select: { id: true },
+    });
+
+    if (notification)
+      await this.notificationsService.markRead(meId,notification.id);
     return { updated: count };
   }
 
@@ -122,6 +142,13 @@ export class DirectMessagesService {
     }
 
     await this.prisma.directMessage.delete({ where: { id: messageId } });
+
+    await this.notificationsService.deleteMatchingNotifications({
+      type: 'NEW_DIRECT_MESSAGE',
+      recipientId: friendId,
+      actorId: meId,
+      data: { path: ['messageId'], equals: messageId },
+    });
     this.realtime.emitToUser(meId, 'dm:message-deleted', {
       friendId,
       messageId,
@@ -130,6 +157,7 @@ export class DirectMessagesService {
       friendId: meId,
       messageId,
     });
+
   }
 
   /**
