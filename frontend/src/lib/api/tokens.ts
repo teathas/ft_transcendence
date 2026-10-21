@@ -30,6 +30,20 @@ let accessToken: string | null = null;
 type Listener = (token: string | null) => void;
 const listeners = new Set<Listener>();
 
+/**
+ * Seconds before a JWT expires, read from its payload (negative once expired).
+ * Only to decide when to renew: the server stays the one that verifies it.
+ */
+export function secondsUntilExpiry(token: string): number {
+  try {
+    const payload = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+    const { exp } = JSON.parse(atob(payload)) as { exp: number };
+    return exp - Date.now() / 1000;
+  } catch {
+    return 0;
+  }
+}
+
 export const tokenStore = {
   // Read lazily, so the first call in the browser picks up a saved token.
   get: () => (accessToken ??= read()),

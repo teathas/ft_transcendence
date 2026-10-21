@@ -1,7 +1,9 @@
 import { io, type Socket } from "socket.io-client";
 
-import { tokenStore } from "@/lib/api";
+import { getValidToken, tokenStore } from "@/lib/api";
 import { env } from "@/lib/env";
+
+const RETRY_AFTER_REFUSAL_MS = 5_000;
 
 let socket: Socket | null = null;
 let connected = false;
@@ -25,11 +27,21 @@ export function getSocket(): Socket {
     socket = io(new URL(env.apiUrl).origin, {
       path: "/socket.io",
       autoConnect: false,
-      // A function, so a reconnect sends whatever the current token is.
-      auth: (send) => send({ token: tokenStore.get() ?? "" }),
+      // A function, so a reconnect sends the current token — renewed first if
+      // it has expired while the connection was down.
+      auth: (send) => void getValidToken().then((token) => send({ token: token ?? "" })),
     });
     socket.on("connect", () => setConnected(true));
     socket.on("disconnect", () => setConnected(false));
+    // After a refusal socket.io does not try again by itself. While someone is
+    // still signed in, ask again a little later (with a renewed token).
+    let retry: ReturnType<typeof setTimeout> | undefined;
+    socket.on("connect_error", () => {
+      clearTimeout(retry);
+      retry = setTimeout(() => {
+        if (socket && !socket.active && tokenStore.get()) socket.connect();
+      }, RETRY_AFTER_REFUSAL_MS);
+    });
   }
   return socket;
 }

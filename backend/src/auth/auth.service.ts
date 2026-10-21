@@ -9,7 +9,6 @@ import { ConfigService } from '@nestjs/config';
 import { Prisma } from '../generated/prisma/client';
 
 export type JwtPayload = { sub: string; email: string; jti: string; exp: number };
-export type AuthTokens = { accessToken: string; refreshToken: string };
 
 @Injectable()
 export class AuthService {
@@ -105,7 +104,7 @@ export class AuthService {
 		return { accessToken, refreshToken };
 	}
 
-	async refresh(refreshToken: string): Promise<AuthTokens> {
+	async refresh(refreshToken: string) {
 		const tokenHash = this.hashRefreshToken(refreshToken);
 		const session = await this.prisma.refreshSession.findUnique({
 			where: { tokenHash },
@@ -119,19 +118,9 @@ export class AuthService {
 			throw new UnauthorizedException('Invalid or expired refresh token');
 		}
 
-		const deleted = await this.prisma.refreshSession.deleteMany({
-			where: { id: session.id, tokenHash },
-		});
-		if (deleted.count !== 1) {
-			throw new UnauthorizedException('Refresh token has already been used');
-		}
-
-		const [accessToken, nextRefreshToken] = await Promise.all([
-			this.issueAccessToken(session.user),
-			this.createRefreshSession(session.userId),
-		]);
-
-		return { accessToken, refreshToken: nextRefreshToken };
+		// Keep the opaque session token stable until logout/expiry. This makes
+		// concurrent refreshes from several requests or browser tabs safe.
+		return { accessToken: await this.issueAccessToken(session.user) };
 	}
 
 	async logout(accessToken?: string, refreshToken?: string) {

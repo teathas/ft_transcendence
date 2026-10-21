@@ -5,7 +5,7 @@ import { useSync, useSyncDemo } from "@tldraw/sync";
 import { Tldraw, type Editor, type TLAssetStore } from "tldraw";
 
 import { useUploadRoomFile } from "@/features/rooms/hooks/use-room";
-import { tokenStore } from "@/lib/api";
+import { getValidToken, tokenStore } from "@/lib/api";
 import { env } from "@/lib/env";
 
 import { BOARD_COMPONENTS } from "./board-config";
@@ -90,14 +90,14 @@ function useRoomAssetStore(roomId: string): TLAssetStore {
 /** The API's own sync server: who may connect is decided by the token. */
 function ServerBoard({ roomId, ...rest }: BoardProps) {
   const assets = useRoomAssetStore(roomId);
-  // A function, so a reconnect sends whatever the current token is. A browser
-  // cannot set headers on a websocket, hence the query string. It must keep
-  // the same identity between renders: a new one makes `useSync` reconnect.
-  const uri = useCallback(
-    () =>
-      `${env.syncUrl}/sync/${roomId}?token=${encodeURIComponent(tokenStore.get() ?? "")}`,
-    [roomId],
-  );
+  // A function, so a reconnect sends the current token — renewed first if it
+  // has expired. A browser cannot set headers on a websocket, hence the query
+  // string. It must keep the same identity between renders: a new one makes
+  // `useSync` reconnect.
+  const uri = useCallback(async () => {
+    const token = await getValidToken();
+    return `${env.syncUrl}/sync/${roomId}?token=${encodeURIComponent(token ?? "")}`;
+  }, [roomId]);
   const store = useSync({ uri, assets });
   return <SyncedTldraw store={store} {...rest} />;
 }

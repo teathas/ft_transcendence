@@ -31,6 +31,18 @@ export class AuthController {
 		return options;
 	}
 
+	/**
+	 * Older versions set the cookie on other paths (e.g. '/'). The browser keeps
+	 * those as separate cookies and sends them all, so we expire them here to
+	 * guarantee a single refresh_token.
+	 */
+	private clearLegacyCookies(response: Response) {
+		const { path } = this.cookieOptions();
+		for (const legacyPath of ['/', '/api', '/auth', '/api/auth/refresh', '/api/auth/login']) {
+			if (legacyPath !== path) response.clearCookie(this.refreshCookieName, { ...this.clearCookieOptions(), path: legacyPath });
+		}
+	}
+
 	private readRefreshToken(request: Request) {
 		const cookies = request.headers.cookie?.split(';') ?? [];
 		for (const cookie of cookies) {
@@ -51,6 +63,7 @@ export class AuthController {
 	@HttpCode(HttpStatus.OK)
 	async login(@Body() dto: LoginDto, @Res({ passthrough: true }) response: Response) {
 		const { accessToken, refreshToken } = await this.authService.login(dto);
+		this.clearLegacyCookies(response);
 		response.cookie(this.refreshCookieName, refreshToken, this.cookieOptions());
 		return { accessToken };
 	}
@@ -62,10 +75,9 @@ export class AuthController {
 		const currentToken = this.readRefreshToken(request);
 		if (!currentToken) throw new UnauthorizedException('No refresh token provided');
 
+		this.clearLegacyCookies(response);
 		try {
-			const { accessToken, refreshToken } = await this.authService.refresh(currentToken);
-			response.cookie(this.refreshCookieName, refreshToken, this.cookieOptions());
-			return { accessToken };
+			return await this.authService.refresh(currentToken);
 		} catch (error) {
 			response.clearCookie(this.refreshCookieName, this.clearCookieOptions());
 			throw error;
@@ -79,6 +91,7 @@ export class AuthController {
 		const accessToken = extractBearerToken(request);
 		const refreshToken = this.readRefreshToken(request);
 		await this.authService.logout(accessToken, refreshToken);
+		this.clearLegacyCookies(response);
 		response.clearCookie(this.refreshCookieName, this.clearCookieOptions());
 		return { message: 'Logged out successfully' };
 	}
