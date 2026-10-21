@@ -612,6 +612,13 @@ export const fr = {
     backToPeople: "Voir les utilisateurs",
     about: "Présentation",
     noBio: "Cette personne n’a pas encore ajouté de présentation.",
+    activity: "Activité partagée",
+    stats: {
+      roomsJoined: "Salles rejointes",
+      roomsOwned: "Salles créées",
+      messagesSent: "Messages publiés",
+      filesShared: "Fichiers partagés",
+    },
     unavailable: {
       title: "Profil indisponible",
       body: "Ce compte n’existe pas ou n’est plus disponible.",
@@ -623,6 +630,7 @@ export const fr = {
       "Gérez votre photo, vos informations et votre mot de passe.",
     header: {
       joined: "Inscrit le {date}",
+      viewPublicProfile: "Voir mon profil public",
     },
     error: {
       title: "Impossible de charger votre profil",

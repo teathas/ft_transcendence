@@ -17,6 +17,7 @@ import type {
   FriendsQuery,
   ListQuery,
   PeopleQuery,
+  PublicProfile,
   RequestKind,
 } from "../types";
 
@@ -56,11 +57,12 @@ export function usePeople(query: PeopleQuery, enabled = true) {
   });
 }
 
-export function usePublicProfile(userId: string) {
+export function usePublicProfile(userId: string, initialData?: PublicProfile) {
   return useQuery({
     queryKey: queryKeys.users.detail(userId),
     queryFn: () => friendsApi.profile(userId),
     retry: false,
+    initialData,
   });
 }
 

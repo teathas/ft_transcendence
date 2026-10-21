@@ -13,6 +13,7 @@ import { randomUUID } from 'crypto';
 import { mkdir, writeFile } from 'fs/promises';
 import { SearchUsersDto } from './dto/search-users.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { Public } from '../auth/decorators/public.decorator';
 
 @Controller('users')
 export class UsersController {
@@ -29,6 +30,7 @@ export class UsersController {
 	}
 
 	@Get(':id')
+	@Public()
 	async getProfile(@Param('id') id: string) {
 		return this.usersService.findPublicProfile(id);
 	}

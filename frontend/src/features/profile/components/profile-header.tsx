@@ -1,9 +1,12 @@
 "use client";
 
-import { CalendarDays, Mail } from "lucide-react";
+import { CalendarDays, ExternalLink, Mail } from "lucide-react";
 
+import { buttonStyles } from "@/components/ui/button";
+import { routes } from "@/config/routes";
 import type { User } from "@/features/auth/types";
 import { useDict } from "@/i18n/client";
+import { Link } from "@/i18n/navigation";
 import { t } from "@/i18n/translate";
 import { useFormat } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -28,9 +31,20 @@ export function ProfileHeader({ user }: { user: User }) {
         </div>
 
         <div className="flex flex-col gap-2">
-          <h1 className="text-2xl font-semibold tracking-tight">
-            {user.username}
-          </h1>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h1 className="text-2xl font-semibold tracking-tight">
+              {user.username}
+            </h1>
+            <Link
+              href={routes.user(user.id)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={buttonStyles({ variant: "outline", size: "sm" })}
+            >
+              {d.profile.header.viewPublicProfile}
+              <ExternalLink className="size-3.5" aria-hidden="true" />
+            </Link>
+          </div>
 
           {user.bio && (
             <p className="max-w-prose text-sm text-pretty text-muted-foreground">

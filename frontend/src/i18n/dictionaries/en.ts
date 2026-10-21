@@ -605,6 +605,13 @@ export const en = {
     backToPeople: "Browse people",
     about: "About",
     noBio: "This person has not added a bio yet.",
+    activity: "Shared activity",
+    stats: {
+      roomsJoined: "Rooms joined",
+      roomsOwned: "Rooms created",
+      messagesSent: "Room messages",
+      filesShared: "Files shared",
+    },
     unavailable: {
       title: "Profile unavailable",
       body: "This account does not exist or is no longer available.",
@@ -615,6 +622,7 @@ export const en = {
     metaDescription: "Manage your photo, account details and password.",
     header: {
       joined: "Joined {date}",
+      viewPublicProfile: "View public profile",
     },
     error: {
       title: "Could not load your profile",

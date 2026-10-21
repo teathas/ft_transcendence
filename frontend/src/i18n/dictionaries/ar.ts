@@ -600,6 +600,13 @@ export const ar = {
     backToPeople: "تصفح المستخدمين",
     about: "نبذة",
     noBio: "لم يضف هذا الشخص نبذة بعد.",
+    activity: "النشاط المشترك",
+    stats: {
+      roomsJoined: "الغرف المنضم إليها",
+      roomsOwned: "الغرف المنشأة",
+      messagesSent: "رسائل الغرف",
+      filesShared: "الملفات المشتركة",
+    },
     unavailable: {
       title: "الملف الشخصي غير متاح",
       body: "هذا الحساب غير موجود أو لم يعد متاحًا.",
@@ -610,6 +617,7 @@ export const ar = {
     metaDescription: "أدِر صورتك وبيانات حسابك وكلمة مرورك.",
     header: {
       joined: "انضم في {date}",
+      viewPublicProfile: "عرض ملفي العام",
     },
     error: {
       title: "تعذّر تحميل ملفك الشخصي",

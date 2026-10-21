@@ -51,13 +51,30 @@ export class UsersService {
 				avatarUrl: true,
 				bio: true,
 				status: true,
+				_count: {
+					select: {
+						rooms: true,
+						roomMemberships: true,
+						messages: true,
+						roomFiles: true,
+					},
+				},
 			},
 		});
 		if (!user) {
 			throw new NotFoundException('User not found');
 		}
 
-		return user;
+		const { _count, ...profile } = user;
+		return {
+			...profile,
+			stats: {
+				roomsJoined: _count.roomMemberships,
+				roomsOwned: _count.rooms,
+				messagesSent: _count.messages,
+				filesShared: _count.roomFiles,
+			},
+		};
 	}
 
 	async updateProfile(id: string, dto: UpdateUserDto) {

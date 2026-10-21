@@ -73,6 +73,7 @@ services:
     restart: always
     environment:
       PORT: ${FRONTEND_PORT}
+      INTERNAL_API_URL: http://backend:${BACKEND_PORT}
     depends_on:
       backend:
         condition: service_healthy
