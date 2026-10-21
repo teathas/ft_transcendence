@@ -107,6 +107,12 @@ export class FriendsService {
 			recipientId: meId,
 			actorId: request.requesterId,
 		});
+		await this.notificationsService.createNotification({
+			recipientId: request.requesterId,
+			actorId: meId,
+			type: 'FRIEND_REQUEST_REJECTED',
+			data: { friendshipId: id },
+		});
 		
 	}
 
@@ -281,6 +287,12 @@ export class FriendsService {
 	}
 
 	async removeFriend(meId: string, friendshipId: string) {
+		const friendship = await this.prisma.friendship.findFirst({
+			where: { id: friendshipId, status: 'ACCEPTED', OR: [{ requesterId: meId }, { addresseeId: meId }] },
+			select: { requesterId: true, addresseeId: true },
+		});
+		if (!friendship) throw new NotFoundException('Friendship not found');
+		const friendId = friendship.requesterId === meId ? friendship.addresseeId : friendship.requesterId;
 		const { count } = await this.prisma.friendship.deleteMany({
 			where: {
 				id: friendshipId,
@@ -300,6 +312,12 @@ export class FriendsService {
 				path: ['friendshipId'],
 				equals: friendshipId,
 			},
+		});
+		await this.notificationsService.createNotification({
+			recipientId: friendId,
+			actorId: meId,
+			type: 'FRIEND_REMOVED',
+			data: { friendshipId },
 		});
 	}
 }

@@ -113,6 +113,14 @@ export class MessagesService {
                 equals: messageId,
             },
         });
+		if (existing.userId !== userId) {
+			await this.notificationsService.createNotification({
+				recipientId: existing.userId,
+				actorId: userId,
+				type: 'ROOM_MESSAGE_DELETED',
+				data: { roomId, messageId },
+			});
+		}
 		this.realtime.emitToRoom(roomId, 'room:message-deleted', { roomId, messageId });
         return { message: 'Message deleted successfully' };
     }

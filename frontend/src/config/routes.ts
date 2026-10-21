@@ -18,6 +18,7 @@ export const routes = {
   profile: "/profile" as Route,
   friends: "/friends" as Route,
   messages: "/messages" as Route,
+  notifications: "/notifications" as Route,
   privacy: "/privacy" as Route,
   terms: "/terms" as Route,
   room: (id: string) => `/rooms/${id}` as Route,

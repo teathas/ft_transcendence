@@ -7,6 +7,7 @@ import { ApiRoomDto } from './dto/api-room.dto';
 import { ListApiRoomsDto } from './dto/list-api-rooms.dto';
 import { pageArgs } from '../common/dto/page.dto';
 import { Prisma } from '../generated/prisma/client';
+import { NotificationsService } from '../notifications/notifications.service';
 
 const apiRoomSelect = {
   id: true,
@@ -23,7 +24,7 @@ type ApiRoomRow = Prisma.RoomGetPayload<{ select: typeof apiRoomSelect }>;
 
 @Injectable()
 export class PublicApiRoomsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService, private notifications: NotificationsService) {}
 
   async list(userId: string, query: ListApiRoomsDto) {
     const search = query.search?.trim();
@@ -77,6 +78,12 @@ export class PublicApiRoomsService {
       },
       select: apiRoomSelect,
     });
+    await this.notifications.createNotification({
+      recipientId: ownerId,
+      actorId: ownerId,
+      type: 'ROOM_CREATED',
+      data: { roomId: room.id, roomName: room.name },
+    });
     return this.toView(room, ownerId);
   }
 
@@ -91,11 +98,22 @@ export class PublicApiRoomsService {
       },
       select: apiRoomSelect,
     });
+    const members = await this.prisma.roomMember.findMany({ where: { roomId: id }, select: { userId: true } });
+    await Promise.all(members.map(({ userId }) => this.notifications.createNotification({
+      recipientId: userId,
+      actorId: ownerId,
+      type: 'ROOM_UPDATED',
+      data: { roomId: room.id, roomName: room.name },
+    })));
     return this.toView(room, ownerId);
   }
 
   async remove(ownerId: string, id: string) {
     await this.assertOwner(ownerId, id);
+    const room = await this.prisma.room.findUnique({
+      where: { id },
+      select: { name: true, members: { select: { userId: true } } },
+    });
     await this.prisma.$transaction([
       this.prisma.message.deleteMany({ where: { roomId: id } }),
       this.prisma.roomMember.deleteMany({ where: { roomId: id } }),
@@ -104,6 +122,14 @@ export class PublicApiRoomsService {
 
     const uploadRoot = process.env.UPLOAD_DIR ?? join(process.cwd(), 'uploads');
     await rm(join(uploadRoot, 'rooms', id), { recursive: true, force: true });
+    if (room) {
+      await Promise.all(room.members.map(({ userId }) => this.notifications.createNotification({
+        recipientId: userId,
+        actorId: ownerId,
+        type: 'ROOM_DELETED',
+        data: { roomId: id, roomName: room.name },
+      })));
+    }
   }
 
   private async assertOwner(ownerId: string, id: string) {

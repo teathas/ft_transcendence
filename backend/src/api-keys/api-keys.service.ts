@@ -6,13 +6,14 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateApiKeyDto } from './dto/create-api-key.dto';
+import { NotificationsService } from '../notifications/notifications.service';
 
 export const hashApiKey = (key: string) =>
   createHash('sha256').update(key).digest('hex');
 
 @Injectable()
 export class ApiKeysService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService, private notifications: NotificationsService) {}
 
   async create(userId: string, dto: CreateApiKeyDto) {
     const expiresAt = dto.expiresAt ? new Date(dto.expiresAt) : null;
@@ -37,6 +38,13 @@ export class ApiKeysService {
         createdAt: true,
         expiresAt: true,
       },
+    });
+
+    await this.notifications.createNotification({
+      recipientId: userId,
+      actorId: userId,
+      type: 'API_KEY_CREATED',
+      data: { keyId: created.id, keyName: created.name },
     });
 
     // The plaintext credential is deliberately returned exactly once.
@@ -65,5 +73,11 @@ export class ApiKeysService {
       data: { revokedAt: new Date() },
     });
     if (result.count === 0) throw new NotFoundException('API key not found');
+    await this.notifications.createNotification({
+      recipientId: userId,
+      actorId: userId,
+      type: 'API_KEY_REVOKED',
+      data: { keyId: id },
+    });
   }
 }

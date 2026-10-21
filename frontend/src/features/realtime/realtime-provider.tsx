@@ -51,6 +51,32 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
       );
 
     const handlers: Record<string, (payload: never) => void> = {
+      "notification:new": () => {
+        void queryClient.invalidateQueries({
+          queryKey: queryKeys.notifications.all,
+        });
+      },
+      "notification:updated": () => {
+        void queryClient.invalidateQueries({
+          queryKey: queryKeys.notifications.all,
+        });
+      },
+      "notification:read": () => {
+        void queryClient.invalidateQueries({
+          queryKey: queryKeys.notifications.all,
+        });
+      },
+      "notifications:read-all": () => {
+        void queryClient.invalidateQueries({
+          queryKey: queryKeys.notifications.all,
+        });
+      },
+      "notification:deleted": () => {
+        void queryClient.invalidateQueries({
+          queryKey: queryKeys.notifications.all,
+        });
+      },
+
       // ---- private messages
       "dm:message": ({ message }: { message: unknown }) => {
         const parsed = directMessageSchema.safeParse(message);

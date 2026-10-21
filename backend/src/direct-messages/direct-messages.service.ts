@@ -149,6 +149,12 @@ export class DirectMessagesService {
       actorId: meId,
       data: { path: ['messageId'], equals: messageId },
     });
+    await this.notificationsService.createNotification({
+      recipientId: friendId,
+      actorId: meId,
+      type: 'DIRECT_MESSAGE_DELETED',
+      data: { messageId },
+    });
     this.realtime.emitToUser(meId, 'dm:message-deleted', {
       friendId,
       messageId,

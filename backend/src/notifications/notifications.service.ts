@@ -61,6 +61,7 @@ export class NotificationsService {
       const [items, total] = await this.prisma.$transaction([
         this.prisma.notification.findMany({
           where,
+          include: { actor: { select: { id: true, username: true, avatarUrl: true } } },
           orderBy: [{ createdAt: 'desc' }, { id: 'asc' }],
           skip: (page - 1) * limit,
           take: limit,
