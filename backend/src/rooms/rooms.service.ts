@@ -41,6 +41,12 @@ export class RoomsService {
             roomId:room.id,
         }
         })
+        await this.notificationsService.createNotification({
+            recipientId: ownerId,
+            actorId: ownerId,
+            type: 'ROOM_CREATED',
+            data: { roomId: room.id, roomName: room.name },
+        });
         return room;
     }
 

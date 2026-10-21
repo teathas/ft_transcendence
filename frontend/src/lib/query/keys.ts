@@ -13,6 +13,11 @@ export const queryKeys = {
     all: ["api-keys"] as const,
     list: () => [...queryKeys.apiKeys.all, "list"] as const,
   },
+  notifications: {
+    all: ["notifications"] as const,
+    list: () => [...queryKeys.notifications.all, "list"] as const,
+    unread: () => [...queryKeys.notifications.all, "unread"] as const,
+  },
   rooms: {
     all: ["rooms"] as const,
     list: (query?: Record<string, unknown>) =>

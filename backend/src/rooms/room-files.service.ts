@@ -13,6 +13,7 @@ import { assertMember } from './room-access';
 import { fileSelect } from './room-views';
 import { RealtimeService } from '../realtime/realtime.service';
 import { AuthService } from '../auth/auth.service';
+import { NotificationsService } from '../notifications/notifications.service';
 
 export const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
@@ -44,7 +45,20 @@ const safeExtension = (name: string) => {
 
 @Injectable()
 export class RoomFilesService {
-	constructor(private prisma: PrismaService, private realtime: RealtimeService, private auth: AuthService) {}
+	constructor(private prisma: PrismaService, private realtime: RealtimeService, private auth: AuthService, private notifications: NotificationsService) {}
+
+	private async notifyMembers(roomId: string, actorId: string, type: 'ROOM_FILE_UPLOADED' | 'ROOM_FILE_DELETED', data: Record<string, string>) {
+		const members = await this.prisma.roomMember.findMany({
+			where: { roomId, userId: { not: actorId } },
+			select: { userId: true },
+		});
+		await Promise.all(members.map(({ userId }) => this.notifications.createNotification({
+			recipientId: userId,
+			actorId,
+			type,
+			data: { roomId, ...data },
+		})));
+	}
 
 	async list(roomId: string, userId: string) {
 		await assertMember(this.prisma, roomId, userId);
@@ -88,6 +102,7 @@ export class RoomFilesService {
 				this.prisma.room.update({ where: { id: roomId }, data: { lastActiveAt: new Date() } }),
 			]);
 			this.realtime.emitToRoom(roomId, 'room:file-added', { roomId, file: created });
+			await this.notifyMembers(roomId, userId, 'ROOM_FILE_UPLOADED', { fileId: created.id, fileName: created.name });
 			return created;
 		} catch (error) {
 			// No row, so nothing would ever point at the bytes.
@@ -102,7 +117,7 @@ export class RoomFilesService {
 
 		const file = await this.prisma.roomFile.findFirst({
 			where: { id: fileId, roomId },
-			select: { id: true, uploaderId: true, url: true },
+			select: { id: true, uploaderId: true, url: true, name: true },
 		});
 		if (!file) throw new NotFoundException('File not found');
 		if (file.uploaderId !== userId && ownerId !== userId) {
@@ -112,6 +127,7 @@ export class RoomFilesService {
 		await this.prisma.roomFile.delete({ where: { id: file.id } });
 		await unlink(join(uploadRoot(), 'rooms', roomId, basename(file.url))).catch(() => undefined);
 		this.realtime.emitToRoom(roomId, 'room:file-removed', { roomId, fileId: file.id });
+		await this.notifyMembers(roomId, userId, 'ROOM_FILE_DELETED', { fileId: file.id, fileName: file.name });
 	}
 
 	/** Validates the query token and room membership before exposing bytes. */

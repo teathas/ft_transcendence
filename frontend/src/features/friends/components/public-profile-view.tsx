@@ -1,10 +1,19 @@
 "use client";
 
-import { ArrowLeft, TriangleAlert, UserRound } from "lucide-react";
+import {
+  ArrowLeft,
+  Crown,
+  FileUp,
+  MessageSquareText,
+  TriangleAlert,
+  UserRound,
+  UsersRound,
+} from "lucide-react";
 
 import { Avatar } from "@/components/ui/avatar";
 import { PresenceDot } from "@/components/ui/presence-dot";
 import { Skeleton } from "@/components/ui/skeleton";
+import { StatTile } from "@/components/ui/stat-tile";
 import { buttonStyles } from "@/components/ui/button";
 import { routes } from "@/config/routes";
 import { useDict } from "@/i18n/client";
@@ -12,10 +21,17 @@ import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
 import { usePublicProfile } from "../hooks/use-friends";
+import type { PublicProfile } from "../types";
 
-export function PublicProfileView({ userId }: { userId: string }) {
+export function PublicProfileView({
+  userId,
+  initialProfile,
+}: {
+  userId: string;
+  initialProfile: PublicProfile;
+}) {
   const d = useDict();
-  const profile = usePublicProfile(userId);
+  const profile = usePublicProfile(userId, initialProfile);
 
   if (profile.isPending) {
     return (
@@ -107,6 +123,44 @@ export function PublicProfileView({ userId }: { userId: string }) {
               {user.bio ?? d.publicProfile.noBio}
             </p>
           </div>
+
+          <section
+            className="mt-8 w-full text-start"
+            aria-labelledby="public-profile-activity"
+          >
+            <h2
+              id="public-profile-activity"
+              className="mb-3 text-lg font-semibold"
+            >
+              {d.publicProfile.activity}
+            </h2>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <StatTile
+                label={d.publicProfile.stats.roomsJoined}
+                value={user.stats.roomsJoined}
+                icon={UsersRound}
+                accent="primary"
+              />
+              <StatTile
+                label={d.publicProfile.stats.roomsOwned}
+                value={user.stats.roomsOwned}
+                icon={Crown}
+                accent="amber"
+              />
+              <StatTile
+                label={d.publicProfile.stats.messagesSent}
+                value={user.stats.messagesSent}
+                icon={MessageSquareText}
+                accent="emerald"
+              />
+              <StatTile
+                label={d.publicProfile.stats.filesShared}
+                value={user.stats.filesShared}
+                icon={FileUp}
+                accent="sky"
+              />
+            </div>
+          </section>
         </div>
       </article>
     </div>

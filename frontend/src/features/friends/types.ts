@@ -4,12 +4,14 @@ import type {
   friendSchema,
   friendsSummarySchema,
   personSchema,
+  publicProfileSchema,
   publicUserSchema,
   relationshipSchema,
   requestSchema,
 } from "./schemas";
 
 export type PublicUser = z.infer<typeof publicUserSchema>;
+export type PublicProfile = z.infer<typeof publicProfileSchema>;
 export type Relationship = z.infer<typeof relationshipSchema>;
 export type Person = z.infer<typeof personSchema>;
 export type Friend = z.infer<typeof friendSchema>;

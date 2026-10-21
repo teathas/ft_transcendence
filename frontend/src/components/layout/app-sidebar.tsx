@@ -2,6 +2,7 @@
 
 import {
   Gauge,
+  Bell,
   LayoutGrid,
   LogOut,
   MessagesSquare,
@@ -20,6 +21,7 @@ import { routes } from "@/config/routes";
 import { useLogout, useSession } from "@/features/auth/hooks/use-auth";
 import { useFriendsSummary } from "@/features/friends/hooks/use-friends";
 import { useRecentRooms } from "@/features/rooms/hooks/use-rooms";
+import { useUnreadNotifications } from "@/features/notifications/hooks/use-notifications";
 import { useDict } from "@/i18n/client";
 import { Link, useBarePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
@@ -68,6 +70,7 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
   const logout = useLogout();
   const { data: rooms, isPending } = useRecentRooms();
   const { data: summary } = useFriendsSummary();
+  const { data: unreadNotifications } = useUnreadNotifications();
 
   return (
     <div className="flex h-full flex-col gap-6 p-4">
@@ -125,6 +128,16 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
         >
           <MessagesSquare className="size-4" aria-hidden="true" />
           {d.nav.messages}
+        </NavLink>
+
+        <NavLink
+          href={routes.notifications}
+          active={pathname === routes.notifications}
+          onNavigate={onNavigate}
+          badge={unreadNotifications}
+        >
+          <Bell className="size-4" aria-hidden="true" />
+          {d.nav.notifications}
         </NavLink>
 
         <NavLink

@@ -14,6 +14,7 @@ import { ChangePasswordDto } from './dto/change-password.dto';
 import { SearchUsersDto } from './dto/search-users.dto';
 import { pageArgs, Paged } from '../common/dto/page.dto';
 import { relationshipFilter } from '../friends/utils/friend-filters';
+import { NotificationsService } from '../notifications/notifications.service';
 
 export const PUBLIC_USER_SELECT = {
 	id: true,
@@ -25,7 +26,7 @@ export const PUBLIC_USER_SELECT = {
 
 @Injectable()
 export class UsersService {
-	constructor(private prisma: PrismaService) {}
+	constructor(private prisma: PrismaService, private notifications: NotificationsService) {}
 
 	async findById(id: string)
 	{
@@ -50,13 +51,30 @@ export class UsersService {
 				avatarUrl: true,
 				bio: true,
 				status: true,
+				_count: {
+					select: {
+						rooms: true,
+						roomMemberships: true,
+						messages: true,
+						roomFiles: true,
+					},
+				},
 			},
 		});
 		if (!user) {
 			throw new NotFoundException('User not found');
 		}
 
-		return user;
+		const { _count, ...profile } = user;
+		return {
+			...profile,
+			stats: {
+				roomsJoined: _count.roomMemberships,
+				roomsOwned: _count.rooms,
+				messagesSent: _count.messages,
+				filesShared: _count.roomFiles,
+			},
+		};
 	}
 
 	async updateProfile(id: string, dto: UpdateUserDto) {
@@ -91,6 +109,7 @@ export class UsersService {
 		});
 
 		const { passwordHash: _, ...safeUser } = updated;
+		await this.notifications.createNotification({ recipientId: id, actorId: id, type: 'PROFILE_UPDATED' });
 		return safeUser;
 	}
 
@@ -110,6 +129,7 @@ export class UsersService {
 			where: { id },
 			data: { passwordHash: await bcrypt.hash(dto.newPassword, 10) },
 		});
+		await this.notifications.createNotification({ recipientId: id, actorId: id, type: 'PASSWORD_CHANGED' });
 	}
 
 	async updateAvatar(id: string, avatarUrl: string) {
@@ -119,6 +139,7 @@ export class UsersService {
 		});
 
 		const { passwordHash: _, ...safeUser } = updated;
+		await this.notifications.createNotification({ recipientId: id, actorId: id, type: 'AVATAR_UPDATED' });
 		return safeUser;
 	}
 
@@ -132,6 +153,7 @@ export class UsersService {
 		await this.deleteAvatarFile(user.avatarUrl);
 
 		const { passwordHash: _, ...safeUser } = updated;
+		await this.notifications.createNotification({ recipientId: id, actorId: id, type: 'AVATAR_UPDATED' });
 		return safeUser;
 	}
 

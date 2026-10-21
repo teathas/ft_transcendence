@@ -14,6 +14,16 @@ export const publicUserSchema = z.object({
   status: userStatusSchema,
 });
 
+/** Public profile details. Only aggregate activity is exposed, never room data. */
+export const publicProfileSchema = publicUserSchema.extend({
+  stats: z.object({
+    roomsJoined: z.number().int().nonnegative(),
+    roomsOwned: z.number().int().nonnegative(),
+    messagesSent: z.number().int().nonnegative(),
+    filesShared: z.number().int().nonnegative(),
+  }),
+});
+
 /** How a person stands with the signed-in user, as `GET /users/search` computes it. */
 export const relationshipSchema = z.enum(["none", "sent", "received", "friends"]);
 

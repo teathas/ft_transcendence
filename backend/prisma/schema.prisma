@@ -65,6 +65,22 @@ model User {
   notificationsReceived Notification[] @relation("NotificationRecipient")
   notificationsSent     Notification[] @relation("NotificationActor")
   apiKeys                ApiKey[]
+  refreshSessions        RefreshSession[]
+}
+
+/// Server-side refresh sessions. The browser only receives the opaque token;
+/// the database keeps its SHA-256 digest so a database leak cannot replay it.
+model RefreshSession {
+  id        String   @id @default(uuid())
+  tokenHash String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
 }
 
 /// Credentials for third-party clients. Only a SHA-256 digest is stored; the
@@ -183,10 +199,24 @@ model RoomFile {
 enum NotificationType {
   FRIEND_REQUEST
   FRIEND_REQUEST_ACCEPTED
+  FRIEND_REQUEST_REJECTED
+  FRIEND_REMOVED
   NEW_DIRECT_MESSAGE
+  DIRECT_MESSAGE_DELETED
+  ROOM_CREATED
+  ROOM_UPDATED
+  ROOM_DELETED
   ROOM_MEMBER_JOINED
   ROOM_MEMBER_LEFT
   NEW_ROOM_MESSAGE
+  ROOM_MESSAGE_DELETED
+  ROOM_FILE_UPLOADED
+  ROOM_FILE_DELETED
+  PROFILE_UPDATED
+  PASSWORD_CHANGED
+  AVATAR_UPDATED
+  API_KEY_CREATED
+  API_KEY_REVOKED
 }
 
 model Notification {

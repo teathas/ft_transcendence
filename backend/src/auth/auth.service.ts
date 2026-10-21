@@ -4,7 +4,8 @@ import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
-import { randomUUID } from 'crypto';
+import { createHash, randomBytes, randomUUID } from 'crypto';
+import { ConfigService } from '@nestjs/config';
 import { Prisma } from '../generated/prisma/client';
 
 export type JwtPayload = { sub: string; email: string; jti: string; exp: number };
@@ -14,7 +15,35 @@ export class AuthService {
 	constructor(
 		private prisma: PrismaService,
 		private jwtService: JwtService,
+		private config: ConfigService,
 	) { }
+
+	private refreshTokenLifetimeSeconds() {
+		return parseInt(this.config.get<string>('REFRESH_TOKEN_EXPIRES_IN') ?? '604800', 10);
+	}
+
+	private hashRefreshToken(token: string) {
+		return createHash('sha256').update(token).digest('hex');
+	}
+
+	private async issueAccessToken(user: { id: string; email: string }) {
+		return this.jwtService.signAsync({ sub: user.id, email: user.email, jti: randomUUID() });
+	}
+
+	private async createRefreshSession(userId: string) {
+		const refreshToken = randomBytes(48).toString('base64url');
+		const expiresAt = new Date(Date.now() + this.refreshTokenLifetimeSeconds() * 1000);
+
+		await this.prisma.refreshSession.create({
+			data: {
+				tokenHash: this.hashRefreshToken(refreshToken),
+				userId,
+				expiresAt,
+			},
+		});
+
+		return refreshToken;
+	}
 
 	async register(dto: RegisterDto) {
 		const existingEmail = await this.prisma.user.findUnique({
@@ -67,21 +96,52 @@ export class AuthService {
 			throw new UnauthorizedException('Invalid credentials');
 		}
 
-		const payload = { sub: user.id, email: user.email, jti: randomUUID() };
-		const accessToken = await this.jwtService.signAsync(payload);
+		const [accessToken, refreshToken] = await Promise.all([
+			this.issueAccessToken(user),
+			this.createRefreshSession(user.id),
+		]);
 
-		return { accessToken };
+		return { accessToken, refreshToken };
 	}
 
-	async logout(token: string) {
-		const payload = await this.jwtService.verifyAsync(token);
-
-		await this.prisma.revokedToken.create({
-			data: {
-				jti: payload.jti,
-				expiresAt: new Date(payload.exp * 1000),
-			},
+	async refresh(refreshToken: string) {
+		const tokenHash = this.hashRefreshToken(refreshToken);
+		const session = await this.prisma.refreshSession.findUnique({
+			where: { tokenHash },
+			include: { user: { select: { id: true, email: true } } },
 		});
+
+		if (!session || session.expiresAt <= new Date()) {
+			if (session) {
+				await this.prisma.refreshSession.delete({ where: { id: session.id } });
+			}
+			throw new UnauthorizedException('Invalid or expired refresh token');
+		}
+
+		// Keep the opaque session token stable until logout/expiry. This makes
+		// concurrent refreshes from several requests or browser tabs safe.
+		return { accessToken: await this.issueAccessToken(session.user) };
+	}
+
+	async logout(accessToken?: string, refreshToken?: string) {
+		if (refreshToken) {
+			await this.prisma.refreshSession.deleteMany({
+				where: { tokenHash: this.hashRefreshToken(refreshToken) },
+			});
+		}
+
+		if (accessToken) {
+			try {
+				const payload = await this.jwtService.verifyAsync<JwtPayload>(accessToken);
+				await this.prisma.revokedToken.upsert({
+					where: { jti: payload.jti },
+					create: { jti: payload.jti, expiresAt: new Date(payload.exp * 1000) },
+					update: {},
+				});
+			} catch {
+				// An expired access token must not prevent the refresh cookie being cleared.
+			}
+		}
 
 		return { message: 'Logged out successfully' };
 	}

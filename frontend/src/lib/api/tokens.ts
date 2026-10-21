@@ -1,6 +1,6 @@
 /**
- * Access token store, kept in `localStorage` so a reload does not sign the user
- * out — the backend issues no refresh cookie to get a new one from.
+ * Access token store. The HttpOnly refresh cookie cannot be read by JavaScript;
+ * it is used automatically by the API client when this short-lived token expires.
  *
  * Every storage access is wrapped: it throws on the server (there is no
  * `localStorage` there) and in private windows with storage blocked, and the
@@ -29,6 +29,20 @@ let accessToken: string | null = null;
 
 type Listener = (token: string | null) => void;
 const listeners = new Set<Listener>();
+
+/**
+ * Seconds before a JWT expires, read from its payload (negative once expired).
+ * Only to decide when to renew: the server stays the one that verifies it.
+ */
+export function secondsUntilExpiry(token: string): number {
+  try {
+    const payload = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+    const { exp } = JSON.parse(atob(payload)) as { exp: number };
+    return exp - Date.now() / 1000;
+  } catch {
+    return 0;
+  }
+}
 
 export const tokenStore = {
   // Read lazily, so the first call in the browser picks up a saved token.
