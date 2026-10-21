@@ -25,6 +25,10 @@ const geistMono = Geist_Mono({
 const notoArabic = Noto_Sans_Arabic({
   variable: "--font-arabic",
   subsets: ["arabic"],
+  // This layout also renders French and English pages. Preloading the Arabic
+  // subset there wastes bandwidth and triggers an "unused preload" warning;
+  // the font is still loaded normally as soon as an Arabic page uses it.
+  preload: false,
 });
 
 /** Pre-renders the three language shells instead of building them per request. */
