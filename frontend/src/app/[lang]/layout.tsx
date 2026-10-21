@@ -13,11 +13,16 @@ const geistSans = Geist({
   // Consumed by `--font-geist-sans` in globals.css.
   variable: "--font-geist-sans",
   subsets: ["latin"],
+  // Arabic pages use Noto Sans Arabic first, so a global preload would be
+  // unused there. The browser still loads Geist when Latin text needs it.
+  preload: false,
 });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  // Monospace text is not present above the fold on every page.
+  preload: false,
 });
 
 // Geist carries no Arabic glyphs, so Arabic would fall back to whatever the
