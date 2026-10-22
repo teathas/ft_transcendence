@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { DoorOpen, TriangleAlert } from "lucide-react";
 
 import { buttonStyles } from "@/components/ui/button";
@@ -25,6 +25,7 @@ import type { SyncStatus } from "./board-synced";
 import { ChatPanel } from "./chat-panel";
 import { FilesPanel } from "./files-panel";
 import { PanelFrame } from "./panel-frame";
+import { readPanelState, savePanelState } from "./panel-state";
 import { PeoplePanel } from "./people-panel";
 import { RoomHeader } from "./room-header";
 import { ROOM_PANELS, type RoomPanel } from "./room-panels";
@@ -53,8 +54,12 @@ export function RoomWorkspace({ id }: { id: string }) {
   const [syncStatus, setSyncStatus] = useState<SyncStatus>("loading");
   // Which tab, and whether the panel shows: closing keeps the tab, so the
   // toggle reopens where you were.
-  const [tab, setTab] = useState<RoomPanel>("chat");
-  const [open, setOpen] = useState(false);
+  // Read once, before the first paint: this component only mounts in the
+  // browser (behind `RequireAuth`), so storage is there and nothing hydrates.
+  const [saved] = useState(readPanelState);
+  const [tab, setTab] = useState<RoomPanel>(saved.tab);
+  const [open, setOpen] = useState(saved.open);
+  useEffect(() => savePanelState({ open, tab }), [open, tab]);
   const panel = open ? tab : null;
   const unread = useUnreadChat(id, panel === "chat");
 
