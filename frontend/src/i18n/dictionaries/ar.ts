@@ -47,6 +47,7 @@ export const ar = {
     friends: "الأصدقاء",
     messages: "الرسائل",
     notifications: "الإشعارات",
+    unreadNotifications: "الإشعارات، غير المقروءة: {count}",
     recent: "الأحدث",
     noRoomsYet: "لا توجد غرف بعد.",
     signedOut: "غير مسجَّل الدخول",

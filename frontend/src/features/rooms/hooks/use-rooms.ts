@@ -34,7 +34,7 @@ export function useRooms(query: RoomQuery) {
   });
 }
 
-/** The short list shown in the sidebar and on the dashboard. */
+/** The short list shown on the dashboard. */
 export function useRecentRooms(limit = 6) {
   return useQuery({
     queryKey: queryKeys.rooms.recent(limit),

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Menu, X } from "lucide-react";
+import { Menu } from "lucide-react";
 
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import { BrandWordmark } from "@/components/layout/brand-mark";
@@ -55,17 +55,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           isOpen ? "translate-x-0" : "-translate-x-full rtl:translate-x-full",
         )}
       >
-        <div className="absolute end-3 top-3">
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label={d.nav.closeNavigation}
-            onClick={() => setIsOpen(false)}
-          >
-            <X className="size-4" aria-hidden="true" />
-          </Button>
-        </div>
-        <AppSidebar onNavigate={() => setIsOpen(false)} />
+        <AppSidebar
+          onNavigate={() => setIsOpen(false)}
+          onClose={() => setIsOpen(false)}
+        />
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">

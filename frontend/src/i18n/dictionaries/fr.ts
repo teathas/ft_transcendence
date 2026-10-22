@@ -49,6 +49,7 @@ export const fr = {
     friends: "Amis",
     messages: "Messages",
     notifications: "Notifications",
+    unreadNotifications: "Notifications, non lues : {count}",
     recent: "Récentes",
     noRoomsYet: "Aucune salle pour l’instant.",
     signedOut: "Déconnecté",
