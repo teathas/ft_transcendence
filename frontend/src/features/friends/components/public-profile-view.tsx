@@ -101,14 +101,14 @@ export function PublicProfileView({
             className={cn(
               "mt-2 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium",
               online
-                ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                ? "bg-live/10 text-live"
                 : "bg-muted text-muted-foreground",
             )}
           >
             <span
               className={cn(
                 "size-2 rounded-full",
-                online ? "bg-emerald-500" : "bg-muted-foreground/60",
+                online ? "bg-live" : "bg-muted-foreground/60",
               )}
             />
             {online ? d.room.online : d.room.offline}

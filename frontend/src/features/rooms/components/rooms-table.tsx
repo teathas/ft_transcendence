@@ -80,7 +80,7 @@ export function RoomsTable({ rooms }: { rooms: Room[] }) {
                 className={cn(
                   "inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium",
                   room.status === "active"
-                    ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                    ? "bg-live/10 text-live"
                     : "bg-muted text-muted-foreground",
                 )}
               >
@@ -88,7 +88,7 @@ export function RoomsTable({ rooms }: { rooms: Room[] }) {
                   className={cn(
                     "size-1.5 rounded-full",
                     room.status === "active"
-                      ? "bg-emerald-500"
+                      ? "bg-live"
                       : "bg-muted-foreground/60",
                   )}
                 />
