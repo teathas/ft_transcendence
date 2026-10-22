@@ -48,6 +48,8 @@ export const en = {
     messages: "Messages",
     notifications: "Notifications",
     unreadNotifications: "Notifications, {count} unread",
+    collapseSidebar: "Collapse sidebar",
+    expandSidebar: "Expand sidebar",
     recent: "Recent",
     noRoomsYet: "No rooms yet.",
     signedOut: "Signed out",

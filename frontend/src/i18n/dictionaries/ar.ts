@@ -48,6 +48,8 @@ export const ar = {
     messages: "الرسائل",
     notifications: "الإشعارات",
     unreadNotifications: "الإشعارات، غير المقروءة: {count}",
+    collapseSidebar: "طيّ الشريط الجانبي",
+    expandSidebar: "توسيع الشريط الجانبي",
     recent: "الأحدث",
     noRoomsYet: "لا توجد غرف بعد.",
     signedOut: "غير مسجَّل الدخول",

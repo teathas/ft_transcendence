@@ -20,9 +20,11 @@ import { cn } from "@/lib/utils";
 export function LanguageSwitcher({
   className,
   side,
+  align,
 }: {
   className?: string;
   side?: "top" | "bottom";
+  align?: "start" | "end";
 }) {
   const d = useDict();
   const locale = useLocale();
@@ -44,6 +46,7 @@ export function LanguageSwitcher({
     <Dropdown
       label={d.language.change}
       side={side}
+      align={align}
       trigger={(triggerProps) => (
         <Button
           {...triggerProps}
@@ -53,7 +56,9 @@ export function LanguageSwitcher({
           className={cn("gap-1.5", className)}
         >
           <Languages className="size-4" aria-hidden="true" />
-          <span className="text-xs font-medium uppercase">{locale}</span>
+          <span className="text-xs font-medium uppercase rail-collapsed:hidden">
+            {locale}
+          </span>
         </Button>
       )}
     >

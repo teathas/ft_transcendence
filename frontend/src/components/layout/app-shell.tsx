@@ -30,7 +30,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex flex-1">
-      <aside className="sticky top-0 hidden h-svh w-64 shrink-0 border-e bg-card lg:block">
+      <aside
+        id="app-sidebar"
+        data-rail
+        className="sticky top-0 hidden h-svh w-64 shrink-0 border-e bg-card lg:block rail-collapsed:w-18"
+      >
         <AppSidebar />
       </aside>
 

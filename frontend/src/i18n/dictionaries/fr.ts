@@ -50,6 +50,8 @@ export const fr = {
     messages: "Messages",
     notifications: "Notifications",
     unreadNotifications: "Notifications, non lues : {count}",
+    collapseSidebar: "Réduire la barre latérale",
+    expandSidebar: "Déployer la barre latérale",
     recent: "Récentes",
     noRoomsYet: "Aucune salle pour l’instant.",
     signedOut: "Déconnecté",

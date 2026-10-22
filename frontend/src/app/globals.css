@@ -4,6 +4,13 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
+ * The desktop sidebar's collapsed state. An inline script in the root layout
+ * copies the saved choice onto <html> before the first paint; only the
+ * element marked `data-rail` (the desktop aside) and its children react.
+ */
+@custom-variant rail-collapsed (&:where([data-sidebar="collapsed"] [data-rail], [data-sidebar="collapsed"] [data-rail] *));
+
+/*
  * Design tokens.
  *
  * `:root` / `.dark` hold the raw values; `@theme inline` exposes them to

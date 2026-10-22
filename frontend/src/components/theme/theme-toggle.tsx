@@ -13,12 +13,32 @@ const OPTIONS = [
   { value: "system", icon: Monitor },
 ] as const;
 
-export function ThemeToggle() {
+export function ThemeToggle({ compact = false }: { compact?: boolean }) {
   const d = useDict();
   const { theme, setTheme } = useTheme();
   // The stored theme is unknown on the server; render nothing as selected
   // until hydration so the markup matches.
   const mounted = useMounted();
+
+  if (compact) {
+    // One button that steps through the three, for the 72px rail.
+    const index = OPTIONS.findIndex((option) => option.value === theme);
+    const current = mounted && index >= 0 ? OPTIONS[index] : OPTIONS[2];
+    const next = OPTIONS[(OPTIONS.indexOf(current) + 1) % OPTIONS.length];
+    const label = `${d.theme.label}: ${d.theme[current.value]}`;
+
+    return (
+      <button
+        type="button"
+        aria-label={label}
+        title={label}
+        onClick={() => setTheme(next.value)}
+        className="inline-flex size-11 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+      >
+        <current.icon className="size-5" aria-hidden="true" />
+      </button>
+    );
+  }
 
   return (
     <div
