@@ -33,7 +33,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <aside
         id="app-sidebar"
         data-rail
-        className="sticky top-0 hidden h-svh w-64 shrink-0 border-e bg-card lg:block rail-collapsed:w-18"
+        className="sticky top-0 z-30 hidden h-svh w-64 shrink-0 border-e bg-card lg:block rail-collapsed:w-18"
       >
         <AppSidebar />
       </aside>
