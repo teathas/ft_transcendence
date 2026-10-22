@@ -591,6 +591,11 @@ export const ar = {
       minutes: "{minutes} د",
     },
     recentRooms: "الغرف الأخيرة",
+    friendsOnline: {
+      title: "الأصدقاء المتصلون",
+      count: "المتصلون الآن: {count}",
+      empty: "لا أحد من أصدقائك متصل الآن.",
+    },
   },
 
   publicProfile: {

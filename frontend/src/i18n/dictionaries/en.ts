@@ -596,6 +596,11 @@ export const en = {
       minutes: "{minutes}m",
     },
     recentRooms: "Recent rooms",
+    friendsOnline: {
+      title: "Friends online",
+      count: "{count} online",
+      empty: "None of your friends are online right now.",
+    },
   },
 
   publicProfile: {

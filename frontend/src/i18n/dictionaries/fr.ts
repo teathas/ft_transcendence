@@ -603,6 +603,11 @@ export const fr = {
       minutes: "{minutes} min",
     },
     recentRooms: "Salles récentes",
+    friendsOnline: {
+      title: "Amis en ligne",
+      count: "{count} en ligne",
+      empty: "Aucun de vos amis n’est en ligne pour le moment.",
+    },
   },
 
   publicProfile: {
