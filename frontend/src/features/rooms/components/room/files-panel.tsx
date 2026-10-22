@@ -3,9 +3,9 @@
 import { useId, useState } from "react";
 import {
   Download,
+  Eye,
   File as FileIcon,
   FileText,
-  Image as ImageIcon,
   LoaderCircle,
   Trash2,
   Upload,
@@ -73,20 +73,15 @@ async function download(file: RoomFile) {
   URL.revokeObjectURL(link.href);
 }
 
-const KIND_STYLE = {
-  pdf: {
-    icon: FileText,
-    tile: "bg-rose-500/10 text-rose-600 dark:text-rose-400",
-  },
-  image: {
-    icon: ImageIcon,
-    tile: "bg-sky-500/10 text-sky-600 dark:text-sky-400",
-  },
-  document: {
-    icon: FileIcon,
-    tile: "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400",
-  },
-} as const;
+/** "PDF", "PNG", "DOCX": the tile's label, from the name's extension. */
+function typeLabel(name: string) {
+  const dot = name.lastIndexOf(".");
+  return dot > 0 ? name.slice(dot + 1, dot + 5).toUpperCase() : "";
+}
+
+/** The browser can show these itself; other types can only be downloaded. */
+const canPreview = (file: RoomFile) =>
+  file.kind === "pdf" || file.kind === "image";
 
 /** Where a file's bytes are, or nothing for mock files that have no address. */
 const urlOf = (file: RoomFile) => protectedUrl(file, true);
@@ -190,7 +185,7 @@ export function FilesPanel({ roomId }: { roomId: string }) {
             buttonStyles({
               variant: "primary",
               size: "md",
-              className: "w-full cursor-pointer",
+              className: "h-11 w-full cursor-pointer",
             }),
             "peer-focus-visible:ring-[3px] peer-focus-visible:ring-ring/40",
             "peer-disabled:pointer-events-none peer-disabled:opacity-50",
@@ -254,85 +249,78 @@ export function FilesPanel({ roomId }: { roomId: string }) {
         ) : (
           <ul className="flex flex-col gap-2">
             {files.map((file) => {
-              const { icon: Icon, tile } = KIND_STYLE[file.kind];
-              const src = urlOf(file);
+              const label = typeLabel(file.name);
               const canDelete =
                 file.uploaderId === user?.id || room?.ownerId === user?.id;
 
               return (
                 <li
                   key={file.id}
-                  className="flex items-center gap-1 rounded-xl border bg-card p-2 transition-colors hover:border-primary/40"
+                  className="flex items-center gap-3 rounded-xl border bg-card p-3"
                 >
-                  <button
-                    type="button"
-                    onClick={() =>
-                      file.kind === "pdf" ? setPreview(file) : save(file)
-                    }
-                    disabled={!file.url}
-                    aria-label={
-                      file.kind === "pdf"
-                        ? t(d.room.previewFile, { name: file.name })
-                        : t(d.room.download, { name: file.name })
-                    }
-                    className="flex min-w-0 flex-1 items-center gap-3 rounded-lg text-start"
+                  <span
+                    aria-hidden="true"
+                    className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted text-[11px] font-semibold text-muted-foreground"
                   >
-                    {file.kind === "image" && src ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={src}
-                        alt=""
-                        loading="lazy"
-                        className="size-11 shrink-0 rounded-lg border object-cover"
-                      />
-                    ) : (
-                      <span
-                        className={cn(
-                          "flex size-11 shrink-0 items-center justify-center rounded-lg",
-                          tile,
-                        )}
+                    {label || <FileIcon className="size-4" />}
+                  </span>
+
+                  <span className="min-w-0 flex-1">
+                    <span
+                      dir="auto"
+                      title={file.name}
+                      className="line-clamp-2 text-sm font-medium [overflow-wrap:anywhere]"
+                    >
+                      {file.name}
+                    </span>
+                    <span className="block text-xs text-muted-foreground">
+                      {formatBytes(file.sizeBytes)} ·{" "}
+                      <bdi>{file.uploadedBy}</bdi> ·{" "}
+                      {relativeTime(file.uploadedAt)}
+                    </span>
+                  </span>
+
+                  <span className="flex shrink-0 items-center">
+                    {canPreview(file) && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label={t(d.room.previewFile, { name: file.name })}
+                        title={t(d.room.previewFile, { name: file.name })}
+                        disabled={!file.url}
+                        onClick={() => setPreview(file)}
+                        className="size-11 text-muted-foreground"
                       >
-                        <Icon className="size-5" aria-hidden="true" />
-                      </span>
+                        <Eye className="size-4" aria-hidden="true" />
+                      </Button>
                     )}
 
-                    <span className="min-w-0 flex-1">
-                      <span
-                        title={file.name}
-                        className="block truncate text-sm font-medium"
-                      >
-                        {file.name}
-                      </span>
-                      <span className="block truncate text-xs text-muted-foreground">
-                        {formatBytes(file.sizeBytes)} · {file.uploadedBy} ·{" "}
-                        {relativeTime(file.uploadedAt)}
-                      </span>
-                    </span>
-                  </button>
-
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    aria-label={t(d.room.download, { name: file.name })}
-                    disabled={!file.url}
-                    onClick={() => save(file)}
-                    className="text-muted-foreground"
-                  >
-                    <Download className="size-4" aria-hidden="true" />
-                  </Button>
-
-                  {canDelete && (
                     <Button
                       variant="ghost"
                       size="icon"
-                      aria-label={t(d.room.deleteFile, { name: file.name })}
-                      disabled={remove.isPending}
-                      onClick={() => remove.mutate(file.id)}
-                      className="text-muted-foreground hover:text-destructive"
+                      aria-label={t(d.room.download, { name: file.name })}
+                      title={t(d.room.download, { name: file.name })}
+                      disabled={!file.url}
+                      onClick={() => save(file)}
+                      className="size-11 text-muted-foreground"
                     >
-                      <Trash2 className="size-4" aria-hidden="true" />
+                      <Download className="size-4" aria-hidden="true" />
                     </Button>
-                  )}
+
+                    {canDelete && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label={t(d.room.deleteFile, { name: file.name })}
+                        title={t(d.room.deleteFile, { name: file.name })}
+                        disabled={remove.isPending}
+                        onClick={() => remove.mutate(file.id)}
+                        className="size-11 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                      >
+                        <Trash2 className="size-4" aria-hidden="true" />
+                      </Button>
+                    )}
+                  </span>
                 </li>
               );
             })}
@@ -354,13 +342,22 @@ export function FilesPanel({ roomId }: { roomId: string }) {
         title={preview?.name ?? d.room.pdfPreview}
         className="max-w-5xl"
       >
-        {preview && protectedUrl(preview, true) && (
-          <iframe
-            src={protectedUrl(preview, true) ?? undefined}
-            title={preview.name}
-            className="h-[70vh] w-full rounded-lg border bg-white"
-          />
-        )}
+        {preview &&
+          urlOf(preview) &&
+          (preview.kind === "image" ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={urlOf(preview) ?? undefined}
+              alt={preview.name}
+              className="mx-auto max-h-[70vh] w-auto rounded-lg border"
+            />
+          ) : (
+            <iframe
+              src={urlOf(preview) ?? undefined}
+              title={preview.name}
+              className="h-[70vh] w-full rounded-lg border bg-white"
+            />
+          ))}
       </Modal>
     </div>
   );
