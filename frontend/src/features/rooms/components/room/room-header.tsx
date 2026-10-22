@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowLeft, Check } from "lucide-react";
+import { ArrowLeft, Check, PanelRight } from "lucide-react";
 
 import { BellLink } from "@/components/layout/bell-link";
 import { Button, buttonStyles } from "@/components/ui/button";
@@ -23,16 +23,22 @@ export function RoomHeader({
   panel,
   onToggle,
   counts,
+  panelOpen,
+  onTogglePanel,
 }: {
   room: Room;
   syncStatus: SyncStatus;
   panel: RoomPanel | null;
   onToggle: (panel: RoomPanel) => void;
   counts: Partial<Record<RoomPanel, number>>;
+  panelOpen: boolean;
+  onTogglePanel: () => void;
 }) {
   const d = useDict();
   const subjectLabel = useSubjectLabel();
   const [copied, setCopied] = useState(false);
+  const unread = counts.chat ?? 0;
+  const panelLabel = panelOpen ? d.room.hidePanel : d.room.showPanel;
 
   async function copyCode() {
     if (!room.inviteCode) return;
@@ -85,7 +91,36 @@ export function RoomHeader({
         {copied ? d.room.copied : ""}
       </span>
 
-      <BellLink />
+      {/* Desktop shows the sidebar's own bell, so this one is for smaller
+          screens. Focus mode (step 7) hides the sidebar: show it again there. */}
+      <span className="lg:hidden">
+        <BellLink />
+      </span>
+
+      {/* Tablets and up: one button for the side panel; phones keep the icons. */}
+      <button
+        type="button"
+        onClick={onTogglePanel}
+        aria-expanded={panelOpen}
+        aria-controls="room-panel"
+        aria-label={
+          !panelOpen && unread
+            ? `${panelLabel}, ${t(d.room.unreadChat, { count: unread })}`
+            : panelLabel
+        }
+        title={panelLabel}
+        className="relative hidden size-11 shrink-0 items-center justify-center rounded-lg border text-muted-foreground transition-colors hover:bg-accent hover:text-foreground md:inline-flex"
+      >
+        <PanelRight className="size-5 rtl:rotate-180" aria-hidden="true" />
+        {!panelOpen && unread ? (
+          <span
+            aria-hidden="true"
+            className="absolute -end-1.5 -top-1.5 min-w-5 rounded-full bg-primary px-1 text-center text-[11px] leading-5 font-medium text-primary-foreground tabular-nums"
+          >
+            {unread > 99 ? "99+" : unread}
+          </span>
+        ) : null}
+      </button>
 
       {/* Phones: the dock's three buttons, as icons. */}
       <div className="flex items-center md:hidden">

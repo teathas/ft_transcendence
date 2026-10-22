@@ -5,6 +5,7 @@ import { DoorOpen, TriangleAlert } from "lucide-react";
 
 import { buttonStyles } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs } from "@/components/ui/tabs";
 import { routes } from "@/config/routes";
 import { useDict } from "@/i18n/client";
 import { Link } from "@/i18n/navigation";
@@ -25,9 +26,8 @@ import { ChatPanel } from "./chat-panel";
 import { FilesPanel } from "./files-panel";
 import { PanelFrame } from "./panel-frame";
 import { PeoplePanel } from "./people-panel";
-import { RoomDock } from "./room-dock";
 import { RoomHeader } from "./room-header";
-import type { RoomPanel } from "./room-panels";
+import { ROOM_PANELS, type RoomPanel } from "./room-panels";
 import { useUnreadChat } from "./use-unread-chat";
 
 /** The room owns the whole screen: the app's mobile bar steps aside for it. */
@@ -51,8 +51,11 @@ export function RoomWorkspace({ id }: { id: string }) {
   const { user } = useSession();
   useRoomChannel(id);
   const [syncStatus, setSyncStatus] = useState<SyncStatus>("loading");
-  // One panel at a time, beside the board on wide screens, in a sheet below.
-  const [panel, setPanel] = useState<RoomPanel | null>(null);
+  // Which tab, and whether the panel shows: closing keeps the tab, so the
+  // toggle reopens where you were.
+  const [tab, setTab] = useState<RoomPanel>("chat");
+  const [open, setOpen] = useState(false);
+  const panel = open ? tab : null;
   const unread = useUnreadChat(id, panel === "chat");
 
   // Identity travels with every cursor once a sync server is connected, so it
@@ -72,8 +75,12 @@ export function RoomWorkspace({ id }: { id: string }) {
     (status: SyncStatus) => setSyncStatus(status),
     [],
   );
-  const toggle = (next: RoomPanel) =>
-    setPanel((current) => (current === next ? null : next));
+  /** Phone icons: open on that tab, or close if it is already showing. */
+  const toggle = (next: RoomPanel) => {
+    if (open && tab === next) return setOpen(false);
+    setTab(next);
+    setOpen(true);
+  };
 
   if (isPending) {
     return (
@@ -121,7 +128,7 @@ export function RoomWorkspace({ id }: { id: string }) {
     files: files?.length,
     people: participants?.length,
   };
-  const close = () => setPanel(null);
+  const close = () => setOpen(false);
   const closeOnEscape = (event: React.KeyboardEvent) => {
     if (event.key === "Escape") close();
   };
@@ -134,6 +141,8 @@ export function RoomWorkspace({ id }: { id: string }) {
         panel={panel}
         onToggle={toggle}
         counts={counts}
+        panelOpen={open}
+        onTogglePanel={() => setOpen((current) => !current)}
       />
 
       <div className="flex min-h-0 flex-1">
@@ -147,20 +156,46 @@ export function RoomWorkspace({ id }: { id: string }) {
               onStatusChange={handleStatusChange}
             />
           </div>
-          <RoomDock panel={panel} onToggle={toggle} counts={counts} />
         </div>
 
-        {/* Tablets and up: beside the board, which gives up the width. */}
-        {panel && (
-          <aside
-            onKeyDown={closeOnEscape}
-            className="hidden w-80 shrink-0 border-s bg-card md:flex lg:w-[22.5rem] xl:w-[25rem]"
-          >
-            <PanelFrame title={d.room[panel]} onClose={close}>
-              <PanelBody panel={panel} roomId={room.id} />
-            </PanelFrame>
-          </aside>
-        )}
+        {/* Tablets and up: beside the board, which gives up the width. Always
+            in the page, so the toggle's `aria-controls` points at something. */}
+        <aside
+          id="room-panel"
+          onKeyDown={closeOnEscape}
+          className={cn(
+            "hidden w-80 shrink-0 flex-col border-s bg-card lg:w-90",
+            open && "md:flex",
+          )}
+        >
+          {open && (
+            <>
+              <div className="shrink-0 border-b p-3">
+                <Tabs
+                  variant="fill"
+                  label={d.room.tabs}
+                  controls="room-panel-body"
+                  value={tab}
+                  onChange={(next) => setTab(next as RoomPanel)}
+                  items={ROOM_PANELS.map(({ id: panelId }) => ({
+                    id: panelId,
+                    label: d.room[panelId],
+                    // Only chat has news to report; files and people do not.
+                    count: panelId === "chat" ? unread : undefined,
+                  }))}
+                />
+              </div>
+              <div
+                id="room-panel-body"
+                role="tabpanel"
+                aria-label={d.room[tab]}
+                className="flex min-h-0 flex-1 flex-col"
+              >
+                <PanelBody panel={tab} roomId={room.id} />
+              </div>
+            </>
+          )}
+        </aside>
       </div>
 
       {/* Phones: a sheet rising over the board instead of squeezing it. */}
