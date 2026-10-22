@@ -133,7 +133,7 @@ export function RoomHeader({
         ) : null}
       </button>
 
-      {/* Phones: the dock's three buttons, as icons. */}
+      {/* Phones: one icon per panel. */}
       <div className="flex items-center md:hidden">
         {ROOM_PANELS.map(({ id, icon: Icon }) => {
           const count = counts[id];

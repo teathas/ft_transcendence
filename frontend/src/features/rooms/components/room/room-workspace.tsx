@@ -148,7 +148,7 @@ export function RoomWorkspace({ id }: { id: string }) {
       <div className="flex min-h-0 flex-1">
         <div className="relative flex min-w-0 flex-1 flex-col">
           {/* `isolate` keeps the board's own very high z-indexes inside it, so
-              the sheet and the dock can sit above them. */}
+              the phone sheet can sit above them. */}
           <div className="isolate flex min-h-0 flex-1 flex-col">
             <BoardPanel
               roomId={room.id}
