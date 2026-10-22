@@ -372,6 +372,12 @@ export const fr = {
       active: "Active",
       archived: "Archivée",
     },
+    tabs: {
+      label: "Listes de salles",
+      all: "Toutes",
+      owned: "Les miennes",
+      archived: "Archivées",
+    },
     table: {
       room: "Salle",
       subject: "Matière",

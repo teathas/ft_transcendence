@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import type { Room } from "../types";
 import { useSubjectLabel } from "../subject-label";
 import { RoomLink } from "./room-link";
+import { RoomStatusPill } from "./room-status-pill";
 
 // A stable accent per room, so a board is recognisable at a glance.
 const ACCENTS = [
@@ -25,7 +26,14 @@ function accentFor(seed: string) {
   return ACCENTS[hash % ACCENTS.length];
 }
 
-export function RoomCard({ room }: { room: Room }) {
+/** `showStatus` adds the status pill; the Dashboard leaves it off. */
+export function RoomCard({
+  room,
+  showStatus = false,
+}: {
+  room: Room;
+  showStatus?: boolean;
+}) {
   const d = useDict();
   const { relativeTime } = useFormat();
   const subjectLabel = useSubjectLabel();
@@ -90,6 +98,11 @@ export function RoomCard({ room }: { room: Room }) {
           <span className="inline-flex items-center gap-1.5">
             <Clock className="size-3.5" aria-hidden="true" />
             {relativeTime(room.lastActiveAt)}
+          </span>
+        )}
+        {showStatus && (
+          <span className="ms-auto">
+            <RoomStatusPill status={room.status} />
           </span>
         )}
       </div>

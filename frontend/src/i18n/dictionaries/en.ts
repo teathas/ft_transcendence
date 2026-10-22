@@ -368,6 +368,12 @@ export const en = {
       active: "Active",
       archived: "Archived",
     },
+    tabs: {
+      label: "Room lists",
+      all: "All",
+      owned: "I own",
+      archived: "Archived",
+    },
     table: {
       room: "Room",
       subject: "Subject",

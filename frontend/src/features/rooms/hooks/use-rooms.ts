@@ -50,6 +50,14 @@ export function useRecentRooms(limit = 6) {
   });
 }
 
+/** Counts over every room you can see; the tabs show them. */
+export function useRoomStats() {
+  return useQuery({
+    queryKey: queryKeys.rooms.stats(),
+    queryFn: roomsApi.stats,
+  });
+}
+
 function useEnterRoom() {
   const queryClient = useQueryClient();
   const router = useLocaleRouter();

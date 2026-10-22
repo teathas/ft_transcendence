@@ -366,6 +366,12 @@ export const ar = {
       active: "نشطة",
       archived: "مؤرشفة",
     },
+    tabs: {
+      label: "قوائم الغرف",
+      all: "الكل",
+      owned: "غرفي",
+      archived: "المؤرشفة",
+    },
     table: {
       room: "الغرفة",
       subject: "المادة",
