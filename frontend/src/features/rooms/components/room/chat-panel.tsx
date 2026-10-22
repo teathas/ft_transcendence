@@ -155,10 +155,11 @@ export function ChatPanel({ roomId }: { roomId: string }) {
           onScroll={onScroll}
           role="log"
           aria-label={d.room.messagesLabel}
-          className="h-full overflow-y-auto overscroll-contain py-3"
+          className="flex h-full flex-col overflow-y-auto overscroll-contain py-3"
         >
           {isPending ? (
-            <div className="flex flex-col gap-4 px-4">
+            // At the bottom too, so nothing jumps when the messages arrive.
+            <div className="mt-auto flex shrink-0 flex-col gap-4 px-4">
               {[0, 1, 2].map((index) => (
                 <div key={index} className="flex gap-3">
                   <Skeleton className="size-8 shrink-0 rounded-full" />
@@ -180,7 +181,9 @@ export function ChatPanel({ roomId }: { roomId: string }) {
               </p>
             </div>
           ) : (
-            <ul className="flex flex-col">
+            // `mt-auto` takes only free space: short chats sit above the
+            // input, long ones fill the box and scroll as before.
+            <ul className="mt-auto flex shrink-0 flex-col">
               {hasNextPage && (
                 <li className="flex justify-center pb-3">
                   <Button
