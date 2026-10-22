@@ -729,6 +729,7 @@ export const en = {
   room: {
     metaTitle: "Room",
     back: "Back to rooms",
+    leave: "Leave room",
     copyCode: "Copy room code",
     copyCodeTitle: "Copy the room code",
     copied: "Code copied",

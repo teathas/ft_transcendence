@@ -739,6 +739,7 @@ export const fr = {
   room: {
     metaTitle: "Salle",
     back: "Retour aux salles",
+    leave: "Quitter la salle",
     copyCode: "Copier le code de la salle",
     copyCodeTitle: "Copier le code de la salle",
     copied: "Code copié",

@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  Bell,
   LayoutDashboard,
   LogOut,
   MessageSquare,
@@ -13,6 +12,7 @@ import {
   X,
 } from "lucide-react";
 
+import { BellLink } from "@/components/layout/bell-link";
 import { BrandWordmark } from "@/components/layout/brand-mark";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { useSidebarCollapsed } from "@/components/layout/use-sidebar-collapsed";
@@ -22,10 +22,8 @@ import { Button } from "@/components/ui/button";
 import { routes } from "@/config/routes";
 import { useLogout, useSession } from "@/features/auth/hooks/use-auth";
 import { useFriendsSummary } from "@/features/friends/hooks/use-friends";
-import { useUnreadNotifications } from "@/features/notifications/hooks/use-notifications";
 import { useDict } from "@/i18n/client";
 import { Link, useBarePathname } from "@/i18n/navigation";
-import { t } from "@/i18n/translate";
 import { cn } from "@/lib/utils";
 
 function NavLink({
@@ -69,47 +67,6 @@ function NavLink({
   );
 }
 
-/** The way to the Notifications page; a dot, not a number, when some are unread. */
-function BellLink({
-  active,
-  unread,
-  onNavigate,
-}: {
-  active: boolean;
-  unread?: number;
-  onNavigate?: () => void;
-}) {
-  const d = useDict();
-
-  return (
-    <Link
-      href={routes.notifications}
-      onClick={onNavigate}
-      aria-current={active ? "page" : undefined}
-      aria-label={
-        unread
-          ? t(d.nav.unreadNotifications, { count: unread })
-          : d.nav.notifications
-      }
-      title={d.nav.notifications}
-      className={cn(
-        "relative inline-flex size-11 shrink-0 items-center justify-center rounded-lg border transition-colors",
-        active
-          ? "border-transparent bg-primary/10 text-primary"
-          : "text-muted-foreground hover:bg-accent hover:text-foreground",
-      )}
-    >
-      <Bell className="size-5" aria-hidden="true" />
-      {unread ? (
-        <span
-          aria-hidden="true"
-          className="absolute end-2.5 top-2.5 size-2 rounded-full bg-primary ring-2 ring-card"
-        />
-      ) : null}
-    </Link>
-  );
-}
-
 export function AppSidebar({
   onNavigate,
   onClose,
@@ -124,7 +81,6 @@ export function AppSidebar({
   const { user } = useSession();
   const logout = useLogout();
   const { data: summary } = useFriendsSummary();
-  const { data: unreadNotifications } = useUnreadNotifications();
   const [collapsed, toggleCollapsed] = useSidebarCollapsed();
 
   return (
@@ -137,11 +93,7 @@ export function AppSidebar({
         >
           <BrandWordmark labelClassName="rail-collapsed:sr-only" />
         </Link>
-        <BellLink
-          active={pathname === routes.notifications}
-          unread={unreadNotifications}
-          onNavigate={onNavigate}
-        />
+        <BellLink onNavigate={onNavigate} />
         {onClose && (
           <Button
             variant="ghost"

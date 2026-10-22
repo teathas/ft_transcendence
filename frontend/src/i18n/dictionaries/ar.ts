@@ -721,6 +721,7 @@ export const ar = {
   room: {
     metaTitle: "غرفة",
     back: "العودة إلى الغرف",
+    leave: "مغادرة الغرفة",
     copyCode: "نسخ رمز الغرفة",
     copyCodeTitle: "نسخ رمز الغرفة",
     copied: "تم نسخ الرمز",
