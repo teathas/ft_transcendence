@@ -27,7 +27,7 @@ export function PasswordInput({
         {...props}
         disabled={disabled}
         type={visible ? "text" : "password"}
-        className={cn("pe-10", className)}
+        className={cn("pe-11", className)}
       />
 
       <button
@@ -42,7 +42,7 @@ export function PasswordInput({
           visible ? d.auth.passwordStrength.hide : d.auth.passwordStrength.show
         }
         className={cn(
-          "absolute inset-y-0 end-0 flex items-center rounded-e-md px-3",
+          "absolute inset-y-0 end-0 flex w-11 items-center justify-center rounded-e-md",
           "text-muted-foreground transition-colors hover:text-foreground",
           "disabled:pointer-events-none disabled:opacity-50",
         )}
