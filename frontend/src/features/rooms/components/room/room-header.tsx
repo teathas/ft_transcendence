@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowLeft, Check, PanelRight } from "lucide-react";
+import { ArrowLeft, Check, Menu, PanelRight } from "lucide-react";
 
+import { useNavDrawer } from "@/components/layout/app-shell";
 import { BellLink } from "@/components/layout/bell-link";
 import { Button, buttonStyles } from "@/components/ui/button";
 import { routes } from "@/config/routes";
@@ -36,6 +37,7 @@ export function RoomHeader({
 }) {
   const d = useDict();
   const subjectLabel = useSubjectLabel();
+  const nav = useNavDrawer();
   const [copied, setCopied] = useState(false);
   const unread = counts.chat ?? 0;
   const panelLabel = panelOpen ? d.room.hidePanel : d.room.showPanel;
@@ -53,6 +55,19 @@ export function RoomHeader({
 
   return (
     <header className="flex h-16 shrink-0 items-center gap-2 border-b bg-card px-2 sm:gap-3 sm:px-4">
+      {/* Focus mode: the sidebar is hidden in a room, at every size. */}
+      <button
+        type="button"
+        onClick={nav.open}
+        aria-expanded={nav.isOpen}
+        aria-controls="app-drawer"
+        aria-label={d.nav.openNavigation}
+        title={d.nav.openNavigation}
+        className="inline-flex size-11 shrink-0 items-center justify-center rounded-lg border text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+      >
+        <Menu className="size-5" aria-hidden="true" />
+      </button>
+
       <Link
         href={routes.dashboard}
         className={buttonStyles({
@@ -91,11 +106,7 @@ export function RoomHeader({
         {copied ? d.room.copied : ""}
       </span>
 
-      {/* Desktop shows the sidebar's own bell, so this one is for smaller
-          screens. Focus mode (step 7) hides the sidebar: show it again there. */}
-      <span className="lg:hidden">
-        <BellLink />
-      </span>
+      <BellLink />
 
       {/* Tablets and up: one button for the side panel; phones keep the icons. */}
       <button
