@@ -54,7 +54,7 @@ export function RoomHeader({
   }
 
   return (
-    <header className="flex h-16 shrink-0 items-center gap-2 border-b bg-card px-2 sm:gap-3 sm:px-4">
+    <header className="flex h-16 shrink-0 items-center gap-1 border-b bg-card px-2 sm:gap-3 sm:px-4">
       {/* Focus mode: the sidebar is hidden in a room, at every size. */}
       <button
         type="button"
