@@ -12,7 +12,7 @@ import {
   X,
 } from "lucide-react";
 
-import { BellLink } from "@/components/layout/bell-link";
+import { BellMenu } from "@/components/layout/bell-menu";
 import { BrandWordmark } from "@/components/layout/brand-mark";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { useSidebarCollapsed } from "@/components/layout/use-sidebar-collapsed";
@@ -85,7 +85,8 @@ export function AppSidebar({
 
   return (
     <div className="flex h-full flex-col gap-6 p-4 rail-collapsed:px-3.5">
-      <div className="flex items-center gap-2 rail-collapsed:flex-col rail-collapsed:gap-4">
+      {/* `relative`: the bell's panel anchors here, at the sidebar's edge. */}
+      <div className="relative flex items-center gap-2 rail-collapsed:flex-col rail-collapsed:gap-4">
         <Link
           href={routes.dashboard}
           onClick={onNavigate}
@@ -93,7 +94,7 @@ export function AppSidebar({
         >
           <BrandWordmark labelClassName="rail-collapsed:sr-only" />
         </Link>
-        <BellLink onNavigate={onNavigate} />
+        <BellMenu placement="sidebar" onNavigate={onNavigate} />
         {onClose && (
           <Button
             variant="ghost"

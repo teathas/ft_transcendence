@@ -779,6 +779,7 @@ export const en = {
     title: "Notifications",
     description: "Follow activity that concerns your account and shared rooms.",
     markAllRead: "Mark all as read",
+    seeAll: "See all notifications",
     loading: "Loading notifications…",
     loadError: "Notifications could not be loaded.",
     empty: "No notifications",

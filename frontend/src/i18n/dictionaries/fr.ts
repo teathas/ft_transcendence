@@ -790,6 +790,7 @@ export const fr = {
     description:
       "Suivez les activités concernant votre compte et vos salles partagées.",
     markAllRead: "Tout marquer comme lu",
+    seeAll: "Voir toutes les notifications",
     loading: "Chargement des notifications…",
     loadError: "Impossible de charger les notifications.",
     empty: "Aucune notification",

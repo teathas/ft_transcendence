@@ -4,7 +4,7 @@ import { useState } from "react";
 import { ArrowLeft, Check, Menu, PanelRight } from "lucide-react";
 
 import { useNavDrawer } from "@/components/layout/app-shell";
-import { BellLink } from "@/components/layout/bell-link";
+import { BellMenu } from "@/components/layout/bell-menu";
 import { Button, buttonStyles } from "@/components/ui/button";
 import { routes } from "@/config/routes";
 import { useDict } from "@/i18n/client";
@@ -106,7 +106,7 @@ export function RoomHeader({
         {copied ? d.room.copied : ""}
       </span>
 
-      <BellLink />
+      <BellMenu placement="bar" />
 
       {/* Tablets and up: one button for the side panel; phones keep the icons. */}
       <button
