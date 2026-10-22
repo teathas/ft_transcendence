@@ -1,0 +1,42 @@
+/*
+ * tldraw's UI on the app's tokens.
+ *
+ * tldraw sets its palette on `.tl-theme__light` / `.tl-theme__dark` (one
+ * class). Two classes win on specificity, whatever order the files load in.
+ * This file stays unlayered on purpose: tldraw.css is unlayered too, and an
+ * unlayered rule always beats one inside `@layer`.
+ *
+ * One rule covers both modes: our tokens already switch with `.dark` on
+ * <html>, and `use-board-identity` keeps tldraw's own class in step with it.
+ */
+.tl-container.tl-theme__light,
+.tl-container.tl-theme__dark {
+  /* Canvas */
+  --tl-color-background: var(--background);
+
+  /* Panels, toolbar and menus. The panel shadows draw an inset 1px ring in
+     `panel-contrast`, so that is what acts as their border. */
+  --tl-color-panel: var(--card);
+  --tl-color-panel-contrast: var(--border);
+  --tl-color-divider: var(--border);
+  --tl-color-low: var(--muted);
+  --tl-color-hint: var(--accent);
+  --tl-color-muted-2: var(--accent);
+
+  /* Text */
+  --tl-color-text: var(--foreground);
+  --tl-color-text-0: var(--foreground);
+  --tl-color-text-1: var(--foreground);
+  --tl-color-text-3: var(--muted-foreground);
+
+  /* Active tool, selection box, links and focus. */
+  --tl-color-selected: var(--primary);
+  --tl-color-selected-contrast: var(--primary-foreground);
+  --tl-color-primary: var(--primary);
+  --tl-color-focus: var(--ring);
+
+  /* Radius on our scale: 8 (`rounded-md`) and 10 (`rounded-lg`). */
+  --tl-radius-2: calc(var(--radius) - 2px);
+  --tl-radius-3: var(--radius);
+  --tl-radius-4: var(--radius);
+}
