@@ -36,7 +36,7 @@ export default async function PublicProfilePage({
 
   return (
     <div className="px-4 py-8 sm:px-6 lg:px-10 lg:py-10">
-      <div className="mx-auto w-full max-w-3xl">
+      <div className="mx-auto w-full max-w-5xl">
         <PublicProfileView userId={userId} initialProfile={profile} />
       </div>
     </div>

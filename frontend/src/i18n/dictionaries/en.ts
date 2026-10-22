@@ -581,11 +581,10 @@ export const en = {
   publicProfile: {
     metaTitle: "User profile",
     metaDescription: "View a Shared Room member’s public profile.",
-    back: "Back to people",
     backToPeople: "Browse people",
-    about: "About",
     noBio: "This person has not added a bio yet.",
-    activity: "Shared activity",
+    friendsSince: "Friends since {date}",
+    activity: "Activity",
     stats: {
       roomsJoined: "Rooms joined",
       roomsOwned: "Rooms created",

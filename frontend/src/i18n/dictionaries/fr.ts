@@ -588,11 +588,10 @@ export const fr = {
   publicProfile: {
     metaTitle: "Profil utilisateur",
     metaDescription: "Consultez le profil public d’un membre de Shared Room.",
-    back: "Retour aux utilisateurs",
     backToPeople: "Voir les utilisateurs",
-    about: "Présentation",
     noBio: "Cette personne n’a pas encore ajouté de présentation.",
-    activity: "Activité partagée",
+    friendsSince: "Amis depuis le {date}",
+    activity: "Activité",
     stats: {
       roomsJoined: "Salles rejointes",
       roomsOwned: "Salles créées",

@@ -576,11 +576,10 @@ export const ar = {
   publicProfile: {
     metaTitle: "الملف الشخصي",
     metaDescription: "عرض الملف الشخصي العام لعضو في Shared Room.",
-    back: "العودة إلى المستخدمين",
     backToPeople: "تصفح المستخدمين",
-    about: "نبذة",
     noBio: "لم يضف هذا الشخص نبذة بعد.",
-    activity: "النشاط المشترك",
+    friendsSince: "أصدقاء منذ {date}",
+    activity: "النشاط",
     stats: {
       roomsJoined: "الغرف المنضم إليها",
       roomsOwned: "الغرف المنشأة",
