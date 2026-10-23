@@ -5,12 +5,15 @@ import { Check } from "lucide-react";
 import { useDict } from "@/i18n/client";
 import { cn } from "@/lib/utils";
 
-import { ACCENTS } from "./accent";
+import { usePreferences } from "@/features/profile/hooks/use-preferences";
+
+import { ACCENT_SWATCHES, ACCENTS } from "./accent";
 import { useAccent } from "./use-accent";
 
 export function AccentPicker() {
   const d = useDict();
-  const [accent, setAccent] = useAccent();
+  const accent = useAccent();
+  const { chooseAccent } = usePreferences();
 
   return (
     <div
@@ -18,9 +21,10 @@ export function AccentPicker() {
       aria-label={d.theme.accent}
       className="flex flex-wrap gap-2"
     >
-      {ACCENTS.map(({ id, swatch }) => {
+      {ACCENTS.map((id) => {
         const selected = accent === id;
         const label = d.theme.accents[id];
+        const swatch = ACCENT_SWATCHES[id];
 
         return (
           <button
@@ -30,7 +34,7 @@ export function AccentPicker() {
             aria-checked={selected}
             aria-label={label}
             title={label}
-            onClick={() => setAccent(id)}
+            onClick={() => chooseAccent(id)}
             className={cn(
               "inline-flex size-11 items-center justify-center rounded-full border-2 transition-colors",
               selected

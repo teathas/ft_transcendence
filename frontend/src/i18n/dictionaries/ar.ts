@@ -605,6 +605,8 @@ export const ar = {
     appearance: {
       title: "المظهر",
       description: "اختر السمة ولون التمييز. يتم حفظهما على هذا الجهاز.",
+      language: "اللغة",
+      languageAuto: "لغة المتصفح",
     },
     header: {
       joined: "انضم في {date}",

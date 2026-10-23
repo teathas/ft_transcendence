@@ -611,6 +611,8 @@ export const en = {
       title: "Appearance",
       description:
         "Pick the theme and the accent colour. They are saved on this device.",
+      language: "Language",
+      languageAuto: "Browser language",
     },
     header: {
       joined: "Joined {date}",

@@ -1,14 +1,12 @@
 "use client";
 
 import { Check, Languages } from "lucide-react";
-import type { Route } from "next";
-import { usePathname, useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { Dropdown, DropdownItem } from "@/components/ui/dropdown";
+import { usePreferences } from "@/features/profile/hooks/use-preferences";
 import { useDict, useLocale } from "@/i18n/client";
 import { localeNames, locales, type Locale } from "@/i18n/config";
-import { stripLocale } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
 /**
@@ -28,18 +26,11 @@ export function LanguageSwitcher({
 }) {
   const d = useDict();
   const locale = useLocale();
-  const router = useRouter();
-  const pathname = usePathname();
+
+  const { chooseLanguage } = usePreferences();
 
   function switchTo(next: Locale) {
-    if (next === locale) return;
-
-    const bare = stripLocale(pathname);
-    // Read at click time rather than with `useSearchParams`, which would opt
-    // every page holding this switcher out of static rendering.
-    const search = typeof window === "undefined" ? "" : window.location.search;
-
-    router.replace(`/${next}${bare === "/" ? "" : bare}${search}` as Route);
+    if (next !== locale) chooseLanguage(next);
   }
 
   return (

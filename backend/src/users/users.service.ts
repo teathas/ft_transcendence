@@ -105,11 +105,16 @@ export class UsersService {
 				...(dto.email !== undefined && { email: dto.email }),
 				// An empty bio is stored as "no bio".
 				...(dto.bio !== undefined && { bio: dto.bio.trim() || null }),
+				...(dto.language !== undefined && { language: dto.language }),
+				...(dto.accentColor !== undefined && { accentColor: dto.accentColor }),
 			},
 		});
 
 		const { passwordHash: _, ...safeUser } = updated;
-		await this.notifications.createNotification({ recipientId: id, actorId: id, type: 'PROFILE_UPDATED' });
+		// Language and colour are settings, not profile news.
+		if (dto.username !== undefined || dto.email !== undefined || dto.bio !== undefined) {
+			await this.notifications.createNotification({ recipientId: id, actorId: id, type: 'PROFILE_UPDATED' });
+		}
 		return safeUser;
 	}
 

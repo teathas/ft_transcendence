@@ -1,5 +1,8 @@
 import type { z } from "zod";
 
+import type { Accent } from "@/components/theme/accent";
+import type { Locale } from "@/i18n/config";
+
 import type {
   authResponseSchema,
   loginSchema,
@@ -22,6 +25,9 @@ export type ProfilePatch = {
   username?: string;
   email?: string;
   bio?: string;
+  /** `null` clears the choice. */
+  language?: Locale | null;
+  accentColor?: Accent | null;
 };
 
 export type PasswordChangePayload = {

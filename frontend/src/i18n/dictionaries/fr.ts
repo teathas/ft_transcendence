@@ -619,6 +619,8 @@ export const fr = {
       title: "Apparence",
       description:
         "Choisissez le thème et la couleur d'accent. Ils sont enregistrés sur cet appareil.",
+      language: "Langue",
+      languageAuto: "Langue du navigateur",
     },
     header: {
       joined: "Inscrit le {date}",

@@ -1,22 +1,24 @@
 /**
  * The accent colour: which hue `--primary` takes. Light and dark are separate
- * values in globals.css (`[data-accent]`); `swatch` is only the preview dot.
- * Indigo is the default and has no attribute, so it stays the plain tokens.
+ * values in globals.css (`[data-accent]`); the swatch is only the preview dot.
+ * Indigo is the default, the plain tokens.
  */
-export const ACCENTS = [
-  { id: "indigo", swatch: "oklch(0.565 0.2 277)" },
-  { id: "blue", swatch: "oklch(0.55 0.15 250)" },
-  { id: "teal", swatch: "oklch(0.54 0.09 185)" },
-  { id: "rose", swatch: "oklch(0.565 0.2 10)" },
-  { id: "orange", swatch: "oklch(0.56 0.14 50)" },
-] as const;
+export const ACCENTS = ["indigo", "blue", "teal", "rose", "orange"] as const;
 
-export type Accent = (typeof ACCENTS)[number]["id"];
+export type Accent = (typeof ACCENTS)[number];
 
-export const ACCENT_KEY = "accent";
 export const DEFAULT_ACCENT: Accent = "indigo";
 
-/** Copies the saved choice onto <html> before anything is drawn. */
-export const ACCENT_SCRIPT = `try{var a=localStorage.getItem("${ACCENT_KEY}");if(${JSON.stringify(
-  ACCENTS.map((accent) => accent.id).filter((id) => id !== DEFAULT_ACCENT),
-)}.indexOf(a)>-1)document.documentElement.dataset.accent=a}catch(e){}`;
+export const ACCENT_SWATCHES: Record<Accent, string> = {
+  indigo: "oklch(0.565 0.2 277)",
+  blue: "oklch(0.55 0.15 250)",
+  teal: "oklch(0.54 0.09 185)",
+  rose: "oklch(0.565 0.2 10)",
+  orange: "oklch(0.56 0.14 50)",
+};
+
+/** Also written in public/prefs-init.js, which restores it before the first paint. */
+export const ACCENT_KEY = "accent";
+
+export const isAccent = (value: unknown): value is Accent =>
+  ACCENTS.some((accent) => accent === value);

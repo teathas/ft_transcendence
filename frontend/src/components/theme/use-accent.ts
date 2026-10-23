@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback, useSyncExternalStore } from "react";
+import { useSyncExternalStore } from "react";
 
-import { ACCENT_KEY, DEFAULT_ACCENT, type Accent } from "./accent";
+import { ACCENT_KEY, DEFAULT_ACCENT, isAccent, type Accent } from "./accent";
 
 const EVENT = "accent-change";
 
@@ -11,30 +11,24 @@ function subscribe(onChange: () => void) {
   return () => window.removeEventListener(EVENT, onChange);
 }
 
-// The <html> attribute is the one source of truth: the inline script set it.
-const getSnapshot = () =>
-  (document.documentElement.dataset.accent as Accent | undefined) ??
-  DEFAULT_ACCENT;
+// The <html> attribute is the one source of truth: prefs-init.js set it.
+const getSnapshot = (): Accent => {
+  const saved = document.documentElement.dataset.accent;
+  return isAccent(saved) ? saved : DEFAULT_ACCENT;
+};
 const getServerSnapshot = () => DEFAULT_ACCENT;
 
+/** Applies an accent to the page and remembers it on this device. */
+export function applyAccent(accent: Accent) {
+  document.documentElement.dataset.accent = accent;
+  try {
+    localStorage.setItem(ACCENT_KEY, accent);
+  } catch {
+    // Storage blocked: the choice lasts until the next page load only.
+  }
+  window.dispatchEvent(new Event(EVENT));
+}
+
 export function useAccent() {
-  const accent = useSyncExternalStore(
-    subscribe,
-    getSnapshot,
-    getServerSnapshot,
-  );
-
-  const setAccent = useCallback((next: Accent) => {
-    const root = document.documentElement;
-    if (next === DEFAULT_ACCENT) delete root.dataset.accent;
-    else root.dataset.accent = next;
-    try {
-      localStorage.setItem(ACCENT_KEY, next);
-    } catch {
-      // Storage blocked: the choice lasts until the next page load only.
-    }
-    window.dispatchEvent(new Event(EVENT));
-  }, []);
-
-  return [accent, setAccent] as const;
+  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 }

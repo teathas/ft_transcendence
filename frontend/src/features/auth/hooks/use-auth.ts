@@ -1,12 +1,15 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { Route } from "next";
+import { useRouter } from "next/navigation";
 
 import { useToast } from "@/components/ui/toast";
 import { routes } from "@/config/routes";
 import { useDict } from "@/i18n/client";
 import { isApiError, tokenStore } from "@/lib/api";
-import { useLocaleRouter } from "@/i18n/navigation";
+import { browserLocale } from "@/i18n/config";
+import { localeHref, useLocaleRouter } from "@/i18n/navigation";
 import { queryKeys } from "@/lib/query/keys";
 import { resetCache } from "@/lib/query/persister";
 
@@ -36,7 +39,7 @@ export function useSession() {
 
 export function useLogin() {
   const queryClient = useQueryClient();
-  const router = useLocaleRouter();
+  const router = useRouter();
 
   return useMutation({
     mutationFn: authApi.login,
@@ -45,7 +48,9 @@ export function useLogin() {
       resetCache(queryClient);
       tokenStore.set(result.accessToken);
       queryClient.setQueryData(queryKeys.auth.session(), result.user);
-      router.replace(routes.dashboard);
+      // The account's language, or the browser's when none was ever chosen.
+      const locale = result.user.language ?? browserLocale();
+      router.replace(localeHref(routes.dashboard, locale) as Route);
     },
   });
 }
