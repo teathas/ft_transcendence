@@ -12,9 +12,12 @@ import {
 import { Menu } from "lucide-react";
 
 import { AppSidebar } from "@/components/layout/app-sidebar";
+import { BellMenu } from "@/components/layout/bell-menu";
 import { BrandWordmark } from "@/components/layout/brand-mark";
+import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { routes } from "@/config/routes";
+import { useSession } from "@/features/auth/hooks/use-auth";
 import { useDict } from "@/i18n/client";
 import { Link, useBarePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
@@ -31,6 +34,7 @@ export function useNavDrawer() {
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const d = useDict();
+  const { user } = useSession();
   const [isOpen, setIsOpen] = useState(false);
   const pathname = useBarePathname();
   // A room has its own header and wants every pixel, so the bar steps aside.
@@ -134,6 +138,22 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <Link href={routes.dashboard} className="rounded-md" key={pathname}>
               <BrandWordmark />
             </Link>
+            {/* The bell's panel opens under it, or across the screen on phones. */}
+            <div className="ms-auto flex items-center gap-1">
+              <BellMenu placement="bar" />
+              <Link
+                href={routes.profile}
+                aria-label={d.nav.profile}
+                title={user?.username}
+                className="inline-flex size-11 items-center justify-center rounded-lg transition-colors hover:bg-accent"
+              >
+                <Avatar
+                  src={user?.avatarUrl}
+                  name={user?.username ?? "?"}
+                  className="size-8"
+                />
+              </Link>
+            </div>
           </header>
 
           <main className="flex-1">{children}</main>
