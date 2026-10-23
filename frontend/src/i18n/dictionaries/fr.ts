@@ -63,6 +63,10 @@ export const fr = {
     signedOut: "Déconnecté",
     noSession: "Aucune session",
     signOut: "Se déconnecter",
+    signOutConfirm: {
+      title: "Se déconnecter ?",
+      description: "Vous devrez vous reconnecter pour accéder à vos rooms.",
+    },
   },
 
   landing: {

@@ -61,6 +61,10 @@ export const ar = {
     signedOut: "غير مسجَّل الدخول",
     noSession: "لا توجد جلسة",
     signOut: "تسجيل الخروج",
+    signOutConfirm: {
+      title: "تسجيل الخروج؟",
+      description: "ستحتاج إلى تسجيل الدخول مرة أخرى للوصول إلى غرفك.",
+    },
   },
 
   landing: {

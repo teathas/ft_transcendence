@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   LayoutDashboard,
   LogOut,
@@ -15,6 +16,7 @@ import {
 import { BellMenu } from "@/components/layout/bell-menu";
 import { BrandWordmark } from "@/components/layout/brand-mark";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
+import { LogoutModal } from "@/components/layout/logout-modal";
 import { useSidebarCollapsed } from "@/components/layout/use-sidebar-collapsed";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Avatar } from "@/components/ui/avatar";
@@ -80,6 +82,7 @@ export function AppSidebar({
   const pathname = useBarePathname();
   const { user } = useSession();
   const logout = useLogout();
+  const [confirmingLogout, setConfirmingLogout] = useState(false);
   const { data: summary } = useFriendsSummary();
   const [collapsed, toggleCollapsed] = useSidebarCollapsed();
 
@@ -220,14 +223,24 @@ export function AppSidebar({
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => logout.mutate()}
-            disabled={logout.isPending}
+            onClick={() => setConfirmingLogout(true)}
             title={d.nav.signOut}
             className="w-full justify-start rail-collapsed:size-11 rail-collapsed:justify-center rail-collapsed:px-0"
           >
             <LogOut className="size-3.5 rtl:rotate-180" aria-hidden="true" />
             <span className="rail-collapsed:sr-only">{d.nav.signOut}</span>
           </Button>
+
+          <LogoutModal
+            open={confirmingLogout}
+            pending={logout.isPending}
+            onClose={() => setConfirmingLogout(false)}
+            onConfirm={() =>
+              logout.mutate(undefined, {
+                onError: () => setConfirmingLogout(false),
+              })
+            }
+          />
         </div>
       </div>
     </div>

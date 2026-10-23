@@ -61,6 +61,10 @@ export const en = {
     signedOut: "Signed out",
     noSession: "No session",
     signOut: "Sign out",
+    signOutConfirm: {
+      title: "Sign out?",
+      description: "You will need to sign in again to reach your rooms.",
+    },
   },
 
   landing: {
