@@ -35,6 +35,14 @@ export const fr = {
     light: "Clair",
     dark: "Sombre",
     system: "Système",
+    accent: "Couleur",
+    accents: {
+      indigo: "Indigo",
+      blue: "Bleu",
+      teal: "Turquoise",
+      rose: "Rose",
+      orange: "Orange",
+    },
   },
 
   nav: {
@@ -607,6 +615,11 @@ export const fr = {
     metaTitle: "Profil",
     metaDescription:
       "Gérez votre photo, vos informations et votre mot de passe.",
+    appearance: {
+      title: "Apparence",
+      description:
+        "Choisissez le thème et la couleur d'accent. Ils sont enregistrés sur cet appareil.",
+    },
     header: {
       joined: "Inscrit le {date}",
       viewPublicProfile: "Voir mon profil public",

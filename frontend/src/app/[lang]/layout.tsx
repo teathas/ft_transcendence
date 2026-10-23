@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Noto_Sans_Arabic } from "next/font/google";
 
 import { SIDEBAR_SCRIPT } from "@/components/layout/sidebar-state";
+import { ACCENT_SCRIPT } from "@/components/theme/accent";
 import { siteConfig } from "@/config/site";
 import { I18nProvider } from "@/i18n/client";
 import { directions, locales } from "@/i18n/config";
@@ -75,8 +76,11 @@ export default async function RootLayout({ children }: LayoutProps<"/[lang]">) {
       className={`${geistSans.variable} ${geistMono.variable} ${notoArabic.variable} h-full antialiased`}
     >
       <head>
-        {/* Before the first paint, so a collapsed sidebar never flashes wide. */}
-        <script dangerouslySetInnerHTML={{ __html: SIDEBAR_SCRIPT }} />
+        {/* Before the first paint, so a collapsed sidebar never flashes wide and
+            the accent never flashes indigo. */}
+        <script
+          dangerouslySetInnerHTML={{ __html: SIDEBAR_SCRIPT + ACCENT_SCRIPT }}
+        />
       </head>
       <body className="flex min-h-full flex-col">
         <I18nProvider locale={locale} dict={dict}>

@@ -33,6 +33,14 @@ export const ar = {
     light: "فاتح",
     dark: "داكن",
     system: "النظام",
+    accent: "اللون",
+    accents: {
+      indigo: "نيلي",
+      blue: "أزرق",
+      teal: "أخضر مزرق",
+      rose: "وردي",
+      orange: "برتقالي",
+    },
   },
 
   nav: {
@@ -594,6 +602,10 @@ export const ar = {
   profile: {
     metaTitle: "الملف الشخصي",
     metaDescription: "أدِر صورتك وبيانات حسابك وكلمة مرورك.",
+    appearance: {
+      title: "المظهر",
+      description: "اختر السمة ولون التمييز. يتم حفظهما على هذا الجهاز.",
+    },
     header: {
       joined: "انضم في {date}",
       viewPublicProfile: "عرض ملفي العام",

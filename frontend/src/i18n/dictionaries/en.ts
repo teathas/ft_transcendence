@@ -33,6 +33,14 @@ export const en = {
     light: "Light",
     dark: "Dark",
     system: "System",
+    accent: "Colour",
+    accents: {
+      indigo: "Indigo",
+      blue: "Blue",
+      teal: "Teal",
+      rose: "Rose",
+      orange: "Orange",
+    },
   },
 
   nav: {
@@ -599,6 +607,11 @@ export const en = {
   profile: {
     metaTitle: "Profile",
     metaDescription: "Manage your photo, account details and password.",
+    appearance: {
+      title: "Appearance",
+      description:
+        "Pick the theme and the accent colour. They are saved on this device.",
+    },
     header: {
       joined: "Joined {date}",
       viewPublicProfile: "View public profile",
