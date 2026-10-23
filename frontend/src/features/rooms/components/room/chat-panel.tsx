@@ -141,7 +141,10 @@ export function ChatPanel({ roomId }: { roomId: string }) {
     const body = draft.trim();
     if (!body) return;
     setDraft("");
-    send.mutate(body);
+    // A failed send puts the text back, unless something new was typed since.
+    send.mutate(body, {
+      onError: () => setDraft((current) => current || body),
+    });
   }
 
   const newest = messages.at(-1)?.id ?? null;
@@ -294,6 +297,11 @@ export function ChatPanel({ roomId }: { roomId: string }) {
             <ArrowRight className="size-4 rtl:rotate-180" aria-hidden="true" />
           </Button>
         </div>
+        {send.isError && (
+          <p role="alert" className="mt-2 text-xs text-destructive">
+            {d.room.sendFailed}
+          </p>
+        )}
         <p id={hintId} className="sr-only">
           {d.room.sendHint}
         </p>

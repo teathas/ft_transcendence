@@ -20,10 +20,25 @@ function SearchField({
   const d = useDict();
   const [draft, setDraft] = useState(value);
 
+  // A reset or the back button changes `value` from outside: the field
+  // follows. What this field sent itself is not an outside change.
+  const [sent, setSent] = useState(value);
+  const [seen, setSeen] = useState(value);
+  if (value !== seen) {
+    setSeen(value);
+    if (value !== sent) {
+      setSent(value);
+      setDraft(value);
+    }
+  }
+
   // Debounced, so typing does not rewrite the URL on every keystroke.
   useEffect(() => {
     if (draft === value) return;
-    const timer = setTimeout(() => onChange(draft), 350);
+    const timer = setTimeout(() => {
+      setSent(draft);
+      onChange(draft);
+    }, 350);
     return () => clearTimeout(timer);
   }, [draft, value, onChange]);
 

@@ -711,6 +711,12 @@ export const ar = {
     fileFailed: "تعذّر إرسال الملف أو حفظه.",
     download: "تنزيل {name}",
     deleteFile: "حذف {name}",
+    deleteFileConfirm: {
+      title: "هل تريد حذف هذا الملف؟",
+      description:
+        "سيُحذف {name} لدى جميع أعضاء الغرفة ولا يمكن التراجع عن ذلك.",
+      confirm: "حذف الملف",
+    },
     fileTooBig: "{name} يتجاوز {size} ولم تتم مشاركته.",
     fileTypeNotAllowed: "نوع الملف {name} غير مدعوم.",
     uploadProgress: "تقدم رفع الملف",
@@ -732,6 +738,7 @@ export const ar = {
     jumpToLatest: "آخر الرسائل",
     newMessages: "رسائل جديدة",
     sendHint: "Enter للإرسال · Shift+Enter لسطر جديد",
+    sendFailed: "لم تُرسل رسالتك. أُعيدت إلى الحقل: حاول مرة أخرى.",
     filesEmpty: {
       title: "لا ملفات بعد",
       body: "شارك الملاحظات أو التمارين أو الصور مع كل من في الغرفة.",

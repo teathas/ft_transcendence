@@ -719,6 +719,12 @@ export const en = {
     fileFailed: "The file could not be sent or saved.",
     download: "Download {name}",
     deleteFile: "Delete {name}",
+    deleteFileConfirm: {
+      title: "Delete this file?",
+      description:
+        "{name} will be removed for everyone in the room. This cannot be undone.",
+      confirm: "Delete file",
+    },
     fileTooBig: "{name} is over {size} and was not shared.",
     fileTypeNotAllowed: "{name} is not a supported file type.",
     uploadProgress: "File upload progress",
@@ -740,6 +746,7 @@ export const en = {
     jumpToLatest: "Latest messages",
     newMessages: "New messages",
     sendHint: "Enter to send · Shift+Enter for a new line",
+    sendFailed: "Your message was not sent. It is back in the box: try again.",
     filesEmpty: {
       title: "No files yet",
       body: "Share notes, exercises or images with everyone in the room.",

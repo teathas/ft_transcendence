@@ -729,6 +729,12 @@ export const fr = {
     fileFailed: "Le fichier n’a pas pu être envoyé ou enregistré.",
     download: "Télécharger {name}",
     deleteFile: "Supprimer {name}",
+    deleteFileConfirm: {
+      title: "Supprimer ce fichier ?",
+      description:
+        "{name} sera supprimé pour tous les membres de la room. Cette action est irréversible.",
+      confirm: "Supprimer le fichier",
+    },
     fileTooBig: "{name} dépasse {size} et n’a pas été partagé.",
     fileTypeNotAllowed: "Le type de fichier de {name} n’est pas accepté.",
     uploadProgress: "Progression de l’envoi du fichier",
@@ -750,6 +756,8 @@ export const fr = {
     jumpToLatest: "Derniers messages",
     newMessages: "Nouveaux messages",
     sendHint: "Entrée pour envoyer · Maj+Entrée pour un retour à la ligne",
+    sendFailed:
+      "Votre message n'a pas été envoyé. Il est revenu dans le champ : réessayez.",
     filesEmpty: {
       title: "Aucun fichier",
       body: "Partagez des notes, des exercices ou des images avec toute la salle.",

@@ -17,8 +17,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useSession } from "@/features/auth/hooks/use-auth";
 import { useDict } from "@/i18n/client";
 import { t } from "@/i18n/translate";
-import { isApiError, tokenStore } from "@/lib/api";
-import { env } from "@/lib/env";
+import { isApiError } from "@/lib/api";
 import { useFormat } from "@/lib/format";
 import { formatBytes } from "@/lib/image";
 import { cn } from "@/lib/utils";
@@ -29,7 +28,9 @@ import {
   useRoomFiles,
   useUploadRoomFile,
 } from "../../hooks/use-room";
+import { fetchRoomFile, useBlobUrl } from "../../file-blob";
 import type { RoomFile } from "../../types";
+import { DeleteFileModal } from "./delete-file-modal";
 
 const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
 const ALLOWED_EXTENSIONS = [
@@ -48,29 +49,20 @@ const ALLOWED_EXTENSIONS = [
 ] as const;
 const FILE_ACCEPT = ALLOWED_EXTENSIONS.join(",");
 
-function protectedUrl(file: RoomFile, preview = false) {
-  const token = tokenStore.get();
-  if (!file.url || !token) return null;
-  const query = new URLSearchParams({ token });
-  if (preview) query.set("preview", "1");
-  return `${env.apiUrl}${file.url}?${query}`;
-}
-
 /**
  * The API serves files as downloads under a random name. Fetching the bytes
  * and saving them gives the file its own name back.
  */
 async function download(file: RoomFile) {
-  const url = protectedUrl(file);
-  if (!url) throw new Error("Missing file URL or access token");
-  const response = await fetch(url);
-  if (!response.ok) throw new Error(String(response.status));
+  if (!file.url) throw new Error("Missing file URL");
+  const blob = await fetchRoomFile(file.url);
 
   const link = document.createElement("a");
-  link.href = URL.createObjectURL(await response.blob());
+  link.href = URL.createObjectURL(blob);
   link.download = file.name;
   link.click();
-  URL.revokeObjectURL(link.href);
+  // Revoked right away, some browsers would cancel the save.
+  setTimeout(() => URL.revokeObjectURL(link.href), 10_000);
 }
 
 /** "PDF", "PNG", "DOCX": the tile's label, from the name's extension. */
@@ -83,8 +75,36 @@ function typeLabel(name: string) {
 const canPreview = (file: RoomFile) =>
   file.kind === "pdf" || file.kind === "image";
 
-/** Where a file's bytes are, or nothing for mock files that have no address. */
-const urlOf = (file: RoomFile) => protectedUrl(file, true);
+/** The tile before the name: the picture itself for an image, else its type. */
+function FileTile({ file, onOpen }: { file: RoomFile; onOpen: () => void }) {
+  const d = useDict();
+  const src = useBlobUrl(file.kind === "image" ? file.url : undefined);
+
+  if (src) {
+    return (
+      <button
+        type="button"
+        onClick={onOpen}
+        aria-label={t(d.room.previewFile, { name: file.name })}
+        className="size-12 shrink-0 overflow-hidden rounded-lg border bg-muted"
+      >
+        {/* A blob: address cannot go through next/image. */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={src} alt="" className="size-full object-cover" />
+      </button>
+    );
+  }
+
+  const label = typeLabel(file.name);
+  return (
+    <span
+      aria-hidden="true"
+      className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-muted text-[11px] font-semibold text-muted-foreground"
+    >
+      {label || <FileIcon className="size-4" />}
+    </span>
+  );
+}
 
 export function FilesPanel({ roomId }: { roomId: string }) {
   const d = useDict();
@@ -100,6 +120,8 @@ export function FilesPanel({ roomId }: { roomId: string }) {
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [uploadingName, setUploadingName] = useState<string | null>(null);
   const [preview, setPreview] = useState<RoomFile | null>(null);
+  const [deleting, setDeleting] = useState<RoomFile | null>(null);
+  const previewUrl = useBlobUrl(preview?.url);
 
   /** The button and the drop zone both end up here. */
   async function accept(list: FileList | null) {
@@ -249,7 +271,6 @@ export function FilesPanel({ roomId }: { roomId: string }) {
         ) : (
           <ul className="flex flex-col gap-2">
             {files.map((file) => {
-              const label = typeLabel(file.name);
               const canDelete =
                 file.uploaderId === user?.id || room?.ownerId === user?.id;
 
@@ -258,12 +279,7 @@ export function FilesPanel({ roomId }: { roomId: string }) {
                   key={file.id}
                   className="flex items-center gap-3 rounded-xl border bg-card p-3"
                 >
-                  <span
-                    aria-hidden="true"
-                    className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted text-[11px] font-semibold text-muted-foreground"
-                  >
-                    {label || <FileIcon className="size-4" />}
-                  </span>
+                  <FileTile file={file} onOpen={() => setPreview(file)} />
 
                   <span className="min-w-0 flex-1">
                     <span
@@ -314,7 +330,7 @@ export function FilesPanel({ roomId }: { roomId: string }) {
                         aria-label={t(d.room.deleteFile, { name: file.name })}
                         title={t(d.room.deleteFile, { name: file.name })}
                         disabled={remove.isPending}
-                        onClick={() => remove.mutate(file.id)}
+                        onClick={() => setDeleting(file)}
                         className="size-11 text-destructive hover:bg-destructive/10 hover:text-destructive"
                       >
                         <Trash2 className="size-4" aria-hidden="true" />
@@ -343,22 +359,40 @@ export function FilesPanel({ roomId }: { roomId: string }) {
         className="max-w-5xl"
       >
         {preview &&
-          urlOf(preview) &&
-          (preview.kind === "image" ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={urlOf(preview) ?? undefined}
-              alt={preview.name}
-              className="mx-auto max-h-[70vh] w-auto rounded-lg border"
-            />
+          (previewUrl ? (
+            preview.kind === "image" ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={previewUrl}
+                alt={preview.name}
+                className="mx-auto max-h-[70vh] w-auto rounded-lg border"
+              />
+            ) : (
+              <iframe
+                src={previewUrl}
+                title={preview.name}
+                className="h-[70vh] w-full rounded-lg border bg-white"
+              />
+            )
           ) : (
-            <iframe
-              src={urlOf(preview) ?? undefined}
-              title={preview.name}
-              className="h-[70vh] w-full rounded-lg border bg-white"
-            />
+            <Skeleton className="h-[70vh] w-full rounded-lg" />
           ))}
       </Modal>
+
+      <DeleteFileModal
+        name={deleting?.name ?? null}
+        pending={remove.isPending}
+        error={remove.error}
+        onClose={() => {
+          if (remove.isPending) return;
+          remove.reset();
+          setDeleting(null);
+        }}
+        onConfirm={() => {
+          if (!deleting) return;
+          remove.mutate(deleting.id, { onSuccess: () => setDeleting(null) });
+        }}
+      />
     </div>
   );
 }

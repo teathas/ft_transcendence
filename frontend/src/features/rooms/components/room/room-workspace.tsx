@@ -7,6 +7,7 @@ import { buttonStyles } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs } from "@/components/ui/tabs";
 import { routes } from "@/config/routes";
+import { useMediaQuery } from "@/hooks/use-media-query";
 import { useDict } from "@/i18n/client";
 import { Link } from "@/i18n/navigation";
 import { isApiError } from "@/lib/api";
@@ -15,11 +16,7 @@ import { cn } from "@/lib/utils";
 import { useSession } from "@/features/auth/hooks/use-auth";
 import { useRoomChannel } from "@/features/realtime/use-room-channel";
 
-import {
-  useParticipants,
-  useRoom,
-  useRoomFiles,
-} from "../../hooks/use-room";
+import { useParticipants, useRoom, useRoomFiles } from "../../hooks/use-room";
 import { BoardPanel } from "./board-panel";
 import type { SyncStatus } from "./board-synced";
 import { ChatPanel } from "./chat-panel";
@@ -33,6 +30,8 @@ import { useUnreadChat } from "./use-unread-chat";
 
 /** The room owns the whole screen: the app's mobile bar steps aside for it. */
 const FULL_HEIGHT = "h-dvh";
+/** Tablets and up: the panel sits beside the board. Below, it is a sheet. */
+const WIDE = "(min-width: 48rem)";
 
 function PanelBody({ panel, roomId }: { panel: RoomPanel; roomId: string }) {
   return (
@@ -51,6 +50,9 @@ export function RoomWorkspace({ id }: { id: string }) {
   const { data: files } = useRoomFiles(id);
   const { user } = useSession();
   useRoomChannel(id);
+  // One panel is mounted, not both with one hidden by CSS: two chats would
+  // double every effect and every input.
+  const wide = useMediaQuery(WIDE);
   const [syncStatus, setSyncStatus] = useState<SyncStatus>("loading");
   // Which tab, and whether the panel shows: closing keeps the tab, so the
   // toggle reopens where you were.
@@ -165,75 +167,81 @@ export function RoomWorkspace({ id }: { id: string }) {
 
         {/* Tablets and up: beside the board, which gives up the width. Always
             in the page, so the toggle's `aria-controls` points at something. */}
-        <aside
-          id="room-panel"
-          onKeyDown={closeOnEscape}
-          className={cn(
-            "hidden w-80 shrink-0 flex-col border-s bg-card lg:w-90",
-            open && "md:flex",
-          )}
-        >
-          {open && (
-            <>
-              <div className="shrink-0 border-b p-3">
-                <Tabs
-                  variant="fill"
-                  label={d.room.tabs}
-                  controls="room-panel-body"
-                  value={tab}
-                  onChange={(next) => setTab(next as RoomPanel)}
-                  items={ROOM_PANELS.map(({ id: panelId }) => ({
-                    id: panelId,
-                    label: d.room[panelId],
-                    // Only chat has news to report; files and people do not.
-                    count: panelId === "chat" ? unread : undefined,
-                  }))}
-                />
-              </div>
-              <div
-                id="room-panel-body"
-                role="tabpanel"
-                aria-label={d.room[tab]}
-                className="flex min-h-0 flex-1 flex-col"
-              >
-                <PanelBody panel={tab} roomId={room.id} />
-              </div>
-            </>
-          )}
-        </aside>
+        {wide && (
+          <aside
+            id="room-panel"
+            onKeyDown={closeOnEscape}
+            className={cn(
+              "hidden w-80 shrink-0 flex-col border-s bg-card lg:w-90",
+              open && "flex",
+            )}
+          >
+            {open && (
+              <>
+                <div className="shrink-0 border-b p-3">
+                  <Tabs
+                    variant="fill"
+                    label={d.room.tabs}
+                    controls="room-panel-body"
+                    value={tab}
+                    onChange={(next) => setTab(next as RoomPanel)}
+                    items={ROOM_PANELS.map(({ id: panelId }) => ({
+                      id: panelId,
+                      label: d.room[panelId],
+                      // Only chat has news to report; files and people do not.
+                      count: panelId === "chat" ? unread : undefined,
+                    }))}
+                  />
+                </div>
+                <div
+                  id="room-panel-body"
+                  role="tabpanel"
+                  aria-label={d.room[tab]}
+                  className="flex min-h-0 flex-1 flex-col"
+                >
+                  <PanelBody panel={tab} roomId={room.id} />
+                </div>
+              </>
+            )}
+          </aside>
+        )}
       </div>
 
       {/* Phones: a sheet rising over the board instead of squeezing it. */}
-      <div
-        aria-hidden="true"
-        onClick={close}
-        className={cn(
-          "fixed inset-0 z-40 bg-black/50 transition-opacity md:hidden",
-          panel ? "opacity-100" : "pointer-events-none opacity-0",
-        )}
-      />
-      <aside
-        role="dialog"
-        aria-modal={panel !== null}
-        aria-label={panel ? d.room[panel] : d.room.panels}
-        inert={panel === null}
-        onKeyDown={closeOnEscape}
-        className={cn(
-          "fixed inset-x-0 bottom-0 z-50 flex h-[85dvh] flex-col rounded-t-2xl border-t bg-card shadow-2xl",
-          "transition-transform duration-200 md:hidden",
-          panel ? "translate-y-0" : "translate-y-full",
-        )}
-      >
-        <span
-          aria-hidden="true"
-          className="mx-auto mt-2 h-1 w-10 shrink-0 rounded-full bg-border"
-        />
-        {panel && (
-          <PanelFrame title={d.room[panel]} onClose={close}>
-            <PanelBody panel={panel} roomId={room.id} />
-          </PanelFrame>
-        )}
-      </aside>
+      {!wide && (
+        <>
+          <div
+            aria-hidden="true"
+            onClick={close}
+            className={cn(
+              "fixed inset-0 z-40 bg-black/50 transition-opacity",
+              panel ? "opacity-100" : "pointer-events-none opacity-0",
+            )}
+          />
+          <aside
+            role="dialog"
+            aria-modal={panel !== null}
+            aria-label={panel ? d.room[panel] : d.room.panels}
+            inert={panel === null}
+            onKeyDown={closeOnEscape}
+            className={cn(
+              "fixed inset-x-0 bottom-0 z-50 flex h-[85dvh] flex-col rounded-t-2xl border-t bg-card shadow-2xl",
+              "transition-transform duration-200",
+              panel ? "translate-y-0" : "translate-y-full",
+            )}
+          >
+            <span
+              aria-hidden="true"
+              className="mx-auto mt-2 h-1 w-10 shrink-0 rounded-full bg-border"
+            />
+            {panel && (
+              <PanelFrame title={d.room[panel]} onClose={close}>
+                <PanelBody panel={panel} roomId={room.id} />
+              </PanelFrame>
+            )}
+          </aside>
+        </>
+      )}
     </div>
   );
 }
