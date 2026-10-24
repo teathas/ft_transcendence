@@ -1,5 +1,6 @@
 "use client";
 
+import { useSyncExternalStore } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Route } from "next";
 import { useRouter } from "next/navigation";
@@ -18,7 +19,16 @@ import type { AuthResponse } from "../types";
 
 /** Current user, or `undefined` while loading / when signed out. */
 export function useSession() {
+  // Without a token there is no session to ask for. Some components using this
+  // hook are always mounted, the login page included: asking anyway made each
+  // failure start a refresh, then a cache reset, then the same request again.
+  const token = useSyncExternalStore(
+    tokenStore.subscribe,
+    tokenStore.get,
+    () => null,
+  );
   const query = useQuery({
+    enabled: Boolean(token),
     queryKey: queryKeys.auth.session(),
     queryFn: authApi.session,
     // A 401 here is the answer, not a failure worth retrying.
@@ -28,7 +38,8 @@ export function useSession() {
   return {
     user: query.data,
     isAuthenticated: Boolean(query.data),
-    isSignedOut: isApiError(query.error) && query.error.isUnauthorized,
+    isSignedOut:
+      !token || (isApiError(query.error) && query.error.isUnauthorized),
     isPending: query.isPending,
     isFetching: query.isFetching,
     isError: query.isError,
