@@ -82,6 +82,7 @@ export class PublicApiRoomsService {
       recipientId: ownerId,
       actorId: ownerId,
       type: 'ROOM_CREATED',
+      category: 'ROOM',
       data: { roomId: room.id, roomName: room.name },
     });
     return this.toView(room, ownerId);
@@ -103,6 +104,7 @@ export class PublicApiRoomsService {
       recipientId: userId,
       actorId: ownerId,
       type: 'ROOM_UPDATED',
+      category: 'ROOM',
       data: { roomId: room.id, roomName: room.name },
     })));
     return this.toView(room, ownerId);
@@ -127,6 +129,7 @@ export class PublicApiRoomsService {
         recipientId: userId,
         actorId: ownerId,
         type: 'ROOM_DELETED',
+				category: 'ROOM',
         data: { roomId: id, roomName: room.name },
       })));
     }

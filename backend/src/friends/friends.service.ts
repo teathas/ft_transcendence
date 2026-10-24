@@ -35,6 +35,7 @@ export class FriendsService {
 				recipientId: addresseeId,
 				actorId: meId,
 				type: 'FRIEND_REQUEST',
+				category: 'FRIEND',
 				data: { friendshipId: friendship.id },
 			});
 			return friendship;
@@ -78,6 +79,7 @@ export class FriendsService {
 			recipientId: request.requesterId,
 			actorId: meId,
 			type: 'FRIEND_REQUEST_ACCEPTED',
+			category: 'FRIEND',
 			data: { friendshipId: id },
 		});
 		await this.notificationsService.markMatchingNotificationsRead({
@@ -111,6 +113,7 @@ export class FriendsService {
 			recipientId: request.requesterId,
 			actorId: meId,
 			type: 'FRIEND_REQUEST_REJECTED',
+			category: 'FRIEND',
 			data: { friendshipId: id },
 		});
 		
@@ -317,6 +320,7 @@ export class FriendsService {
 			recipientId: friendId,
 			actorId: meId,
 			type: 'FRIEND_REMOVED',
+			category: 'FRIEND',
 			data: { friendshipId },
 		});
 	}

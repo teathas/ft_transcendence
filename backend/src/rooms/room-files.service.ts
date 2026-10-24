@@ -56,6 +56,7 @@ export class RoomFilesService {
 			recipientId: userId,
 			actorId,
 			type,
+			category: 'ROOM',
 			data: { roomId, ...data },
 		})));
 	}

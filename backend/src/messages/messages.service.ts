@@ -16,6 +16,15 @@ export class MessagesService {
             throw new ForbiddenException('You are not a member of this room');
     }
 
+    private static readonly MENTION_RE = /(?<![\w@])@([A-Za-z0-9_]{3,20})\b/g;
+
+    private extractMentions(content: string): string[] {
+        const names = [...content.matchAll(MessagesService.MENTION_RE)].map((m) => m[1].toLowerCase());
+        return [...new Set(names)].slice(0, 10);
+    }
+
+
+
     async send(roomId: string, userId: string, dto: SendMessageDto) {
         await this.assertMember(roomId, userId);
 
@@ -33,22 +42,27 @@ export class MessagesService {
         this.realtime.emitToRoom(roomId, 'room:message', { roomId, message: view });
         const members = await this.prisma.roomMember.findMany({
             where: {
-            roomId,
-            userId: { not: userId },
+                roomId,
+                userId: { not: userId },
             },
-            select: { userId: true },
+            select: {
+                userId: true,
+                user: { select: { username: true } },
+            },
         });
+            
+        const mentioned = new Set(this.extractMentions(dto.content));
         await Promise.all(
             members.map((member) =>
-            this.notificationsService.createNotification({
-                recipientId: member.userId,
-                actorId: userId,
-                type: 'NEW_ROOM_MESSAGE',
-                data: {
-                roomId,
-                messageId: message.id,
-                },
-            }),
+                this.notificationsService.createNotification({
+                    recipientId: member.userId,
+                    actorId: userId,
+                    type: mentioned.has(member.user.username.toLowerCase())
+                        ? 'ROOM_MENTION'
+                        : 'NEW_ROOM_MESSAGE',
+                    category: 'ROOM',
+                    data: { roomId, messageId: message.id },
+                }),
             ),
         );
         return view;
@@ -107,7 +121,7 @@ export class MessagesService {
             where: { id: messageId },
         });
         await this.notificationsService.deleteMatchingNotifications({
-            type: 'NEW_ROOM_MESSAGE',
+            type: { in: ['NEW_ROOM_MESSAGE', 'ROOM_MENTION'] },
             data: {
                 path: ['messageId'],
                 equals: messageId,
@@ -118,6 +132,7 @@ export class MessagesService {
 				recipientId: existing.userId,
 				actorId: userId,
 				type: 'ROOM_MESSAGE_DELETED',
+				category: 'ROOM',
 				data: { roomId, messageId },
 			});
 		}

@@ -212,6 +212,7 @@ enum NotificationType {
   ROOM_MESSAGE_DELETED
   ROOM_FILE_UPLOADED
   ROOM_FILE_DELETED
+  ROOM_MENTION
   PROFILE_UPDATED
   PASSWORD_CHANGED
   AVATAR_UPDATED
@@ -219,11 +220,19 @@ enum NotificationType {
   API_KEY_REVOKED
 }
 
+enum NotificationCategory {
+  ROOM
+  FRIEND
+  DM
+  ACCOUNT
+}
+
 model Notification {
   id          String           @id @default(uuid())
   recipientId String
   actorId     String?
   type        NotificationType
+  category    NotificationCategory @default(ACCOUNT)
   data        Json?
   readAt      DateTime?
   createdAt   DateTime         @default(now())
@@ -233,4 +242,5 @@ model Notification {
 
   @@index([recipientId, createdAt])
   @@index([recipientId, readAt])
+  @@index([recipientId, category, readAt])
 }

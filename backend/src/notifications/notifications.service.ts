@@ -13,6 +13,7 @@ export class NotificationsService {
         recipientId: string;
         actorId?: string | null;
         type: Prisma.NotificationCreateInput['type'];
+        category?: Prisma.NotificationCreateInput['category'];
         data?: Prisma.InputJsonValue;})
     {
       if (input.type === 'NEW_DIRECT_MESSAGE' && input.actorId) {
@@ -43,6 +44,7 @@ export class NotificationsService {
           ...(input.actorId ? { actor: { connect: { id: input.actorId } } }
             : {}),
           type: input.type,
+          category: input.category,
           ...(input.data !== undefined ? { data: input.data } : {}),
         },
       });
@@ -56,7 +58,9 @@ export class NotificationsService {
   async list(userId: string, query: ListNotificationsDto) {
       const page = query.page ?? 1;
       const limit = query.limit ?? 10;
-      const where = { recipientId:userId, ...(query.unreadOnly && { readAt: null }) };
+      const where = { recipientId:userId,
+        ...(query.unreadOnly && { readAt: null }),
+        ...(query.category && { category: query.category }), };
 
       const [items, total] = await this.prisma.$transaction([
         this.prisma.notification.findMany({
@@ -74,6 +78,26 @@ export class NotificationsService {
   unreadCount(userId: string) {
     return this.prisma.notification.count({ where: { recipientId:userId, readAt: null } });
   }
+
+  async unreadRoomCounts(userId: string, roomId: string) {
+    const count = await this.prisma.notification.count({
+      where: {
+        recipientId: userId,
+        category: 'ROOM',
+        readAt: null,
+        data: {
+          path: ['roomId'],
+          equals: roomId,
+        },
+      },
+    });
+
+    return { roomId, count };
+  }
+
+
+
+
   async markAllRead(userId: string) {
     const result = await this.prisma.notification.updateMany({
       where: { recipientId:userId, readAt: null },

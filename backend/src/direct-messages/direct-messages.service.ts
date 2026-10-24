@@ -62,6 +62,7 @@ export class DirectMessagesService {
 			recipientId: friendId,
 			actorId: meId,
 			type: 'NEW_DIRECT_MESSAGE',
+      category: 'DM',
 			data: { messageId: message.id },
 		});
     return message;
@@ -153,6 +154,7 @@ export class DirectMessagesService {
       recipientId: friendId,
       actorId: meId,
       type: 'DIRECT_MESSAGE_DELETED',
+      category: 'DM',
       data: { messageId },
     });
     this.realtime.emitToUser(meId, 'dm:message-deleted', {

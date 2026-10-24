@@ -15,6 +15,12 @@ export class NotificationsController {
     const count = await this.notificationsService.unreadCount(user.sub);
     return { count };
   }
+
+  @Get('unread-by-room/:roomId')
+  async unreadRoomCounts(@CurrentUser() user: { sub: string },
+  @Param('roomId', ParseUUIDPipe) roomId: string) {
+    return this.notificationsService.unreadRoomCounts(user.sub,roomId);
+  }
   @Patch('read-all')
   markAllRead(@CurrentUser() user: { sub: string }) {
     return this.notificationsService.markAllRead(user.sub);
@@ -35,4 +41,6 @@ export class NotificationsController {
   ) {
     return this.notificationsService.deleteNotification(user.sub, id);
   }
+
+  
 }

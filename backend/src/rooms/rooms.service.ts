@@ -45,6 +45,7 @@ export class RoomsService {
             recipientId: ownerId,
             actorId: ownerId,
             type: 'ROOM_CREATED',
+            category: 'ROOM',
             data: { roomId: room.id, roomName: room.name },
         });
         return room;
@@ -93,6 +94,7 @@ export class RoomsService {
             recipientId: member.userId,
             actorId: userId,
             type: 'ROOM_MEMBER_JOINED',
+            category: 'ROOM',
             data: { roomId },
         }),
         ),
@@ -211,6 +213,7 @@ export class RoomsService {
             recipientId: member.userId,
             actorId: userId,
             type: 'ROOM_MEMBER_LEFT',
+            category: 'ROOM',
             data: { roomId },
             }),
         ),
