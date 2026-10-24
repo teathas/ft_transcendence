@@ -386,6 +386,28 @@ export const fr = {
     addMenu: {
       joinWithCode: "Rejoindre avec un code",
     },
+    menu: {
+      label: "Actions pour {name}",
+      edit: "Modifier la room",
+      delete: "Supprimer la room",
+      leave: "Quitter la room",
+    },
+    edit: {
+      title: "Modifier la room",
+      description: "Changez le nom, le sujet ou qui peut la trouver.",
+      submit: "Enregistrer",
+    },
+    deleteConfirm: {
+      title: "Supprimer cette room ?",
+      description: "{name} sera supprimée avec ses messages et ses fichiers, pour tout le monde. Cette action est irréversible.",
+      confirm: "Supprimer la room",
+    },
+    leaveConfirm: {
+      title: "Quitter cette room ?",
+      description:
+        "Vous ne ferez plus partie des personnes de {name}. Vous pourrez la rejoindre plus tard avec son code si elle est privée.",
+      confirm: "Quitter la room",
+    },
     create: {
       title: "Créer une salle",
       description:

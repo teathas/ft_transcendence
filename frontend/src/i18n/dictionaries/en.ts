@@ -382,6 +382,28 @@ export const en = {
     addMenu: {
       joinWithCode: "Join a room with a code",
     },
+    menu: {
+      label: "Actions for {name}",
+      edit: "Edit room",
+      delete: "Delete room",
+      leave: "Leave room",
+    },
+    edit: {
+      title: "Edit room",
+      description: "Change the name, the subject or who can find it.",
+      submit: "Save changes",
+    },
+    deleteConfirm: {
+      title: "Delete this room?",
+      description: "{name} will be deleted with its messages and files, for everyone. This cannot be undone.",
+      confirm: "Delete room",
+    },
+    leaveConfirm: {
+      title: "Leave this room?",
+      description:
+        "You will no longer be one of the people in {name}. You can join again later with its code if it is private.",
+      confirm: "Leave room",
+    },
     create: {
       title: "Create a room",
       description:

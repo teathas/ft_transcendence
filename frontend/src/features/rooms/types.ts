@@ -19,6 +19,8 @@ export type Room = z.infer<typeof roomSchema>;
 export type RoomPage = z.infer<typeof roomPageSchema>;
 export type RoomStats = z.infer<typeof roomStatsSchema>;
 export type CreateRoomPayload = z.infer<typeof createRoomSchema>;
+/** Editing asks for the same three fields as creating. */
+export type UpdateRoomPayload = CreateRoomPayload;
 export type JoinRoomPayload = z.infer<typeof joinRoomSchema>;
 
 export type RoomSort = "recent" | "name" | "participants";
