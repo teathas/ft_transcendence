@@ -29,4 +29,10 @@ export class RealtimeService {
 		if (!this.server) return;
 		this.server.in(userChannel(userId)).socketsLeave(roomChannel(roomId));
 	}
+
+	isRoomLive(roomId: string): boolean {
+		if (!this.server) return false;
+		const sockets = this.server.sockets.adapter.rooms.get(roomChannel(roomId));
+		return (sockets?.size ?? 0) > 0;
+	}
 }

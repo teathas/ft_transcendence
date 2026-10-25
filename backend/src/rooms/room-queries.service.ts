@@ -7,10 +7,14 @@ import { PUBLIC_USER_SELECT } from '../users/users.service';
 import { ListRoomsDto } from './dto/list-rooms.dto';
 import { JoinByCodeDto } from './dto/join-by-code.dto';
 import { activeSince, fileSelect, roomSelect, toRoomView, visibleTo } from './room-views';
+import { RealtimeService } from '../realtime/realtime.service';
 
 @Injectable()
 export class RoomQueriesService {
-	constructor(private prisma: PrismaService) {}
+	constructor(
+		private prisma: PrismaService,
+		private realtime: RealtimeService,
+	) {}
 
 	/** The rooms the caller can see, filtered, sorted and paged by the API. */
 	async list(meId: string, query: ListRoomsDto): Promise<Paged<ReturnType<typeof toRoomView>>> {
@@ -53,7 +57,7 @@ export class RoomQueriesService {
 			this.prisma.room.count({ where }),
 		]);
 
-		return { items: rows.map(toRoomView), total };
+		return { items: rows.map((row) => toRoomView(row, this.realtime.isRoomLive(row.id))), total };
 	}
 
 	/** The numbers above the list, over every room the caller can see. */
@@ -96,7 +100,7 @@ export class RoomQueriesService {
 			select: roomSelect(meId),
 		});
 		if (!row) throw new NotFoundException('Room not found');
-		return toRoomView(row);
+		return toRoomView(row, this.realtime.isRoomLive(row.id));
 	}
 
 	/**
