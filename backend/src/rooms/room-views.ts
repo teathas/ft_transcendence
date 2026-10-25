@@ -29,7 +29,7 @@ export const roomSelect = (meId: string) =>
 
 type RoomRow = Prisma.RoomGetPayload<{ select: ReturnType<typeof roomSelect> }>;
 
-export function toRoomView(row: RoomRow) {
+export function toRoomView(row: RoomRow, isLive: boolean) {
 	const isMember = row.members.length > 0;
 	return {
 		id: row.id,
@@ -39,6 +39,7 @@ export function toRoomView(row: RoomRow) {
 		// Only people inside can share it on; outsiders see public rooms by id.
 		inviteCode: isMember ? row.inviteCode : null,
 		status: row.lastActiveAt >= activeSince() ? 'active' : 'archived',
+				isLive,
 		participantCount: row._count.members,
 		ownerId: row.ownerId,
 		ownerUsername: row.owner.username,
