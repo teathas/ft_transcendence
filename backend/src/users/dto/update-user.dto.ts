@@ -1,4 +1,4 @@
-import { IsEmail, IsIn, IsOptional, IsString, MaxLength, MinLength } from "class-validator";
+import { Equals, IsEmail, IsIn, IsOptional, IsString, MaxLength, MinLength } from "class-validator";
 
 export const LANGUAGES = ['en', 'fr', 'ar'];
 export const ACCENT_COLORS = ['indigo', 'blue', 'teal', 'rose', 'orange'];
@@ -27,4 +27,9 @@ export class UpdateUserDto {
 	@IsOptional()
 	@IsIn(ACCENT_COLORS)
 	accentColor?: string | null;
+
+	// Accepting is one way: there is no sending `false` to take it back.
+	@IsOptional()
+	@Equals(true)
+	termsAccepted?: true;
 }

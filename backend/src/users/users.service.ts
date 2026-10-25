@@ -107,6 +107,7 @@ export class UsersService {
 				...(dto.bio !== undefined && { bio: dto.bio.trim() || null }),
 				...(dto.language !== undefined && { language: dto.language }),
 				...(dto.accentColor !== undefined && { accentColor: dto.accentColor }),
+				...(dto.termsAccepted && { termsAccepted: true }),
 			},
 		});
 

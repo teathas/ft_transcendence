@@ -28,6 +28,8 @@ export type ProfilePatch = {
   /** `null` clears the choice. */
   language?: Locale | null;
   accentColor?: Accent | null;
+  /** Accepting is one way: it cannot be taken back. */
+  termsAccepted?: true;
 };
 
 export type PasswordChangePayload = {

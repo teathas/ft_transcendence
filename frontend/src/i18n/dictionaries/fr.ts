@@ -326,6 +326,17 @@ export const fr = {
       created: "Compte créé. Connectez-vous pour continuer.",
       haveAccount: "Vous avez déjà un compte ?",
       signIn: "Se connecter",
+      acceptPrefix: "J'accepte les",
+      termsLink: "conditions d'utilisation",
+      acceptAnd: "et la",
+      privacyLink: "politique de confidentialité",
+      termsRequired: "Vous devez accepter les conditions pour créer un compte.",
+    },
+    termsGate: {
+      title: "Acceptez les conditions pour continuer",
+      description:
+        "Avant d'utiliser Shared Room, lisez et acceptez les conditions d'utilisation et la politique de confidentialité.",
+      accept: "J'accepte",
     },
     passwordStrength: {
       label: "Robustesse du mot de passe",

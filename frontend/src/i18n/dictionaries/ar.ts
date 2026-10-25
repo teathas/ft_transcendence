@@ -320,6 +320,17 @@ export const ar = {
       created: "تم إنشاء الحساب. سجّل الدخول للمتابعة.",
       haveAccount: "لديك حساب بالفعل؟",
       signIn: "تسجيل الدخول",
+      acceptPrefix: "أوافق على",
+      termsLink: "شروط الخدمة",
+      acceptAnd: "و",
+      privacyLink: "سياسة الخصوصية",
+      termsRequired: "يجب قبول الشروط لإنشاء حساب.",
+    },
+    termsGate: {
+      title: "اقبل الشروط للمتابعة",
+      description:
+        "قبل استخدام Shared Room، يرجى قراءة شروط الخدمة وسياسة الخصوصية وقبولها.",
+      accept: "أوافق",
     },
     passwordStrength: {
       label: "قوة كلمة المرور",

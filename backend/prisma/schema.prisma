@@ -54,6 +54,8 @@ model User {
   language               String?
   /// Preferred accent colour. Empty: the default one.
   accentColor            String?
+  /// Accepted the terms of service. Nothing in the app opens until it is true.
+  termsAccepted          Boolean         @default(false)
   status                 UserStatus      @default(OFFLINE)
   lastSeenAt             DateTime?
   createdAt              DateTime        @default(now())

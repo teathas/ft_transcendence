@@ -322,6 +322,17 @@ export const en = {
       created: "Account created. Sign in to continue.",
       haveAccount: "Already have an account?",
       signIn: "Sign in",
+      acceptPrefix: "I accept the",
+      termsLink: "terms of service",
+      acceptAnd: "and the",
+      privacyLink: "privacy policy",
+      termsRequired: "You must accept the terms to create an account.",
+    },
+    termsGate: {
+      title: "Accept the terms to continue",
+      description:
+        "Before you use Shared Room, please read and accept the terms of service and the privacy policy.",
+      accept: "I accept",
     },
     passwordStrength: {
       label: "Password strength",

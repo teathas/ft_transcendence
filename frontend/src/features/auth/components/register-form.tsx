@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { LoaderCircle } from "lucide-react";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -12,7 +13,9 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
+import { routes } from "@/config/routes";
 import { useDict } from "@/i18n/client";
+import { Link } from "@/i18n/navigation";
 import { useZodForm } from "@/hooks/use-zod-form";
 import { isApiError } from "@/lib/api";
 
@@ -31,6 +34,8 @@ export function RegisterForm() {
   const d = useDict();
   const register = useRegister();
   const isSubmitting = register.isPending;
+  const [accepted, setAccepted] = useState(false);
+  const [termsMissing, setTermsMissing] = useState(false);
 
   const apiError = isApiError(register.error) ? register.error : null;
   const serverFieldErrors = apiError?.fieldErrors;
@@ -43,7 +48,8 @@ export function RegisterForm() {
       // Belt and braces: the button is disabled, but a stray Enter key should
       // not be able to fire a second request either.
       if (isSubmitting) return;
-      register.mutate(payload);
+      if (!accepted) return setTermsMissing(true);
+      register.mutate({ ...payload, acceptTerms: true });
     },
   });
 
@@ -115,6 +121,44 @@ export function RegisterForm() {
               placeholder={d.auth.register.confirmPasswordPlaceholder}
             />
             <FieldError {...form.getErrorProps("confirmPassword")} />
+          </Field>
+
+          <Field>
+            <label className="flex items-start gap-3 text-sm">
+              <input
+                type="checkbox"
+                checked={accepted}
+                onChange={(event) => {
+                  setAccepted(event.target.checked);
+                  setTermsMissing(false);
+                }}
+                aria-invalid={termsMissing || undefined}
+                className="mt-0.5 size-5 shrink-0 accent-primary"
+              />
+              <span className="text-pretty">
+                {d.auth.register.acceptPrefix}{" "}
+                <Link
+                  href={routes.terms}
+                  target="_blank"
+                  className="font-medium text-primary underline-offset-4 hover:underline"
+                >
+                  {d.auth.register.termsLink}
+                </Link>{" "}
+                {d.auth.register.acceptAnd}{" "}
+                <Link
+                  href={routes.privacy}
+                  target="_blank"
+                  className="font-medium text-primary underline-offset-4 hover:underline"
+                >
+                  {d.auth.register.privacyLink}
+                </Link>
+              </span>
+            </label>
+            {termsMissing && (
+              <p role="alert" className="text-sm text-destructive">
+                {d.auth.register.termsRequired}
+              </p>
+            )}
           </Field>
 
           <Button type="submit" size="lg" disabled={isSubmitting}>
