@@ -78,15 +78,17 @@ export function PublicProfileView({
 
   return (
     <div className="flex flex-col gap-6">
+      {/* The page has no layout around it, so this is the way out: the friends
+          list for a member, the home page for anyone else. */}
       <Link
-        href={routes.friends}
+        href={session.isAuthenticated ? routes.friends : routes.home}
         className={buttonStyles({
           variant: "ghost",
           className: "h-11 self-start text-muted-foreground",
         })}
       >
         <ArrowLeft className="size-4 rtl:rotate-180" aria-hidden="true" />
-        {d.nav.friends}
+        {session.isAuthenticated ? d.nav.friends : d.common.back}
       </Link>
 
       <article className="overflow-hidden rounded-xl border bg-card">
