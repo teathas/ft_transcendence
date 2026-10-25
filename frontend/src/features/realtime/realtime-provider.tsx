@@ -317,6 +317,9 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
         void queryClient.invalidateQueries({
           queryKey: queryKeys.users.detail(userId),
         });
+        void queryClient.invalidateQueries({
+          queryKey: queryKeys.users.peer(userId),
+        });
       },
     };
 

@@ -51,6 +51,9 @@ export const queryKeys = {
       [...queryKeys.users.all, "search", query ?? {}] as const,
     list: (filters?: Record<string, unknown>) =>
       [...queryKeys.users.all, "list", filters ?? {}] as const,
+    /** The public profile page: the profile and its stats. */
     detail: (id: string) => [...queryKeys.users.all, "detail", id] as const,
+    /** The friend at the top of a chat. Not `detail`: it holds another shape. */
+    peer: (id: string) => [...queryKeys.users.all, "peer", id] as const,
   },
 } as const;
