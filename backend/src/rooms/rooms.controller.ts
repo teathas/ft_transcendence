@@ -1,12 +1,13 @@
 
 import { FindRoomsQueryDto } from './dto/find-rooms-query.dto';
 
-import { Controller, Post, Body, Req, UseGuards, Param, Delete, Get, Query, ParseUUIDPipe, UploadedFile, UseInterceptors, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Patch,Body, Req, UseGuards, Param, Delete, Get, Query, ParseUUIDPipe, UploadedFile, UseInterceptors, HttpCode, HttpStatus } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { RoomsService } from './rooms.service';
 import { CreateRoomDto  } from './dto/create-room.dto';
 import { JoinRoomDto  } from './dto/join-room.dto';
+import { UpdateNotificationPreferenceDto  } from './dto/update-notification-preference.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ListRoomsDto } from './dto/list-rooms.dto';
 import { JoinByCodeDto } from './dto/join-by-code.dto';
@@ -74,6 +75,11 @@ export class RoomsController {
     {
         return this.files.list(roomId, req.user.sub);
     }
+    @Get('shared/:friendId')
+    async getSharedRooms(@Param('friendId', ParseUUIDPipe) friendId: string, @Req() req: any)
+    {
+        return this.roomsService.getSharedRooms(friendId, req.user.sub);
+    }
     @Post(':roomId/files')
     @UseInterceptors(FileInterceptor('file', { storage: memoryStorage(), limits: { fileSize: MAX_FILE_SIZE } }))
     async uploadFile(@Param('roomId', ParseUUIDPipe) roomId: string, @UploadedFile() file: Express.Multer.File, @Req() req: any)
@@ -86,4 +92,12 @@ export class RoomsController {
     {
         await this.files.remove(roomId, fileId, req.user.sub);
     }
+
+    @Patch(':roomId/notification-preference')
+    async updateNotificationPreference(@Param('roomId', ParseUUIDPipe) roomId: string, @Req() req: any,
+    @Body() dto: UpdateNotificationPreferenceDto)
+    {
+        await this.roomsService.updateNotificationPreference(roomId, req.user.sub,dto.preference);
+    }
+
 }

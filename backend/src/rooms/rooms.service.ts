@@ -7,6 +7,8 @@ import { randomBytes } from 'crypto';
 import { FindRoomsQueryDto, RoomSort } from './dto/find-rooms-query.dto';
 import { RealtimeService } from '../realtime/realtime.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import { assertMember } from './room-access';
+import { RoomNotificationPreference } from '../generated/prisma/client';
 
 @Injectable()
 export class RoomsService {
@@ -147,6 +149,26 @@ export class RoomsService {
     }
 
 
+    async getSharedRooms(friendId: string,userId :string)
+    {
+        const myMemberships = await this.prisma.roomMember.findMany({
+            where: { userId },
+            select: { roomId: true },
+        });
+        const myRoomIds = myMemberships.map((membership) => membership.roomId);
+        const sharedMemberships = await this.prisma.roomMember.findMany({
+            where: {
+                userId: friendId,
+                roomId: { in: myRoomIds },
+            },
+            select: {
+                room: true,
+            },
+            });
+
+        return sharedMemberships.map((membership) => membership.room);
+    }
+
     //leave_room
     async leave(roomId: string, userId: string)
     {
@@ -219,5 +241,25 @@ export class RoomsService {
         ),
         );
 		return removed;
+    }
+
+
+    async updateNotificationPreference(roomId: string, userId: string, preference: RoomNotificationPreference)
+    {
+        await assertMember(this.prisma, roomId, userId);
+        await this.prisma.roomMember.updateMany({
+            where: {
+                roomId,
+                userId,
+            },
+            data: {
+                notificationPreference: preference,
+            },
+        });
+          return {
+            roomId,
+            preference,
+        };
+
     }
 }

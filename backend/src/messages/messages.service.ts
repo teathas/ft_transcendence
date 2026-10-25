@@ -23,8 +23,6 @@ export class MessagesService {
         return [...new Set(names)].slice(0, 10);
     }
 
-
-
     async send(roomId: string, userId: string, dto: SendMessageDto) {
         await this.assertMember(roomId, userId);
 
