@@ -787,7 +787,11 @@ export const fr = {
     copyInviteCode: "Copier le code",
     openPanel: "Ouvrir : {panel}",
     closePanel: "Fermer le panneau",
-    unreadChat: "{count} non lus",
+    unreadNews: "{count} nouveau(x)",
+    toast: {
+      message: "{name} a envoyé un message",
+      file: "{name} a partagé {file}",
+    },
     you: "Vous",
     messagesLabel: "Messages",
     chatEmpty: {

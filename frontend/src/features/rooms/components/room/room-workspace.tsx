@@ -1,22 +1,24 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DoorOpen, TriangleAlert } from "lucide-react";
 
 import { buttonStyles } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useToast } from "@/components/ui/toast";
 import { Tabs } from "@/components/ui/tabs";
 import { routes } from "@/config/routes";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { useDict } from "@/i18n/client";
 import { Link } from "@/i18n/navigation";
+import { t } from "@/i18n/translate";
 import { isApiError } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 import { useSession } from "@/features/auth/hooks/use-auth";
 import { useRoomChannel } from "@/features/realtime/use-room-channel";
 
-import { useParticipants, useRoom, useRoomFiles } from "../../hooks/use-room";
+import { useParticipants, useRoom } from "../../hooks/use-room";
 import { BoardPanel } from "./board-panel";
 import type { SyncStatus } from "./board-synced";
 import { ChatPanel } from "./chat-panel";
@@ -26,7 +28,7 @@ import { readPanelState, savePanelState } from "./panel-state";
 import { PeoplePanel } from "./people-panel";
 import { RoomHeader } from "./room-header";
 import { ROOM_PANELS, type RoomPanel } from "./room-panels";
-import { useUnreadChat } from "./use-unread-chat";
+import { useRoomUnread } from "./use-room-unread";
 
 /** The room owns the whole screen: the app's mobile bar steps aside for it. */
 const FULL_HEIGHT = "h-dvh";
@@ -47,7 +49,6 @@ export function RoomWorkspace({ id }: { id: string }) {
   const d = useDict();
   const { data: room, isPending, error } = useRoom(id);
   const { data: participants } = useParticipants(id);
-  const { data: files } = useRoomFiles(id);
   const { user } = useSession();
   useRoomChannel(id);
   // One panel is mounted, not both with one hidden by CSS: two chats would
@@ -63,7 +64,27 @@ export function RoomWorkspace({ id }: { id: string }) {
   const [open, setOpen] = useState(saved.open);
   useEffect(() => savePanelState({ open, tab }), [open, tab]);
   const panel = open ? tab : null;
-  const unread = useUnreadChat(id, panel === "chat");
+  const arrived = useRoomUnread(id, panel);
+  const unread = arrived.chat.length;
+  const unreadFiles = arrived.files.length;
+
+  // Something new came in while its panel was out of sight: say so, once per
+  // arrival (a ref remembers how many were already announced).
+  const toast = useToast();
+  const announced = useRef({ chat: 0, files: 0 });
+  const lastMessage = arrived.chat.at(-1);
+  const lastFile = arrived.files.at(-1);
+  useEffect(() => {
+    if (unread > announced.current.chat && lastMessage) {
+      toast(t(d.room.toast.message, { name: lastMessage.authorUsername }));
+    }
+    if (unreadFiles > announced.current.files && lastFile) {
+      toast(
+        t(d.room.toast.file, { name: lastFile.uploadedBy, file: lastFile.name }),
+      );
+    }
+    announced.current = { chat: unread, files: unreadFiles };
+  }, [unread, unreadFiles, lastMessage, lastFile, toast, d]);
 
   // Identity travels with every cursor once a sync server is connected, so it
   // is derived here rather than inside the board.
@@ -130,10 +151,9 @@ export function RoomWorkspace({ id }: { id: string }) {
     );
   }
 
-  const counts = {
+  const counts: Partial<Record<RoomPanel, number>> = {
     chat: unread,
-    files: files?.length,
-    people: participants?.length,
+    files: unreadFiles,
   };
   const close = () => setOpen(false);
   const closeOnEscape = (event: React.KeyboardEvent) => {
@@ -188,8 +208,8 @@ export function RoomWorkspace({ id }: { id: string }) {
                     items={ROOM_PANELS.map(({ id: panelId }) => ({
                       id: panelId,
                       label: d.room[panelId],
-                      // Only chat has news to report; files and people do not.
-                      count: panelId === "chat" ? unread : undefined,
+                      // Chat and files report what arrived; people has no news.
+                      count: counts[panelId],
                     }))}
                   />
                 </div>

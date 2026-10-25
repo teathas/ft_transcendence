@@ -39,7 +39,8 @@ export function RoomHeader({
   const subjectLabel = useSubjectLabel();
   const nav = useNavDrawer();
   const [copied, setCopied] = useState(false);
-  const unread = counts.chat ?? 0;
+  // Anything new in chat or files lights the one button that opens the panel.
+  const unread = (counts.chat ?? 0) + (counts.files ?? 0);
   const panelLabel = panelOpen ? d.room.hidePanel : d.room.showPanel;
 
   async function copyCode() {
@@ -116,7 +117,7 @@ export function RoomHeader({
         aria-controls="room-panel"
         aria-label={
           !panelOpen && unread
-            ? `${panelLabel}, ${t(d.room.unreadChat, { count: unread })}`
+            ? `${panelLabel}, ${t(d.room.unreadNews, { count: unread })}`
             : panelLabel
         }
         title={panelLabel}
@@ -149,7 +150,7 @@ export function RoomHeader({
               className={cn("relative", panel === id && "bg-accent")}
             >
               <Icon className="size-[18px]" aria-hidden="true" />
-              {count && id === "chat" ? (
+              {count ? (
                 <span className="absolute end-1 top-1 min-w-4 rounded-full bg-primary px-1 text-center text-[10px] leading-4 font-semibold text-primary-foreground">
                   {count > 9 ? "9+" : count}
                 </span>

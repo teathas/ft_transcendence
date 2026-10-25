@@ -768,7 +768,11 @@ export const ar = {
     copyInviteCode: "نسخ الرمز",
     openPanel: "فتح: {panel}",
     closePanel: "إغلاق اللوحة",
-    unreadChat: "{count} غير مقروءة",
+    unreadNews: "{count} جديد",
+    toast: {
+      message: "{name} أرسل رسالة",
+      file: "{name} شارك {file}",
+    },
     you: "أنت",
     messagesLabel: "الرسائل",
     chatEmpty: {

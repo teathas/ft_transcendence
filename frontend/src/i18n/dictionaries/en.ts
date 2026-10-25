@@ -777,7 +777,11 @@ export const en = {
     copyInviteCode: "Copy code",
     openPanel: "Open {panel}",
     closePanel: "Close panel",
-    unreadChat: "{count} unread",
+    unreadNews: "{count} new",
+    toast: {
+      message: "{name} sent a message",
+      file: "{name} shared {file}",
+    },
     you: "You",
     messagesLabel: "Messages",
     chatEmpty: {
