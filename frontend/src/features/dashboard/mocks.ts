@@ -19,10 +19,3 @@ export const WEEK_ACTIVITY: ActivityPoint[] = [
   { weekday: 6, minutes: 20 },
   { weekday: 7, minutes: 55 },
 ];
-
-export const DASHBOARD_STATS = {
-  roomsJoined: 12,
-  minutesCollaborated: WEEK_ACTIVITY.reduce((sum, d) => sum + d.minutes, 0),
-  messagesSent: 348,
-  filesShared: 19,
-};

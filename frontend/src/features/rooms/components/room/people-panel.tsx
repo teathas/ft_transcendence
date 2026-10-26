@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Copy } from "lucide-react";
+import { Check } from "lucide-react";
 
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -21,7 +21,14 @@ function Person({ person, isMe }: { person: Participant; isMe: boolean }) {
 
   return (
     <li className="flex items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-accent/50">
-      <Link href={routes.user(person.id)} className="relative shrink-0">
+      {/* The name is the link for keyboards and screen readers; the avatar is
+          the same link for the mouse only, so it is not read or tabbed twice. */}
+      <Link
+        href={routes.user(person.id)}
+        tabIndex={-1}
+        aria-hidden="true"
+        className="relative shrink-0"
+      >
         <Avatar
           src={person.avatarUrl}
           name={person.username}
@@ -34,7 +41,7 @@ function Person({ person, isMe }: { person: Participant; isMe: boolean }) {
         <span className="flex items-center gap-1.5">
           <Link
             href={routes.user(person.id)}
-            className="truncate text-sm font-medium hover:underline"
+            className="truncate rounded-sm text-sm font-medium hover:underline"
           >
             {person.username}
           </Link>
@@ -107,7 +114,7 @@ export function PeoplePanel({ roomId }: { roomId: string }) {
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-3">
       {room?.inviteCode && (
-        <section className="flex flex-col gap-3 rounded-xl border bg-muted/40 p-4">
+        <section className="flex flex-col gap-3 rounded-xl border bg-card p-4">
           <div>
             <h3 className="text-sm font-semibold">{d.room.inviteTitle}</h3>
             <p className="mt-0.5 text-xs text-pretty text-muted-foreground">
@@ -115,18 +122,18 @@ export function PeoplePanel({ roomId }: { roomId: string }) {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <code className="min-w-0 flex-1 truncate rounded-lg border bg-background px-3 py-2 text-center font-mono text-sm tracking-widest uppercase">
+            <code className="flex h-11 min-w-0 flex-1 items-center justify-center rounded-lg border bg-background px-3 font-mono text-sm tracking-widest uppercase">
               {room.inviteCode}
             </code>
-            <Button variant="outline" onClick={copy}>
-              {copied ? (
-                <Check className="size-4 text-emerald-500" aria-hidden="true" />
-              ) : (
-                <Copy className="size-4" aria-hidden="true" />
-              )}
+            <Button variant="outline" onClick={copy} className="h-11 shrink-0">
+              {copied && <Check className="size-4" aria-hidden="true" />}
               {copied ? d.room.copied : d.room.copyInviteCode}
             </Button>
           </div>
+          {/* Says "Code copied" to screen readers, which do not see the label change. */}
+          <span role="status" className="sr-only">
+            {copied ? d.room.copied : ""}
+          </span>
         </section>
       )}
 

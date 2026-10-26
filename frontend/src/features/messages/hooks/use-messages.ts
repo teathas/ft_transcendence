@@ -31,7 +31,7 @@ export function useConversations() {
 
 export function useChatFriend(friendId: string) {
   return useQuery({
-    queryKey: queryKeys.users.detail(friendId),
+    queryKey: queryKeys.users.peer(friendId),
     queryFn: () => messagesApi.friend(friendId),
   });
 }

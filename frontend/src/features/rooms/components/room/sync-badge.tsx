@@ -29,14 +29,14 @@ export function SyncBadge({ status }: { status: SyncStatus }) {
       className={cn(
         "inline-flex items-center gap-1.5 rounded-full px-2 py-1 text-[11px] font-medium",
         isLive
-          ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+          ? "bg-live/10 text-live"
           : "bg-muted text-muted-foreground",
       )}
     >
       {isLive ? (
         <span className="relative flex size-1.5">
-          <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-500 opacity-75" />
-          <span className="relative inline-flex size-1.5 rounded-full bg-emerald-500" />
+          <span className="absolute inline-flex size-full animate-ping rounded-full bg-live opacity-75" />
+          <span className="relative inline-flex size-1.5 rounded-full bg-live" />
         </span>
       ) : status === "loading" ? (
         <Radio className="size-3 animate-pulse" aria-hidden="true" />

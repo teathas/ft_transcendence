@@ -45,7 +45,7 @@ export const joinRoomSchema = z.object({
     .regex(/^[A-Z0-9-]+$/, "roomCodeFormat"),
 });
 
-/** Aggregates for the KPI row, over every room the caller can see. */
+/** Counts over every room the caller can see; the tabs show them. */
 export const roomStatsSchema = z.object({
   total: z.number().int().nonnegative(),
   active: z.number().int().nonnegative(),

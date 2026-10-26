@@ -12,7 +12,7 @@ import { useLocaleRouter } from "@/i18n/navigation";
 import { queryKeys } from "@/lib/query/keys";
 
 import { roomsApi } from "../api/rooms.api";
-import type { Room, RoomQuery } from "../types";
+import type { Room, RoomQuery, UpdateRoomPayload } from "../types";
 
 export const DEFAULT_ROOM_QUERY: RoomQuery = {
   search: "",
@@ -34,7 +34,7 @@ export function useRooms(query: RoomQuery) {
   });
 }
 
-/** The short list shown in the sidebar and on the dashboard. */
+/** The short list shown on the dashboard. */
 export function useRecentRooms(limit = 6) {
   return useQuery({
     queryKey: queryKeys.rooms.recent(limit),
@@ -47,6 +47,14 @@ export function useRecentRooms(limit = 6) {
         pageSize: limit,
       }),
     select: (page) => page.items,
+  });
+}
+
+/** Counts over every room you can see; the tabs show them. */
+export function useRoomStats() {
+  return useQuery({
+    queryKey: queryKeys.rooms.stats(),
+    queryFn: roomsApi.stats,
   });
 }
 
@@ -78,3 +86,33 @@ export function useJoinPublicRoom() {
     onSuccess: (_void, room) => enterRoom(room),
   });
 }
+
+/** Lists, counts and the room itself all show what changed. */
+function useRefreshRooms() {
+  const queryClient = useQueryClient();
+  return () =>
+    queryClient.invalidateQueries({ queryKey: queryKeys.rooms.all });
+}
+
+export function useUpdateRoom(id: string) {
+  const refresh = useRefreshRooms();
+  return useMutation({
+    mutationFn: (payload: UpdateRoomPayload) => roomsApi.update(id, payload),
+    onSuccess: refresh,
+  });
+}
+
+/** Deleting and leaving both end with the room gone from your lists. */
+function useRoomExit(mutationFn: (id: string) => Promise<void>, id: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => mutationFn(id),
+    onSuccess: () => {
+      queryClient.removeQueries({ queryKey: queryKeys.rooms.detail(id) });
+      return queryClient.invalidateQueries({ queryKey: queryKeys.rooms.all });
+    },
+  });
+}
+
+export const useDeleteRoom = (id: string) => useRoomExit(roomsApi.remove, id);
+export const useLeaveRoom = (id: string) => useRoomExit(roomsApi.leave, id);

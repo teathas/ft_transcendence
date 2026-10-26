@@ -85,8 +85,8 @@ export function ConversationList({ activeId }: { activeId?: string }) {
                     className={cn(
                       "flex items-center gap-3 border-s-2 px-4 py-3 transition-colors",
                       active
-                        ? "border-primary bg-primary/5"
-                        : "border-transparent hover:bg-accent/60",
+                        ? "border-primary bg-primary/10"
+                        : "border-transparent hover:bg-accent",
                     )}
                   >
                     <span className="relative shrink-0">

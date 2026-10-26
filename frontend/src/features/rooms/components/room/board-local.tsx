@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { Tldraw, type Editor } from "tldraw";
 
+import { env } from "@/lib/env";
+
 import { useBoardIdentity, type BoardIdentity } from "./use-board-identity";
 import { BOARD_COMPONENTS } from "./board-config";
 
@@ -22,6 +24,7 @@ export default function BoardLocal({
       persistenceKey={`shared-room-${roomId}`}
       onMount={setEditor}
       components={BOARD_COMPONENTS}
+      licenseKey={env.tldrawLicenseKey}
     />
   );
 }

@@ -73,7 +73,7 @@ async function requestNewToken(): Promise<string | null> {
   } catch (error) {
     // 401: the session is over, so sign out. Anything else (no answer, a
     // restarting server) says nothing about the session: keep it.
-    if (isApiError(error) && error.isUnauthorized) {
+    if (isApiError(error) && error.isUnauthorized && tokenStore.get()) {
       tokenStore.clear();
       onUnauthorized?.();
     }
@@ -135,9 +135,14 @@ api.interceptors.response.use(
     // means it answered. A cancelled request says nothing either way.
     if (!axios.isCancel(error)) connectionStore.set(Boolean(error.response));
 
+    // A request that left without a token was never signed in: renewing for it
+    // would only ask the server for a refresh it will refuse, again and again.
+    const hadToken = Boolean(original?.headers?.get("Authorization"));
+
     const mustRefresh =
       error.response?.status === 401 &&
       original &&
+      hadToken &&
       !original._retry &&
       !original.skipAuthRefresh &&
       !AUTH_ROUTES.some((route) => original.url?.includes(route));

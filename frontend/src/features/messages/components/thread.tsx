@@ -211,7 +211,7 @@ export function Thread({ friendId }: { friendId: string }) {
                   )}
                   <div
                     className={cn(
-                      "flex max-w-[80%] flex-col gap-0.5",
+                      "group relative flex max-w-[80%] flex-col gap-0.5",
                       mine ? "items-end self-end" : "items-start self-start",
                     )}
                   >
@@ -233,18 +233,21 @@ export function Thread({ friendId }: { friendId: string }) {
                           {d.messages.seen}
                         </span>
                       )}
-                      {mine && (
-                        <button
-                          type="button"
-                          aria-label={d.messages.deleteMessage}
-                          title={d.messages.deleteMessage}
-                          onClick={() => setDeletingId(message.id)}
-                          className="ms-1 inline-flex size-5 items-center justify-center rounded-sm hover:text-destructive"
-                        >
-                          <Trash2 className="size-3" aria-hidden="true" />
-                        </button>
-                      )}
                     </p>
+                    {/* Beside the bubble, in the free 20% of the row, so a 44px
+                        target does not make every message taller. Hover and
+                        keyboard focus reveal it; touch screens always show it. */}
+                    {mine && (
+                      <button
+                        type="button"
+                        aria-label={d.messages.deleteMessage}
+                        title={d.messages.deleteMessage}
+                        onClick={() => setDeletingId(message.id)}
+                        className="absolute -start-12 top-0 inline-flex size-11 items-center justify-center rounded-lg text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:bg-accent hover:text-destructive focus-visible:opacity-100 [@media(hover:none)]:opacity-100"
+                      >
+                        <Trash2 className="size-4" aria-hidden="true" />
+                      </button>
+                    )}
                   </div>
                 </div>
               );
@@ -271,7 +274,7 @@ export function Thread({ friendId }: { friendId: string }) {
             maxLength={MAX_LENGTH}
             placeholder={d.messages.placeholder}
             aria-label={d.messages.composerLabel}
-            className="max-h-32 min-h-10 resize-none"
+            className="max-h-32 min-h-11 resize-none"
           />
           <Button
             type="submit"

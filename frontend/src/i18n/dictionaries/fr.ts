@@ -35,6 +35,14 @@ export const fr = {
     light: "Clair",
     dark: "Sombre",
     system: "Système",
+    accent: "Couleur",
+    accents: {
+      indigo: "Indigo",
+      blue: "Bleu",
+      teal: "Turquoise",
+      rose: "Rose",
+      orange: "Orange",
+    },
   },
 
   nav: {
@@ -49,11 +57,16 @@ export const fr = {
     friends: "Amis",
     messages: "Messages",
     notifications: "Notifications",
-    recent: "Récentes",
-    noRoomsYet: "Aucune salle pour l’instant.",
+    unreadNotifications: "Notifications, non lues : {count}",
+    collapseSidebar: "Réduire la barre latérale",
+    expandSidebar: "Déployer la barre latérale",
     signedOut: "Déconnecté",
     noSession: "Aucune session",
     signOut: "Se déconnecter",
+    signOutConfirm: {
+      title: "Se déconnecter ?",
+      description: "Vous devrez vous reconnecter pour accéder à vos rooms.",
+    },
   },
 
   landing: {
@@ -313,6 +326,17 @@ export const fr = {
       created: "Compte créé. Connectez-vous pour continuer.",
       haveAccount: "Vous avez déjà un compte ?",
       signIn: "Se connecter",
+      acceptPrefix: "J'accepte les",
+      termsLink: "conditions d'utilisation",
+      acceptAnd: "et la",
+      privacyLink: "politique de confidentialité",
+      termsRequired: "Vous devez accepter les conditions pour créer un compte.",
+    },
+    termsGate: {
+      title: "Acceptez les conditions pour continuer",
+      description:
+        "Avant d'utiliser Shared Room, lisez et acceptez les conditions d'utilisation et la politique de confidentialité.",
+      accept: "J'accepte",
     },
     passwordStrength: {
       label: "Robustesse du mot de passe",
@@ -339,16 +363,6 @@ export const fr = {
     metaDescription: "Parcourez, filtrez et ouvrez vos salles collaboratives.",
     title: "Salles",
     subtitle: "Parcourez toutes les salles accessibles, ou lancez la vôtre.",
-    kpis: {
-      total: "Salles au total",
-      totalHint: "Toutes matières confondues",
-      active: "Actives",
-      activeHint: "{count} archivées",
-      owned: "Les miennes",
-      ownedHint: "Vous pouvez les archiver",
-      participants: "Participants",
-      participantsHint: "Places occupées en ce moment",
-    },
     toolbar: {
       searchPlaceholder: "Rechercher une salle, un code, une matière…",
       searchLabel: "Rechercher une salle",
@@ -357,12 +371,6 @@ export const fr = {
       tableView: "Vue en tableau",
       subject: "Matière",
       allSubjects: "Toutes les matières",
-      status: "Statut",
-      anyStatus: "Tous les statuts",
-      ownership: "Appartenance",
-      everyonesRooms: "Les salles de tous",
-      roomsIOwn: "Mes salles",
-      roomsIJoined: "Salles rejointes",
       sortBy: "Trier par",
       mostRecent: "Plus récentes",
       nameAz: "Nom (A–Z)",
@@ -371,6 +379,12 @@ export const fr = {
     status: {
       active: "Active",
       archived: "Archivée",
+    },
+    tabs: {
+      label: "Listes de salles",
+      all: "Toutes",
+      owned: "Les miennes",
+      archived: "Archivées",
     },
     table: {
       room: "Salle",
@@ -381,13 +395,29 @@ export const fr = {
       status: "Statut",
     },
     addMenu: {
-      addRoom: "Ajouter une salle",
-      more: "Autres actions",
       joinWithCode: "Rejoindre avec un code",
-      jumpTo: "Aller à",
-      roomsIOwn: "Mes salles",
-      roomsIJoined: "Salles rejointes",
-      archivedRooms: "Salles archivées",
+    },
+    menu: {
+      label: "Actions pour {name}",
+      edit: "Modifier la room",
+      delete: "Supprimer la room",
+      leave: "Quitter la room",
+    },
+    edit: {
+      title: "Modifier la room",
+      description: "Changez le nom, le sujet ou qui peut la trouver.",
+      submit: "Enregistrer",
+    },
+    deleteConfirm: {
+      title: "Supprimer cette room ?",
+      description: "{name} sera supprimée avec ses messages et ses fichiers, pour tout le monde. Cette action est irréversible.",
+      confirm: "Supprimer la room",
+    },
+    leaveConfirm: {
+      title: "Quitter cette room ?",
+      description:
+        "Vous ne ferez plus partie des personnes de {name}. Vous pourrez la rejoindre plus tard avec son code si elle est privée.",
+      confirm: "Quitter la room",
     },
     create: {
       title: "Créer une salle",
@@ -583,16 +613,6 @@ export const fr = {
     welcomeNamed: "Content de vous revoir, {name}",
     subtitle: "Voici ce qui s’est passé dans vos salles.",
     browseAll: "Voir toutes les salles",
-    stats: {
-      roomsJoined: "Salles rejointes",
-      roomsJoinedHint: "Depuis votre inscription",
-      collaborated: "Temps collaboré",
-      collaboratedHint: "Sur les 7 derniers jours",
-      messagesSent: "Messages envoyés",
-      messagesSentHint: "Toutes salles confondues",
-      filesShared: "Fichiers partagés",
-      filesSharedHint: "PDF, images, documents",
-    },
     chart: {
       title: "Temps passé au tableau cette semaine",
       subtitle: "Minutes passées en salle, par jour.",
@@ -603,16 +623,20 @@ export const fr = {
       minutes: "{minutes} min",
     },
     recentRooms: "Salles récentes",
+    friendsOnline: {
+      title: "Amis en ligne",
+      count: "{count} en ligne",
+      empty: "Aucun de vos amis n’est en ligne pour le moment.",
+    },
   },
 
   publicProfile: {
     metaTitle: "Profil utilisateur",
     metaDescription: "Consultez le profil public d’un membre de Shared Room.",
-    back: "Retour aux utilisateurs",
     backToPeople: "Voir les utilisateurs",
-    about: "Présentation",
     noBio: "Cette personne n’a pas encore ajouté de présentation.",
-    activity: "Activité partagée",
+    friendsSince: "Amis depuis le {date}",
+    activity: "Activité",
     stats: {
       roomsJoined: "Salles rejointes",
       roomsOwned: "Salles créées",
@@ -628,6 +652,13 @@ export const fr = {
     metaTitle: "Profil",
     metaDescription:
       "Gérez votre photo, vos informations et votre mot de passe.",
+    appearance: {
+      title: "Apparence",
+      description:
+        "Choisissez le thème et la couleur d'accent. Ils sont enregistrés sur cet appareil.",
+      language: "Langue",
+      languageAuto: "Langue du navigateur",
+    },
     header: {
       joined: "Inscrit le {date}",
       viewPublicProfile: "Voir mon profil public",
@@ -724,7 +755,7 @@ export const fr = {
 
   room: {
     metaTitle: "Salle",
-    back: "Retour aux salles",
+    leave: "Quitter la salle",
     copyCode: "Copier le code de la salle",
     copyCodeTitle: "Copier le code de la salle",
     copied: "Code copié",
@@ -750,6 +781,12 @@ export const fr = {
     fileFailed: "Le fichier n’a pas pu être envoyé ou enregistré.",
     download: "Télécharger {name}",
     deleteFile: "Supprimer {name}",
+    deleteFileConfirm: {
+      title: "Supprimer ce fichier ?",
+      description:
+        "{name} sera supprimé pour tous les membres de la room. Cette action est irréversible.",
+      confirm: "Supprimer le fichier",
+    },
     fileTooBig: "{name} dépasse {size} et n’a pas été partagé.",
     fileTypeNotAllowed: "Le type de fichier de {name} n’est pas accepté.",
     uploadProgress: "Progression de l’envoi du fichier",
@@ -761,7 +798,11 @@ export const fr = {
     copyInviteCode: "Copier le code",
     openPanel: "Ouvrir : {panel}",
     closePanel: "Fermer le panneau",
-    unreadChat: "{count} non lus",
+    unreadNews: "{count} nouveau(x)",
+    toast: {
+      message: "{name} a envoyé un message",
+      file: "{name} a partagé {file}",
+    },
     you: "Vous",
     messagesLabel: "Messages",
     chatEmpty: {
@@ -771,6 +812,8 @@ export const fr = {
     jumpToLatest: "Derniers messages",
     newMessages: "Nouveaux messages",
     sendHint: "Entrée pour envoyer · Maj+Entrée pour un retour à la ligne",
+    sendFailed:
+      "Votre message n'a pas été envoyé. Il est revenu dans le champ : réessayez.",
     filesEmpty: {
       title: "Aucun fichier",
       body: "Partagez des notes, des exercices ou des images avec toute la salle.",
@@ -811,6 +854,7 @@ export const fr = {
     description:
       "Suivez les activités concernant votre compte et vos salles partagées.",
     markAllRead: "Tout marquer comme lu",
+    seeAll: "Voir toutes les notifications",
     loading: "Chargement des notifications…",
     loadError: "Impossible de charger les notifications.",
     empty: "Aucune notification",

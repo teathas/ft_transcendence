@@ -17,6 +17,7 @@ import {
 } from "../schemas";
 import type {
   CreateRoomPayload,
+  UpdateRoomPayload,
   JoinRoomPayload,
   Message,
   MessagePage,
@@ -202,6 +203,27 @@ export const roomsApi = {
       inviteCode: payload.code,
     });
     return parseResponse(roomSchema, data, "POST /rooms/join");
+  },
+
+  /** Owner only. */
+  async update(id: string, payload: UpdateRoomPayload): Promise<void> {
+    if (env.enableMocks) return;
+
+    await api.patch(`/rooms/${id}`, payload);
+  },
+
+  /** Owner only: the room goes with its messages and files. */
+  async remove(id: string): Promise<void> {
+    if (env.enableMocks) return;
+
+    await api.delete(`/rooms/${id}`);
+  },
+
+  /** Stops following a room: you are no longer one of its people. */
+  async leave(id: string): Promise<void> {
+    if (env.enableMocks) return;
+
+    await api.delete(`/rooms/${id}/leave`);
   },
 
   /** Joins a public room you found in the list. */

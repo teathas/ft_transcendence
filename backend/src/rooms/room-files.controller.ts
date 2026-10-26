@@ -1,7 +1,8 @@
-import { Controller, Get, Param, ParseUUIDPipe, Query, Res } from '@nestjs/common';
-import type { Response } from 'express';
+import { Controller, Get, Param, ParseUUIDPipe, Query, Req, Res } from '@nestjs/common';
+import type { Request, Response } from 'express';
 import { RoomFilesService } from './room-files.service';
 import { Public } from '../auth/decorators/public.decorator';
+import { extractBearerToken } from '../auth/utils/extract-token.uitl';
 
 @Controller('uploads/rooms')
 export class RoomFilesController {
@@ -14,9 +15,10 @@ export class RoomFilesController {
 		@Param('filename') filename: string,
 		@Query('token') token: string | undefined,
     @Query('preview') preview: string | undefined,
+		@Req() req: Request,
 		@Res() res: Response,
 	) {
-		const file = await this.files.resolveDownload(roomId, filename, token);
+		const file = await this.files.resolveDownload(roomId, filename, extractBearerToken(req) ?? token);
     const inline =
       preview === '1' &&
       (file.mimeType === 'application/pdf' ||

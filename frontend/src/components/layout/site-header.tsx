@@ -1,5 +1,6 @@
 import { BrandWordmark } from "@/components/layout/brand-mark";
 import { Container } from "@/components/layout/container";
+import { HeaderAuthLink } from "@/components/layout/header-auth-link";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { buttonStyles } from "@/components/ui/button";
@@ -36,16 +37,7 @@ export async function SiteHeader() {
         </nav>
 
         <div className="ms-auto flex items-center gap-2 sm:gap-3">
-          <Link
-            href={routes.login}
-            className={buttonStyles({
-              variant: "ghost",
-              size: "sm",
-              className: "hidden sm:inline-flex",
-            })}
-          >
-            {d.landing.header.signIn}
-          </Link>
+          <HeaderAuthLink />
           <Link
             href={routes.createRoom}
             className={buttonStyles({ size: "sm" })}

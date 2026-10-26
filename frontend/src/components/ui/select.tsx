@@ -83,7 +83,7 @@ export function Select<
           container: () => "text-sm",
           control: ({ isFocused, isDisabled }) =>
             cn(
-              "flex min-h-10 w-full cursor-pointer items-center gap-1 bg-background",
+              "flex min-h-11 w-full cursor-pointer items-center gap-1 bg-background",
               "rounded-lg border px-3 shadow-xs transition-[color,box-shadow,border-color]",
               isFocused && "border-ring ring-[3px] ring-ring/35",
               isDisabled && "cursor-not-allowed opacity-50",

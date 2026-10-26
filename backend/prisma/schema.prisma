@@ -50,6 +50,12 @@ model User {
   passwordHash           String
   avatarUrl              String?
   bio                    String?
+  /// Preferred language (en, fr, ar). Empty: the browser's language decides.
+  language               String?
+  /// Preferred accent colour. Empty: the default one.
+  accentColor            String?
+  /// Accepted the terms of service. Nothing in the app opens until it is true.
+  termsAccepted          Boolean         @default(false)
   status                 UserStatus      @default(OFFLINE)
   lastSeenAt             DateTime?
   createdAt              DateTime        @default(now())

@@ -33,6 +33,14 @@ export const en = {
     light: "Light",
     dark: "Dark",
     system: "System",
+    accent: "Colour",
+    accents: {
+      indigo: "Indigo",
+      blue: "Blue",
+      teal: "Teal",
+      rose: "Rose",
+      orange: "Orange",
+    },
   },
 
   nav: {
@@ -47,11 +55,16 @@ export const en = {
     friends: "Friends",
     messages: "Messages",
     notifications: "Notifications",
-    recent: "Recent",
-    noRoomsYet: "No rooms yet.",
+    unreadNotifications: "Notifications, {count} unread",
+    collapseSidebar: "Collapse sidebar",
+    expandSidebar: "Expand sidebar",
     signedOut: "Signed out",
     noSession: "No session",
     signOut: "Sign out",
+    signOutConfirm: {
+      title: "Sign out?",
+      description: "You will need to sign in again to reach your rooms.",
+    },
   },
 
   landing: {
@@ -309,6 +322,17 @@ export const en = {
       created: "Account created. Sign in to continue.",
       haveAccount: "Already have an account?",
       signIn: "Sign in",
+      acceptPrefix: "I accept the",
+      termsLink: "terms of service",
+      acceptAnd: "and the",
+      privacyLink: "privacy policy",
+      termsRequired: "You must accept the terms to create an account.",
+    },
+    termsGate: {
+      title: "Accept the terms to continue",
+      description:
+        "Before you use Shared Room, please read and accept the terms of service and the privacy policy.",
+      accept: "I accept",
     },
     passwordStrength: {
       label: "Password strength",
@@ -335,16 +359,6 @@ export const en = {
     metaDescription: "Browse, filter and open your collaborative rooms.",
     title: "Rooms",
     subtitle: "Browse every room you can reach, or start one of your own.",
-    kpis: {
-      total: "Total rooms",
-      totalHint: "Across every subject",
-      active: "Active",
-      activeHint: "{count} archived",
-      owned: "I own",
-      ownedHint: "You can archive these",
-      participants: "Participants",
-      participantsHint: "Seats taken right now",
-    },
     toolbar: {
       searchPlaceholder: "Search rooms, codes, subjects…",
       searchLabel: "Search rooms",
@@ -353,12 +367,6 @@ export const en = {
       tableView: "Table view",
       subject: "Subject",
       allSubjects: "All subjects",
-      status: "Status",
-      anyStatus: "Any status",
-      ownership: "Ownership",
-      everyonesRooms: "Everyone's rooms",
-      roomsIOwn: "Rooms I own",
-      roomsIJoined: "Rooms I joined",
       sortBy: "Sort by",
       mostRecent: "Most recent",
       nameAz: "Name (A–Z)",
@@ -366,6 +374,12 @@ export const en = {
     },
     status: {
       active: "Active",
+      archived: "Archived",
+    },
+    tabs: {
+      label: "Room lists",
+      all: "All",
+      owned: "I own",
       archived: "Archived",
     },
     table: {
@@ -377,13 +391,29 @@ export const en = {
       status: "Status",
     },
     addMenu: {
-      addRoom: "Add room",
-      more: "More room actions",
       joinWithCode: "Join a room with a code",
-      jumpTo: "Jump to",
-      roomsIOwn: "Rooms I own",
-      roomsIJoined: "Rooms I joined",
-      archivedRooms: "Archived rooms",
+    },
+    menu: {
+      label: "Actions for {name}",
+      edit: "Edit room",
+      delete: "Delete room",
+      leave: "Leave room",
+    },
+    edit: {
+      title: "Edit room",
+      description: "Change the name, the subject or who can find it.",
+      submit: "Save changes",
+    },
+    deleteConfirm: {
+      title: "Delete this room?",
+      description: "{name} will be deleted with its messages and files, for everyone. This cannot be undone.",
+      confirm: "Delete room",
+    },
+    leaveConfirm: {
+      title: "Leave this room?",
+      description:
+        "You will no longer be one of the people in {name}. You can join again later with its code if it is private.",
+      confirm: "Leave room",
     },
     create: {
       title: "Create a room",
@@ -576,16 +606,6 @@ export const en = {
     welcomeNamed: "Welcome back, {name}",
     subtitle: "Here is what has been happening in your rooms.",
     browseAll: "Browse all rooms",
-    stats: {
-      roomsJoined: "Rooms joined",
-      roomsJoinedHint: "Since you signed up",
-      collaborated: "Collaborated",
-      collaboratedHint: "Over the last 7 days",
-      messagesSent: "Messages sent",
-      messagesSentHint: "Across every room",
-      filesShared: "Files shared",
-      filesSharedHint: "PDFs, images, documents",
-    },
     chart: {
       title: "Time on the board this week",
       subtitle: "Minutes spent in rooms, by day.",
@@ -596,16 +616,20 @@ export const en = {
       minutes: "{minutes}m",
     },
     recentRooms: "Recent rooms",
+    friendsOnline: {
+      title: "Friends online",
+      count: "{count} online",
+      empty: "None of your friends are online right now.",
+    },
   },
 
   publicProfile: {
     metaTitle: "User profile",
     metaDescription: "View a Shared Room member’s public profile.",
-    back: "Back to people",
     backToPeople: "Browse people",
-    about: "About",
     noBio: "This person has not added a bio yet.",
-    activity: "Shared activity",
+    friendsSince: "Friends since {date}",
+    activity: "Activity",
     stats: {
       roomsJoined: "Rooms joined",
       roomsOwned: "Rooms created",
@@ -620,6 +644,13 @@ export const en = {
   profile: {
     metaTitle: "Profile",
     metaDescription: "Manage your photo, account details and password.",
+    appearance: {
+      title: "Appearance",
+      description:
+        "Pick the theme and the accent colour. They are saved on this device.",
+      language: "Language",
+      languageAuto: "Browser language",
+    },
     header: {
       joined: "Joined {date}",
       viewPublicProfile: "View public profile",
@@ -714,7 +745,7 @@ export const en = {
 
   room: {
     metaTitle: "Room",
-    back: "Back to rooms",
+    leave: "Leave room",
     copyCode: "Copy room code",
     copyCodeTitle: "Copy the room code",
     copied: "Code copied",
@@ -740,6 +771,12 @@ export const en = {
     fileFailed: "The file could not be sent or saved.",
     download: "Download {name}",
     deleteFile: "Delete {name}",
+    deleteFileConfirm: {
+      title: "Delete this file?",
+      description:
+        "{name} will be removed for everyone in the room. This cannot be undone.",
+      confirm: "Delete file",
+    },
     fileTooBig: "{name} is over {size} and was not shared.",
     fileTypeNotAllowed: "{name} is not a supported file type.",
     uploadProgress: "File upload progress",
@@ -751,7 +788,11 @@ export const en = {
     copyInviteCode: "Copy code",
     openPanel: "Open {panel}",
     closePanel: "Close panel",
-    unreadChat: "{count} unread",
+    unreadNews: "{count} new",
+    toast: {
+      message: "{name} sent a message",
+      file: "{name} shared {file}",
+    },
     you: "You",
     messagesLabel: "Messages",
     chatEmpty: {
@@ -761,6 +802,7 @@ export const en = {
     jumpToLatest: "Latest messages",
     newMessages: "New messages",
     sendHint: "Enter to send · Shift+Enter for a new line",
+    sendFailed: "Your message was not sent. It is back in the box: try again.",
     filesEmpty: {
       title: "No files yet",
       body: "Share notes, exercises or images with everyone in the room.",
@@ -800,6 +842,7 @@ export const en = {
     title: "Notifications",
     description: "Follow activity that concerns your account and shared rooms.",
     markAllRead: "Mark all as read",
+    seeAll: "See all notifications",
     loading: "Loading notifications…",
     loadError: "Notifications could not be loaded.",
     empty: "No notifications",

@@ -5,7 +5,6 @@ import { Bell, CheckCheck, Trash2 } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { routes } from "@/config/routes";
 import { useDict, useLocale } from "@/i18n/client";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
@@ -16,20 +15,7 @@ import {
   useMarkNotificationRead,
   useNotifications,
 } from "../hooks/use-notifications";
-import type { Notification } from "../types";
-
-function destination(notification: Notification) {
-  const roomId = notification.data?.roomId;
-  if (typeof roomId === "string" && notification.type !== "ROOM_DELETED")
-    return routes.room(roomId);
-  if (notification.type.startsWith("FRIEND")) return routes.friends;
-  if (notification.type.includes("DIRECT_MESSAGE")) {
-    return notification.actorId
-      ? routes.thread(notification.actorId)
-      : routes.messages;
-  }
-  return undefined;
-}
+import { destination, useNotificationText } from "../notification-text";
 
 export function NotificationsView() {
   const d = useDict();
@@ -38,23 +24,7 @@ export function NotificationsView() {
   const markRead = useMarkNotificationRead();
   const markAll = useMarkAllNotificationsRead();
   const remove = useDeleteNotification();
-
-  const text = (notification: Notification) => {
-    const template = d.notifications.types[notification.type];
-    const actor = notification.actor?.username ?? d.notifications.someone;
-    const room =
-      typeof notification.data?.roomName === "string"
-        ? notification.data.roomName
-        : d.notifications.aRoom;
-    const file =
-      typeof notification.data?.fileName === "string"
-        ? notification.data.fileName
-        : d.notifications.aFile;
-    return template
-      .replace("{actor}", actor)
-      .replace("{room}", room)
-      .replace("{file}", file);
-  };
+  const text = useNotificationText();
 
   return (
     <div className="flex flex-col gap-6">

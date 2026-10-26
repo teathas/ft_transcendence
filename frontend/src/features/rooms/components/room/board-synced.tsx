@@ -50,7 +50,12 @@ function SyncedTldraw({
   }, [raw, onStatusChange]);
 
   return (
-    <Tldraw store={store} onMount={setEditor} components={BOARD_COMPONENTS} />
+    <Tldraw
+      store={store}
+      onMount={setEditor}
+      components={BOARD_COMPONENTS}
+      licenseKey={env.tldrawLicenseKey}
+    />
   );
 }
 

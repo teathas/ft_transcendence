@@ -3,7 +3,10 @@ import { Prisma } from '../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateRoomDto,Visibility  } from './dto/create-room.dto';
 import { JoinRoomDto  } from './dto/join-room.dto';
+import { UpdateRoomDto } from './dto/update-room.dto';
 import { randomBytes } from 'crypto';
+import { rm } from 'fs/promises';
+import { join } from 'path';
 import { FindRoomsQueryDto, RoomSort } from './dto/find-rooms-query.dto';
 import { RealtimeService } from '../realtime/realtime.service';
 import { NotificationsService } from '../notifications/notifications.service';
@@ -216,5 +219,45 @@ export class RoomsService {
         ),
         );
 		return removed;
+    }
+
+    /** The room, if it exists and the user owns it: what editing and deleting need. */
+    private async ownedRoom(roomId: string, userId: string) {
+        const room = await this.prisma.room.findUnique({ where: { id: roomId } });
+        if (!room)
+            throw new NotFoundException('Room not found');
+        if (room.ownerId !== userId)
+            throw new ForbiddenException('Only the owner can do this');
+        return room;
+    }
+
+    async update(roomId: string, userId: string, dto: UpdateRoomDto) {
+        await this.ownedRoom(roomId, userId);
+        const room = await this.prisma.room.update({
+            where: { id: roomId },
+            data: {
+                ...(dto.name !== undefined && { name: dto.name.trim() }),
+                ...(dto.subject !== undefined && { subject: dto.subject.trim() }),
+                ...(dto.visibility !== undefined && { visibility: dto.visibility }),
+            },
+        });
+        this.realtime.emitToRoom(roomId, 'room:updated', { roomId });
+        return room;
+    }
+
+    /** Removes the room with its messages, files and members, in one transaction. */
+    async remove(roomId: string, userId: string) {
+        await this.ownedRoom(roomId, userId);
+        await this.prisma.$transaction([
+            this.prisma.message.deleteMany({ where: { roomId } }),
+            this.prisma.roomFile.deleteMany({ where: { roomId } }),
+            this.prisma.roomMember.deleteMany({ where: { roomId } }),
+            this.prisma.room.delete({ where: { id: roomId } }),
+        ]);
+        this.realtime.emitToRoom(roomId, 'room:deleted', { roomId });
+
+        // Best effort: the rows are already gone, a leftover folder is harmless.
+        const uploads = process.env.UPLOAD_DIR ?? join(process.cwd(), 'uploads');
+        await rm(join(uploads, 'rooms', roomId), { recursive: true, force: true }).catch(() => undefined);
     }
 }

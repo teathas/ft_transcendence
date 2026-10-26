@@ -9,6 +9,7 @@ import BoardSynced, { type SyncStatus } from "./board-synced";
 import type { BoardIdentity } from "./use-board-identity";
 
 import "tldraw/tldraw.css";
+import "./board-theme.css";
 
 /**
  * Picks how the board shares state. `local` is the default until a sync server
