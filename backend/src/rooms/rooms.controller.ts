@@ -7,7 +7,6 @@ import { memoryStorage } from 'multer';
 import { RoomsService } from './rooms.service';
 import { CreateRoomDto  } from './dto/create-room.dto';
 import { JoinRoomDto  } from './dto/join-room.dto';
-import { UpdateNotificationPreferenceDto  } from './dto/update-notification-preference.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ListRoomsDto } from './dto/list-rooms.dto';
 import { JoinByCodeDto } from './dto/join-by-code.dto';
@@ -91,13 +90,6 @@ export class RoomsController {
     async removeFile(@Param('roomId', ParseUUIDPipe) roomId: string, @Param('fileId', ParseUUIDPipe) fileId: string, @Req() req: any)
     {
         await this.files.remove(roomId, fileId, req.user.sub);
-    }
-
-    @Patch(':roomId/notification-preference')
-    async updateNotificationPreference(@Param('roomId', ParseUUIDPipe) roomId: string, @Req() req: any,
-    @Body() dto: UpdateNotificationPreferenceDto)
-    {
-        await this.roomsService.updateNotificationPreference(roomId, req.user.sub,dto.preference);
     }
 
 }

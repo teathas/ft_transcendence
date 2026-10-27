@@ -140,8 +140,6 @@ model RoomMember {
   roomId   String
   joinedAt DateTime @default(now())
 
-  notificationPreference RoomNotificationPreference @default(ALL)
-
   user User @relation(fields: [userId], references: [id])
   room Room @relation(fields: [roomId], references: [id])
 
@@ -197,11 +195,7 @@ model RoomFile {
 
   @@index([roomId, createdAt])
 }
-enum RoomNotificationPreference {
-  ALL
-  MENTIONS_ONLY
-  MUTED
-}
+
 
 enum NotificationType {
   FRIEND_REQUEST

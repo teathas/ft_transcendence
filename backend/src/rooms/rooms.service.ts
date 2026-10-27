@@ -7,8 +7,6 @@ import { randomBytes } from 'crypto';
 import { FindRoomsQueryDto, RoomSort } from './dto/find-rooms-query.dto';
 import { RealtimeService } from '../realtime/realtime.service';
 import { NotificationsService } from '../notifications/notifications.service';
-import { assertMember } from './room-access';
-import { RoomNotificationPreference } from '../generated/prisma/client';
 
 @Injectable()
 export class RoomsService {
@@ -243,23 +241,4 @@ export class RoomsService {
 		return removed;
     }
 
-
-    async updateNotificationPreference(roomId: string, userId: string, preference: RoomNotificationPreference)
-    {
-        await assertMember(this.prisma, roomId, userId);
-        await this.prisma.roomMember.updateMany({
-            where: {
-                roomId,
-                userId,
-            },
-            data: {
-                notificationPreference: preference,
-            },
-        });
-          return {
-            roomId,
-            preference,
-        };
-
-    }
 }
