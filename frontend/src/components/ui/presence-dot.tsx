@@ -23,7 +23,7 @@ export function PresenceDot({
       title={online ? d.room.online : d.room.offline}
       className={cn(
         "absolute -end-0.5 -bottom-0.5 size-3 rounded-full ring-2 ring-card",
-        online ? "bg-emerald-500" : "bg-muted-foreground/40",
+        online ? "bg-live" : "bg-muted-foreground/40",
         className,
       )}
     />

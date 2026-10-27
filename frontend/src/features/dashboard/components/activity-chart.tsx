@@ -9,11 +9,10 @@ import { useActivityFormat } from "../use-activity-format";
 
 /**
  * Minutes collaborated per day. One series, so the title names it and no
- * legend is needed; the peak is labelled directly and every bar carries its
- * value for keyboard and screen-reader users.
+ * legend is needed; every bar shows its value, the peak in the strongest ink.
  */
 export function ActivityChart({ data }: { data: ActivityPoint[] }) {
-  const { weekdayLong, weekdayNarrow, duration } = useActivityFormat();
+  const { weekdayLong, weekdayShort, duration } = useActivityFormat();
   const [hovered, setHovered] = useState<number | null>(null);
   const peak = Math.max(...data.map((point) => point.minutes));
 
@@ -33,12 +32,10 @@ export function ActivityChart({ data }: { data: ActivityPoint[] }) {
             <span
               aria-hidden="true"
               className={cn(
-                "h-4 text-xs font-medium tabular-nums",
-                isActive
-                  ? "text-foreground"
-                  : isPeak
-                    ? "text-muted-foreground"
-                    : "text-transparent",
+                "h-4 text-xs whitespace-nowrap tabular-nums",
+                isActive || isPeak
+                  ? "font-medium text-foreground"
+                  : "text-muted-foreground",
               )}
             >
               {duration(point.minutes)}
@@ -54,7 +51,7 @@ export function ActivityChart({ data }: { data: ActivityPoint[] }) {
                 onBlur={() => setHovered(null)}
                 style={{ height: `${Math.max(height, 3)}%` }}
                 className={cn(
-                  "w-full max-w-10 rounded-t-[4px] bg-chart-1 transition-opacity",
+                  "w-full max-w-10 rounded-md bg-chart-1 transition-opacity",
                   // Hover dims the others rather than recolouring this one,
                   // so the series keeps a single identity.
                   hovered !== null && !isActive && "opacity-40",
@@ -62,8 +59,8 @@ export function ActivityChart({ data }: { data: ActivityPoint[] }) {
               />
             </div>
 
-            <span className="w-full border-t border-border pt-1.5 text-center text-xs text-muted-foreground">
-              {weekdayNarrow(point.weekday)}
+            <span className="w-full pt-1.5 text-center text-xs text-muted-foreground">
+              {weekdayShort(point.weekday)}
             </span>
           </div>
         );

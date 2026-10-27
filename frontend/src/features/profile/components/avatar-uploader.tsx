@@ -119,12 +119,16 @@ export function AvatarUploader({
             onClick={() => removeAvatar.mutate()}
             aria-label={d.profile.removePhoto}
             title={d.profile.removePhoto}
+            // A 44px target around a small visible circle, centred where the
+            // old 28px button sat.
             className={cn(
-              "absolute -end-0.5 -top-0.5 bg-card text-muted-foreground hover:text-destructive",
-              "flex size-7 items-center justify-center rounded-full border shadow-sm transition-colors",
+              "absolute -end-2.5 -top-2.5 flex size-11 items-center justify-center rounded-full",
+              "text-muted-foreground transition-colors hover:text-destructive",
             )}
           >
-            <X className="size-3.5" aria-hidden="true" />
+            <span className="flex size-7 items-center justify-center rounded-full border bg-card shadow-sm">
+              <X className="size-3.5" aria-hidden="true" />
+            </span>
           </button>
         )}
       </div>

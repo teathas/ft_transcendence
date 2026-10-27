@@ -1,22 +1,55 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Menu, X } from "lucide-react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { Menu } from "lucide-react";
 
 import { AppSidebar } from "@/components/layout/app-sidebar";
+import { BellMenu } from "@/components/layout/bell-menu";
 import { BrandWordmark } from "@/components/layout/brand-mark";
+import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { routes } from "@/config/routes";
+import { useSession } from "@/features/auth/hooks/use-auth";
 import { useDict } from "@/i18n/client";
 import { Link, useBarePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
+/** Lets a page's own top bar (the room's) open the shell's drawer. */
+const NavDrawerContext = createContext<{ isOpen: boolean; open: () => void }>({
+  isOpen: false,
+  open: () => {},
+});
+
+export function useNavDrawer() {
+  return useContext(NavDrawerContext);
+}
+
 export function AppShell({ children }: { children: React.ReactNode }) {
   const d = useDict();
+  const { user } = useSession();
   const [isOpen, setIsOpen] = useState(false);
   const pathname = useBarePathname();
   // A room has its own header and wants every pixel, so the bar steps aside.
+  // On desktop the sidebar does too: the room's menu button opens the drawer.
   const inRoom = /^\/rooms\/[^/]+$/.test(pathname);
+
+  const drawerRef = useRef<HTMLElement>(null);
+  // Whatever opened the drawer gets the focus back when it closes.
+  const triggerRef = useRef<HTMLElement | null>(null);
+
+  const open = useCallback(() => {
+    triggerRef.current = document.activeElement as HTMLElement | null;
+    setIsOpen(true);
+  }, []);
+  const drawer = useMemo(() => ({ isOpen, open }), [isOpen, open]);
 
   // Escape closes the drawer, the way any dialog should.
   useEffect(() => {
@@ -28,69 +61,104 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [isOpen]);
 
+  // Focus moves into the dialog, then back out. After a navigation the
+  // trigger is gone from the page and `focus()` does nothing.
+  useEffect(() => {
+    if (isOpen) {
+      drawerRef.current?.focus();
+    } else if (triggerRef.current) {
+      triggerRef.current.focus();
+      triggerRef.current = null;
+    }
+  }, [isOpen]);
+
   return (
-    <div className="flex flex-1">
-      <aside className="sticky top-0 hidden h-svh w-64 shrink-0 border-e bg-card lg:block">
-        <AppSidebar />
-      </aside>
-
-      {/* Mobile drawer */}
-      <div
-        aria-hidden="true"
-        onClick={() => setIsOpen(false)}
-        className={cn(
-          "fixed inset-0 z-40 bg-black/50 transition-opacity lg:hidden",
-          isOpen ? "opacity-100" : "pointer-events-none opacity-0",
-        )}
-      />
-      <aside
-        role="dialog"
-        aria-modal={isOpen}
-        aria-label={d.nav.navigation}
-        inert={!isOpen}
-        className={cn(
-          "fixed inset-y-0 start-0 z-50 w-72 border-e bg-card transition-transform duration-200 lg:hidden",
-          // `translate` has no logical form, so the closed position is mirrored
-          // explicitly: off to the left in LTR, off to the right in RTL.
-          isOpen ? "translate-x-0" : "-translate-x-full rtl:translate-x-full",
-        )}
-      >
-        <div className="absolute end-3 top-3">
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label={d.nav.closeNavigation}
-            onClick={() => setIsOpen(false)}
-          >
-            <X className="size-4" aria-hidden="true" />
-          </Button>
-        </div>
-        <AppSidebar onNavigate={() => setIsOpen(false)} />
-      </aside>
-
-      <div className="flex min-w-0 flex-1 flex-col">
-        <header
+    <NavDrawerContext.Provider value={drawer}>
+      <div className="flex flex-1">
+        <aside
+          id="app-sidebar"
+          data-rail
           className={cn(
-            "sticky top-0 z-30 flex h-14 items-center gap-3 border-b bg-background/80 px-4 backdrop-blur-md lg:hidden",
-            inRoom && "hidden",
+            "sticky top-0 z-30 hidden h-svh w-64 shrink-0 border-e bg-card rail-collapsed:w-18",
+            !inRoom && "lg:block",
           )}
         >
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label={d.nav.openNavigation}
-            aria-expanded={isOpen}
-            onClick={() => setIsOpen(true)}
-          >
-            <Menu className="size-5" aria-hidden="true" />
-          </Button>
-          <Link href={routes.dashboard} className="rounded-md" key={pathname}>
-            <BrandWordmark />
-          </Link>
-        </header>
+          <AppSidebar />
+        </aside>
 
-        <main className="flex-1">{children}</main>
+        {/* Drawer: phones everywhere, and every screen size inside a room. */}
+        <div
+          aria-hidden="true"
+          onClick={() => setIsOpen(false)}
+          className={cn(
+            "fixed inset-0 z-40 bg-black/50 transition-opacity",
+            !inRoom && "lg:hidden",
+            isOpen ? "opacity-100" : "pointer-events-none opacity-0",
+          )}
+        />
+        <aside
+          ref={drawerRef}
+          id="app-drawer"
+          role="dialog"
+          aria-modal={isOpen}
+          aria-label={d.nav.navigation}
+          inert={!isOpen}
+          tabIndex={-1}
+          className={cn(
+            "fixed inset-y-0 start-0 z-50 w-72 border-e bg-card outline-none transition-transform duration-200",
+            !inRoom && "lg:hidden",
+            // `translate` has no logical form, so the closed position is mirrored
+            // explicitly: off to the left in LTR, off to the right in RTL.
+            isOpen ? "translate-x-0" : "-translate-x-full rtl:translate-x-full",
+          )}
+        >
+          <AppSidebar
+            onNavigate={() => setIsOpen(false)}
+            onClose={() => setIsOpen(false)}
+          />
+        </aside>
+
+        <div className="flex min-w-0 flex-1 flex-col">
+          <header
+            className={cn(
+              "sticky top-0 z-30 flex h-14 items-center gap-3 border-b bg-background/80 px-4 backdrop-blur-md lg:hidden",
+              inRoom && "hidden",
+            )}
+          >
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label={d.nav.openNavigation}
+              aria-expanded={isOpen}
+              aria-controls="app-drawer"
+              onClick={open}
+            >
+              <Menu className="size-5" aria-hidden="true" />
+            </Button>
+            <Link href={routes.dashboard} className="rounded-md" key={pathname}>
+              <BrandWordmark />
+            </Link>
+            {/* The bell's panel opens under it, or across the screen on phones. */}
+            <div className="ms-auto flex items-center gap-1">
+              <BellMenu placement="bar" />
+              <Link
+                href={routes.profile}
+                aria-label={d.nav.profile}
+                title={user?.username}
+                className="inline-flex size-11 items-center justify-center rounded-lg transition-colors hover:bg-accent"
+              >
+                <Avatar
+                  src={user?.avatarUrl}
+                  name={user?.username ?? "?"}
+                  className="size-8"
+                />
+              </Link>
+            </div>
+          </header>
+
+          <main className="flex-1">{children}</main>
+        </div>
       </div>
-    </div>
+    </NavDrawerContext.Provider>
   );
 }

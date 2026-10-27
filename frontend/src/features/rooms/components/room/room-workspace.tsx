@@ -1,37 +1,39 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DoorOpen, TriangleAlert } from "lucide-react";
 
 import { buttonStyles } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useToast } from "@/components/ui/toast";
+import { Tabs } from "@/components/ui/tabs";
 import { routes } from "@/config/routes";
+import { useMediaQuery } from "@/hooks/use-media-query";
 import { useDict } from "@/i18n/client";
 import { Link } from "@/i18n/navigation";
+import { t } from "@/i18n/translate";
 import { isApiError } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 import { useSession } from "@/features/auth/hooks/use-auth";
 import { useRoomChannel } from "@/features/realtime/use-room-channel";
 
-import {
-  useParticipants,
-  useRoom,
-  useRoomFiles,
-} from "../../hooks/use-room";
+import { useParticipants, useRoom } from "../../hooks/use-room";
 import { BoardPanel } from "./board-panel";
 import type { SyncStatus } from "./board-synced";
 import { ChatPanel } from "./chat-panel";
 import { FilesPanel } from "./files-panel";
 import { PanelFrame } from "./panel-frame";
+import { readPanelState, savePanelState } from "./panel-state";
 import { PeoplePanel } from "./people-panel";
-import { RoomDock } from "./room-dock";
 import { RoomHeader } from "./room-header";
-import type { RoomPanel } from "./room-panels";
-import { useUnreadChat } from "./use-unread-chat";
+import { ROOM_PANELS, type RoomPanel } from "./room-panels";
+import { useRoomUnread } from "./use-room-unread";
 
 /** The room owns the whole screen: the app's mobile bar steps aside for it. */
 const FULL_HEIGHT = "h-dvh";
+/** Tablets and up: the panel sits beside the board. Below, it is a sheet. */
+const WIDE = "(min-width: 48rem)";
 
 function PanelBody({ panel, roomId }: { panel: RoomPanel; roomId: string }) {
   return (
@@ -47,13 +49,42 @@ export function RoomWorkspace({ id }: { id: string }) {
   const d = useDict();
   const { data: room, isPending, error } = useRoom(id);
   const { data: participants } = useParticipants(id);
-  const { data: files } = useRoomFiles(id);
   const { user } = useSession();
   useRoomChannel(id);
+  // One panel is mounted, not both with one hidden by CSS: two chats would
+  // double every effect and every input.
+  const wide = useMediaQuery(WIDE);
   const [syncStatus, setSyncStatus] = useState<SyncStatus>("loading");
-  // One panel at a time, beside the board on wide screens, in a sheet below.
-  const [panel, setPanel] = useState<RoomPanel | null>(null);
-  const unread = useUnreadChat(id, panel === "chat");
+  // Which tab, and whether the panel shows: closing keeps the tab, so the
+  // toggle reopens where you were.
+  // Read once, before the first paint: this component only mounts in the
+  // browser (behind `RequireAuth`), so storage is there and nothing hydrates.
+  const [saved] = useState(readPanelState);
+  const [tab, setTab] = useState<RoomPanel>(saved.tab);
+  const [open, setOpen] = useState(saved.open);
+  useEffect(() => savePanelState({ open, tab }), [open, tab]);
+  const panel = open ? tab : null;
+  const arrived = useRoomUnread(id, panel);
+  const unread = arrived.chat.length;
+  const unreadFiles = arrived.files.length;
+
+  // Something new came in while its panel was out of sight: say so, once per
+  // arrival (a ref remembers how many were already announced).
+  const toast = useToast();
+  const announced = useRef({ chat: 0, files: 0 });
+  const lastMessage = arrived.chat.at(-1);
+  const lastFile = arrived.files.at(-1);
+  useEffect(() => {
+    if (unread > announced.current.chat && lastMessage) {
+      toast(t(d.room.toast.message, { name: lastMessage.authorUsername }));
+    }
+    if (unreadFiles > announced.current.files && lastFile) {
+      toast(
+        t(d.room.toast.file, { name: lastFile.uploadedBy, file: lastFile.name }),
+      );
+    }
+    announced.current = { chat: unread, files: unreadFiles };
+  }, [unread, unreadFiles, lastMessage, lastFile, toast, d]);
 
   // Identity travels with every cursor once a sync server is connected, so it
   // is derived here rather than inside the board.
@@ -72,8 +103,12 @@ export function RoomWorkspace({ id }: { id: string }) {
     (status: SyncStatus) => setSyncStatus(status),
     [],
   );
-  const toggle = (next: RoomPanel) =>
-    setPanel((current) => (current === next ? null : next));
+  /** Phone icons: open on that tab, or close if it is already showing. */
+  const toggle = (next: RoomPanel) => {
+    if (open && tab === next) return setOpen(false);
+    setTab(next);
+    setOpen(true);
+  };
 
   if (isPending) {
     return (
@@ -116,12 +151,11 @@ export function RoomWorkspace({ id }: { id: string }) {
     );
   }
 
-  const counts = {
+  const counts: Partial<Record<RoomPanel, number>> = {
     chat: unread,
-    files: files?.length,
-    people: participants?.length,
+    files: unreadFiles,
   };
-  const close = () => setPanel(null);
+  const close = () => setOpen(false);
   const closeOnEscape = (event: React.KeyboardEvent) => {
     if (event.key === "Escape") close();
   };
@@ -134,12 +168,14 @@ export function RoomWorkspace({ id }: { id: string }) {
         panel={panel}
         onToggle={toggle}
         counts={counts}
+        panelOpen={open}
+        onTogglePanel={() => setOpen((current) => !current)}
       />
 
       <div className="flex min-h-0 flex-1">
         <div className="relative flex min-w-0 flex-1 flex-col">
           {/* `isolate` keeps the board's own very high z-indexes inside it, so
-              the sheet and the dock can sit above them. */}
+              the phone sheet can sit above them. */}
           <div className="isolate flex min-h-0 flex-1 flex-col">
             <BoardPanel
               roomId={room.id}
@@ -147,53 +183,85 @@ export function RoomWorkspace({ id }: { id: string }) {
               onStatusChange={handleStatusChange}
             />
           </div>
-          <RoomDock panel={panel} onToggle={toggle} counts={counts} />
         </div>
 
-        {/* Tablets and up: beside the board, which gives up the width. */}
-        {panel && (
+        {/* Tablets and up: beside the board, which gives up the width. Always
+            in the page, so the toggle's `aria-controls` points at something. */}
+        {wide && (
           <aside
+            id="room-panel"
             onKeyDown={closeOnEscape}
-            className="hidden w-80 shrink-0 border-s bg-card md:flex lg:w-[22.5rem] xl:w-[25rem]"
+            className={cn(
+              "hidden w-80 shrink-0 flex-col border-s bg-card lg:w-90",
+              open && "flex",
+            )}
           >
-            <PanelFrame title={d.room[panel]} onClose={close}>
-              <PanelBody panel={panel} roomId={room.id} />
-            </PanelFrame>
+            {open && (
+              <>
+                <div className="shrink-0 border-b p-3">
+                  <Tabs
+                    variant="fill"
+                    label={d.room.tabs}
+                    controls="room-panel-body"
+                    value={tab}
+                    onChange={(next) => setTab(next as RoomPanel)}
+                    items={ROOM_PANELS.map(({ id: panelId }) => ({
+                      id: panelId,
+                      label: d.room[panelId],
+                      // Chat and files report what arrived; people has no news.
+                      count: counts[panelId],
+                    }))}
+                  />
+                </div>
+                <div
+                  id="room-panel-body"
+                  role="tabpanel"
+                  aria-label={d.room[tab]}
+                  className="flex min-h-0 flex-1 flex-col"
+                >
+                  <PanelBody panel={tab} roomId={room.id} />
+                </div>
+              </>
+            )}
           </aside>
         )}
       </div>
 
       {/* Phones: a sheet rising over the board instead of squeezing it. */}
-      <div
-        aria-hidden="true"
-        onClick={close}
-        className={cn(
-          "fixed inset-0 z-40 bg-black/50 transition-opacity md:hidden",
-          panel ? "opacity-100" : "pointer-events-none opacity-0",
-        )}
-      />
-      <aside
-        role="dialog"
-        aria-modal={panel !== null}
-        aria-label={panel ? d.room[panel] : d.room.panels}
-        inert={panel === null}
-        onKeyDown={closeOnEscape}
-        className={cn(
-          "fixed inset-x-0 bottom-0 z-50 flex h-[85dvh] flex-col rounded-t-2xl border-t bg-card shadow-2xl",
-          "transition-transform duration-200 md:hidden",
-          panel ? "translate-y-0" : "translate-y-full",
-        )}
-      >
-        <span
-          aria-hidden="true"
-          className="mx-auto mt-2 h-1 w-10 shrink-0 rounded-full bg-border"
-        />
-        {panel && (
-          <PanelFrame title={d.room[panel]} onClose={close}>
-            <PanelBody panel={panel} roomId={room.id} />
-          </PanelFrame>
-        )}
-      </aside>
+      {!wide && (
+        <>
+          <div
+            aria-hidden="true"
+            onClick={close}
+            className={cn(
+              "fixed inset-0 z-40 bg-black/50 transition-opacity",
+              panel ? "opacity-100" : "pointer-events-none opacity-0",
+            )}
+          />
+          <aside
+            role="dialog"
+            aria-modal={panel !== null}
+            aria-label={panel ? d.room[panel] : d.room.panels}
+            inert={panel === null}
+            onKeyDown={closeOnEscape}
+            className={cn(
+              "fixed inset-x-0 bottom-0 z-50 flex h-[85dvh] flex-col rounded-t-2xl border-t bg-card shadow-2xl",
+              "transition-transform duration-200",
+              panel ? "translate-y-0" : "translate-y-full",
+            )}
+          >
+            <span
+              aria-hidden="true"
+              className="mx-auto mt-2 h-1 w-10 shrink-0 rounded-full bg-border"
+            />
+            {panel && (
+              <PanelFrame title={d.room[panel]} onClose={close}>
+                <PanelBody panel={panel} roomId={room.id} />
+              </PanelFrame>
+            )}
+          </aside>
+        </>
+      )}
     </div>
   );
 }

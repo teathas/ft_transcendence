@@ -279,6 +279,15 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
         });
       },
 
+      // The owner changed the room's settings, or deleted it.
+      "room:updated": () => {
+        void queryClient.invalidateQueries({ queryKey: queryKeys.rooms.all });
+      },
+      "room:deleted": ({ roomId }: { roomId: string }) => {
+        queryClient.removeQueries({ queryKey: queryKeys.rooms.detail(roomId) });
+        void queryClient.invalidateQueries({ queryKey: queryKeys.rooms.all });
+      },
+
       // ---- who is online (the server tells everyone when someone's status changes)
       "presence:update": ({
         userId,
@@ -307,6 +316,9 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
         });
         void queryClient.invalidateQueries({
           queryKey: queryKeys.users.detail(userId),
+        });
+        void queryClient.invalidateQueries({
+          queryKey: queryKeys.users.peer(userId),
         });
       },
     };

@@ -1,5 +1,8 @@
 import { z } from "zod";
 
+import { ACCENTS } from "@/components/theme/accent";
+import { locales } from "@/i18n/config";
+
 /**
  * Messages are dictionary keys, not sentences: `FieldError` translates them at
  * render, which is the only moment the active language is known. A key the
@@ -17,6 +20,11 @@ export const userSchema = z.object({
   // A path such as `/uploads/avatars/….png`, not a full URL.
   avatarUrl: z.string().nullable(),
   bio: z.string().nullable(),
+  // Empty means "follow the browser" and "the default colour".
+  language: z.enum(locales).nullish(),
+  accentColor: z.enum(ACCENTS).nullish(),
+  // Until it is true, nothing in the app opens (see TermsGate).
+  termsAccepted: z.boolean(),
   status: userStatusSchema,
   lastSeenAt: z.iso.datetime().nullable(),
   createdAt: z.iso.datetime(),
@@ -61,6 +69,7 @@ export const registerFormSchema = registerFieldsSchema.refine(
 );
 
 /** What actually goes to the backend — `confirmPassword` is dropped. */
-export const registerSchema = registerFieldsSchema.omit({
-  confirmPassword: true,
-});
+export const registerSchema = registerFieldsSchema
+  .omit({ confirmPassword: true })
+  // The box ticked on the form; the API refuses an account without it.
+  .extend({ acceptTerms: z.literal(true) });

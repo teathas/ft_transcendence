@@ -33,6 +33,14 @@ export const ar = {
     light: "فاتح",
     dark: "داكن",
     system: "النظام",
+    accent: "اللون",
+    accents: {
+      indigo: "نيلي",
+      blue: "أزرق",
+      teal: "أخضر مزرق",
+      rose: "وردي",
+      orange: "برتقالي",
+    },
   },
 
   nav: {
@@ -47,11 +55,16 @@ export const ar = {
     friends: "الأصدقاء",
     messages: "الرسائل",
     notifications: "الإشعارات",
-    recent: "الأحدث",
-    noRoomsYet: "لا توجد غرف بعد.",
+    unreadNotifications: "الإشعارات، غير المقروءة: {count}",
+    collapseSidebar: "طيّ الشريط الجانبي",
+    expandSidebar: "توسيع الشريط الجانبي",
     signedOut: "غير مسجَّل الدخول",
     noSession: "لا توجد جلسة",
     signOut: "تسجيل الخروج",
+    signOutConfirm: {
+      title: "تسجيل الخروج؟",
+      description: "ستحتاج إلى تسجيل الدخول مرة أخرى للوصول إلى غرفك.",
+    },
   },
 
   landing: {
@@ -307,6 +320,17 @@ export const ar = {
       created: "تم إنشاء الحساب. سجّل الدخول للمتابعة.",
       haveAccount: "لديك حساب بالفعل؟",
       signIn: "تسجيل الدخول",
+      acceptPrefix: "أوافق على",
+      termsLink: "شروط الخدمة",
+      acceptAnd: "و",
+      privacyLink: "سياسة الخصوصية",
+      termsRequired: "يجب قبول الشروط لإنشاء حساب.",
+    },
+    termsGate: {
+      title: "اقبل الشروط للمتابعة",
+      description:
+        "قبل استخدام Shared Room، يرجى قراءة شروط الخدمة وسياسة الخصوصية وقبولها.",
+      accept: "أوافق",
     },
     passwordStrength: {
       label: "قوة كلمة المرور",
@@ -333,16 +357,6 @@ export const ar = {
     metaDescription: "تصفّح غرفك التعاونية وصفِّها وافتحها.",
     title: "الغرف",
     subtitle: "تصفّح كل غرفة يمكنك الوصول إليها، أو ابدأ غرفتك الخاصة.",
-    kpis: {
-      total: "إجمالي الغرف",
-      totalHint: "في جميع المواد",
-      active: "نشطة",
-      activeHint: "{count} مؤرشفة",
-      owned: "غرفي",
-      ownedHint: "يمكنك أرشفتها",
-      participants: "المشاركون",
-      participantsHint: "المقاعد المشغولة الآن",
-    },
     toolbar: {
       searchPlaceholder: "ابحث عن غرفة أو رمز أو مادة…",
       searchLabel: "البحث عن غرفة",
@@ -351,12 +365,6 @@ export const ar = {
       tableView: "عرض الجدول",
       subject: "المادة",
       allSubjects: "كل المواد",
-      status: "الحالة",
-      anyStatus: "كل الحالات",
-      ownership: "الملكية",
-      everyonesRooms: "غرف الجميع",
-      roomsIOwn: "غرفي",
-      roomsIJoined: "الغرف التي انضممت إليها",
       sortBy: "الترتيب حسب",
       mostRecent: "الأحدث",
       nameAz: "الاسم (أ–ي)",
@@ -365,6 +373,12 @@ export const ar = {
     status: {
       active: "نشطة",
       archived: "مؤرشفة",
+    },
+    tabs: {
+      label: "قوائم الغرف",
+      all: "الكل",
+      owned: "غرفي",
+      archived: "المؤرشفة",
     },
     table: {
       room: "الغرفة",
@@ -375,13 +389,29 @@ export const ar = {
       status: "الحالة",
     },
     addMenu: {
-      addRoom: "إضافة غرفة",
-      more: "إجراءات أخرى",
       joinWithCode: "الانضمام برمز",
-      jumpTo: "انتقل إلى",
-      roomsIOwn: "غرفي",
-      roomsIJoined: "الغرف التي انضممت إليها",
-      archivedRooms: "الغرف المؤرشفة",
+    },
+    menu: {
+      label: "إجراءات {name}",
+      edit: "تعديل الغرفة",
+      delete: "حذف الغرفة",
+      leave: "مغادرة الغرفة",
+    },
+    edit: {
+      title: "تعديل الغرفة",
+      description: "غيّر الاسم أو الموضوع أو من يمكنه العثور عليها.",
+      submit: "حفظ التغييرات",
+    },
+    deleteConfirm: {
+      title: "هل تريد حذف هذه الغرفة؟",
+      description: "ستُحذف {name} مع رسائلها وملفاتها لدى الجميع ولا يمكن التراجع عن ذلك.",
+      confirm: "حذف الغرفة",
+    },
+    leaveConfirm: {
+      title: "هل تريد مغادرة هذه الغرفة؟",
+      description:
+        "لن تكون ضمن أعضاء {name} بعد الآن. يمكنك الانضمام إليها لاحقًا برمزها إن كانت خاصة.",
+      confirm: "مغادرة الغرفة",
     },
     create: {
       title: "إنشاء غرفة",
@@ -571,16 +601,6 @@ export const ar = {
     welcomeNamed: "أهلًا بعودتك يا {name}",
     subtitle: "إليك ما جرى في غرفك.",
     browseAll: "تصفّح كل الغرف",
-    stats: {
-      roomsJoined: "الغرف المنضم إليها",
-      roomsJoinedHint: "منذ تسجيلك",
-      collaborated: "وقت التعاون",
-      collaboratedHint: "خلال الأيام السبعة الماضية",
-      messagesSent: "الرسائل المرسلة",
-      messagesSentHint: "في جميع الغرف",
-      filesShared: "الملفات المشتركة",
-      filesSharedHint: "ملفات PDF وصور ومستندات",
-    },
     chart: {
       title: "الوقت على السبورة هذا الأسبوع",
       subtitle: "الدقائق التي قضيتها في الغرف، يومًا بيوم.",
@@ -591,16 +611,20 @@ export const ar = {
       minutes: "{minutes} د",
     },
     recentRooms: "الغرف الأخيرة",
+    friendsOnline: {
+      title: "الأصدقاء المتصلون",
+      count: "المتصلون الآن: {count}",
+      empty: "لا أحد من أصدقائك متصل الآن.",
+    },
   },
 
   publicProfile: {
     metaTitle: "الملف الشخصي",
     metaDescription: "عرض الملف الشخصي العام لعضو في Shared Room.",
-    back: "العودة إلى المستخدمين",
     backToPeople: "تصفح المستخدمين",
-    about: "نبذة",
     noBio: "لم يضف هذا الشخص نبذة بعد.",
-    activity: "النشاط المشترك",
+    friendsSince: "أصدقاء منذ {date}",
+    activity: "النشاط",
     stats: {
       roomsJoined: "الغرف المنضم إليها",
       roomsOwned: "الغرف المنشأة",
@@ -615,6 +639,12 @@ export const ar = {
   profile: {
     metaTitle: "الملف الشخصي",
     metaDescription: "أدِر صورتك وبيانات حسابك وكلمة مرورك.",
+    appearance: {
+      title: "المظهر",
+      description: "اختر السمة ولون التمييز. يتم حفظهما على هذا الجهاز.",
+      language: "اللغة",
+      languageAuto: "لغة المتصفح",
+    },
     header: {
       joined: "انضم في {date}",
       viewPublicProfile: "عرض ملفي العام",
@@ -706,7 +736,7 @@ export const ar = {
 
   room: {
     metaTitle: "غرفة",
-    back: "العودة إلى الغرف",
+    leave: "مغادرة الغرفة",
     copyCode: "نسخ رمز الغرفة",
     copyCodeTitle: "نسخ رمز الغرفة",
     copied: "تم نسخ الرمز",
@@ -732,6 +762,12 @@ export const ar = {
     fileFailed: "تعذّر إرسال الملف أو حفظه.",
     download: "تنزيل {name}",
     deleteFile: "حذف {name}",
+    deleteFileConfirm: {
+      title: "هل تريد حذف هذا الملف؟",
+      description:
+        "سيُحذف {name} لدى جميع أعضاء الغرفة ولا يمكن التراجع عن ذلك.",
+      confirm: "حذف الملف",
+    },
     fileTooBig: "{name} يتجاوز {size} ولم تتم مشاركته.",
     fileTypeNotAllowed: "نوع الملف {name} غير مدعوم.",
     uploadProgress: "تقدم رفع الملف",
@@ -743,7 +779,11 @@ export const ar = {
     copyInviteCode: "نسخ الرمز",
     openPanel: "فتح: {panel}",
     closePanel: "إغلاق اللوحة",
-    unreadChat: "{count} غير مقروءة",
+    unreadNews: "{count} جديد",
+    toast: {
+      message: "{name} أرسل رسالة",
+      file: "{name} شارك {file}",
+    },
     you: "أنت",
     messagesLabel: "الرسائل",
     chatEmpty: {
@@ -753,6 +793,7 @@ export const ar = {
     jumpToLatest: "آخر الرسائل",
     newMessages: "رسائل جديدة",
     sendHint: "Enter للإرسال · Shift+Enter لسطر جديد",
+    sendFailed: "لم تُرسل رسالتك. أُعيدت إلى الحقل: حاول مرة أخرى.",
     filesEmpty: {
       title: "لا ملفات بعد",
       body: "شارك الملاحظات أو التمارين أو الصور مع كل من في الغرفة.",
@@ -790,6 +831,7 @@ export const ar = {
     title: "الإشعارات",
     description: "تابع الأنشطة المتعلقة بحسابك وغرفك المشتركة.",
     markAllRead: "تحديد الكل كمقروء",
+    seeAll: "عرض كل الإشعارات",
     loading: "جارٍ تحميل الإشعارات…",
     loadError: "تعذر تحميل الإشعارات.",
     empty: "لا توجد إشعارات",

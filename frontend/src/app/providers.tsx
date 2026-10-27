@@ -7,6 +7,7 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { ConnectionBanner } from "@/components/layout/connection-banner";
 import { ToastProvider } from "@/components/ui/toast";
+import { PreferencesSync } from "@/features/profile/components/preferences-sync";
 import { RealtimeProvider } from "@/features/realtime/realtime-provider";
 import { routes } from "@/config/routes";
 import { useLocaleRouter } from "@/i18n/navigation";
@@ -49,6 +50,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
         }}
       >
         <ConnectionBanner />
+        <PreferencesSync />
         <RealtimeProvider>
           <ToastProvider>{children}</ToastProvider>
         </RealtimeProvider>

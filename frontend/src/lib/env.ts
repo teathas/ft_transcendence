@@ -40,6 +40,16 @@ const envSchema = z.object({
       error: "NEXT_PUBLIC_SYNC_URL must be a ws(s) URL",
     })
     .optional(),
+
+  /**
+   * tldraw's licence key. It is read by the browser, so it ends up in the
+   * bundle: that is how tldraw works, the key is tied to our domain. Empty
+   * means no licence (tldraw then shows its "made with tldraw" watermark).
+   */
+  NEXT_PUBLIC_TLDRAW_LICENSE_KEY: z
+    .string()
+    .optional()
+    .transform((key) => key || undefined),
 });
 
 // Next inlines `NEXT_PUBLIC_*` at build time, so each variable has to be read
@@ -50,6 +60,7 @@ const parsed = envSchema.safeParse({
   NEXT_PUBLIC_ENABLE_MOCKS: process.env.NEXT_PUBLIC_ENABLE_MOCKS,
   NEXT_PUBLIC_SYNC_MODE: process.env.NEXT_PUBLIC_SYNC_MODE,
   NEXT_PUBLIC_SYNC_URL: process.env.NEXT_PUBLIC_SYNC_URL,
+  NEXT_PUBLIC_TLDRAW_LICENSE_KEY: process.env.NEXT_PUBLIC_TLDRAW_LICENSE_KEY,
 });
 
 if (!parsed.success) {
@@ -72,6 +83,8 @@ export const env = {
   syncUrl:
     parsed.data.NEXT_PUBLIC_SYNC_URL ??
     parsed.data.NEXT_PUBLIC_API_URL.replace(/^http/, "ws"),
+  /** Passed to every <Tldraw>. */
+  tldrawLicenseKey: parsed.data.NEXT_PUBLIC_TLDRAW_LICENSE_KEY,
   isProduction: process.env.NODE_ENV === "production",
   isDevelopment: process.env.NODE_ENV === "development",
 } as const;

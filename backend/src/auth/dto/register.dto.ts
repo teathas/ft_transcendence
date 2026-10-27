@@ -1,4 +1,4 @@
-import { IsEmail, IsString, MinLength, MaxLength} from "class-validator";
+import { Equals, IsEmail, IsString, MinLength, MaxLength} from "class-validator";
 
 export class RegisterDto {
 	@IsEmail()
@@ -12,4 +12,7 @@ export class RegisterDto {
 	@IsString()
 	@MinLength(8)
 	password: string;
+	// Signing up is accepting the terms: no box ticked, no account.
+	@Equals(true)
+	acceptTerms: boolean;
 }

@@ -1,15 +1,14 @@
 "use client";
 
-import { useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useId, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowDown,
+  ArrowRight,
   LoaderCircle,
   MessageSquare,
-  SendHorizonal,
   Trash2,
 } from "lucide-react";
 
-import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSession } from "@/features/auth/hooks/use-auth";
@@ -23,10 +22,10 @@ import {
   flattenMessages,
   useDeleteMessage,
   useMessages,
-  useParticipants,
   useRoom,
   useSendMessage,
 } from "../../hooks/use-room";
+import { CHAT_NAME_CLASSES, chatColorIndex } from "../../colors";
 import type { Message } from "../../types";
 
 const MAX_LENGTH = 2000;
@@ -39,12 +38,15 @@ type Row =
   | { kind: "day"; key: string; label: string }
   | { kind: "message"; key: string; message: Message; heading: boolean };
 
+/** Your own message while it is sending counts as you: same group, same colour. */
+const authorOf = (message: Message, myId?: string) =>
+  message.authorId === "pending" && myId ? myId : message.authorId;
+
 export function ChatPanel({ roomId }: { roomId: string }) {
   const d = useDict();
   const { time, dayLabel } = useFormat();
   const { user } = useSession();
   const { data: room } = useRoom(roomId);
-  const { data: people } = useParticipants(roomId);
   const { data, isPending, hasNextPage, isFetchingNextPage, fetchNextPage } =
     useMessages(roomId);
   const messages = useMemo(() => flattenMessages(data), [data]);
@@ -60,10 +62,7 @@ export function ChatPanel({ roomId }: { roomId: string }) {
   const field = useRef<HTMLTextAreaElement>(null);
   const last = useRef({ newest: "", oldest: "", height: 0 });
 
-  const avatars = useMemo(
-    () => new Map(people?.map((person) => [person.id, person.avatarUrl])),
-    [people],
-  );
+  const hintId = useId();
 
   // The conversation as rows: a day label whenever the day changes, and a
   // heading (avatar, name, time) only where a different person starts talking
@@ -79,13 +78,13 @@ export function ChatPanel({ roomId }: { roomId: string }) {
 
       const heading =
         newDay ||
-        before.authorId !== message.authorId ||
+        authorOf(before, user?.id) !== authorOf(message, user?.id) ||
         new Date(message.sentAt).getTime() - new Date(before.sentAt).getTime() >
           GROUP_GAP_MS;
       result.push({ kind: "message", key: message.id, message, heading });
     });
     return result;
-  }, [messages, dayLabel]);
+  }, [messages, dayLabel, user?.id]);
 
   // Stay on the same line when older messages arrive above, follow the
   // conversation down when the reader is already at the bottom (or wrote it).
@@ -142,7 +141,10 @@ export function ChatPanel({ roomId }: { roomId: string }) {
     const body = draft.trim();
     if (!body) return;
     setDraft("");
-    send.mutate(body);
+    // A failed send puts the text back, unless something new was typed since.
+    send.mutate(body, {
+      onError: () => setDraft((current) => current || body),
+    });
   }
 
   const newest = messages.at(-1)?.id ?? null;
@@ -156,10 +158,11 @@ export function ChatPanel({ roomId }: { roomId: string }) {
           onScroll={onScroll}
           role="log"
           aria-label={d.room.messagesLabel}
-          className="h-full overflow-y-auto overscroll-contain py-3"
+          className="flex h-full flex-col overflow-y-auto overscroll-contain py-3"
         >
           {isPending ? (
-            <div className="flex flex-col gap-4 px-4">
+            // At the bottom too, so nothing jumps when the messages arrive.
+            <div className="mt-auto flex shrink-0 flex-col gap-4 px-4">
               {[0, 1, 2].map((index) => (
                 <div key={index} className="flex gap-3">
                   <Skeleton className="size-8 shrink-0 rounded-full" />
@@ -181,7 +184,9 @@ export function ChatPanel({ roomId }: { roomId: string }) {
               </p>
             </div>
           ) : (
-            <ul className="flex flex-col">
+            // `mt-auto` takes only free space: short chats sit above the
+            // input, long ones fill the box and scroll as before.
+            <ul className="mt-auto flex shrink-0 flex-col">
               {hasNextPage && (
                 <li className="flex justify-center pb-3">
                   <Button
@@ -219,10 +224,17 @@ export function ChatPanel({ roomId }: { roomId: string }) {
                     key={row.key}
                     message={row.message}
                     heading={row.heading}
-                    mine={row.message.authorId === user?.id}
-                    avatarUrl={avatars.get(row.message.authorId) ?? null}
+                    name={
+                      authorOf(row.message, user?.id) === user?.id
+                        ? (user?.username ?? row.message.authorUsername)
+                        : row.message.authorUsername
+                    }
+                    colorClass={
+                      CHAT_NAME_CLASSES[
+                        chatColorIndex(authorOf(row.message, user?.id)) - 1
+                      ]
+                    }
                     time={time(row.message.sentAt)}
-                    youLabel={d.room.you}
                     canDelete={
                       row.message.authorId === user?.id ||
                       room?.ownerId === user?.id
@@ -252,7 +264,7 @@ export function ChatPanel({ roomId }: { roomId: string }) {
       </div>
 
       <form onSubmit={submit} className="shrink-0 border-t p-3">
-        <div className="flex items-end gap-2 rounded-2xl border bg-background p-1.5 transition-shadow focus-within:ring-[3px] focus-within:ring-ring/30">
+        <div className="flex items-end gap-2">
           <textarea
             ref={field}
             value={draft}
@@ -272,22 +284,25 @@ export function ChatPanel({ roomId }: { roomId: string }) {
             }}
             placeholder={d.room.chatPlaceholder}
             aria-label={d.room.message}
-            className="max-h-32 min-h-9 flex-1 resize-none bg-transparent px-2.5 py-2 text-sm outline-none placeholder:text-muted-foreground"
+            aria-describedby={hintId}
+            className="max-h-32 min-h-11 flex-1 resize-none rounded-lg border bg-background px-3 py-2.5 text-sm leading-5 outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/35"
           />
           <Button
             type="submit"
             size="icon"
             aria-label={d.room.send}
             disabled={!draft.trim()}
-            className="rounded-full"
+            className="size-11 shrink-0"
           >
-            <SendHorizonal
-              className="size-4 rtl:rotate-180"
-              aria-hidden="true"
-            />
+            <ArrowRight className="size-4 rtl:rotate-180" aria-hidden="true" />
           </Button>
         </div>
-        <p className="mt-1.5 hidden px-2 text-[11px] text-muted-foreground lg:block">
+        {send.isError && (
+          <p role="alert" className="mt-2 text-xs text-destructive">
+            {d.room.sendFailed}
+          </p>
+        )}
+        <p id={hintId} className="sr-only">
           {d.room.sendHint}
         </p>
       </form>
@@ -314,75 +329,59 @@ export function ChatPanel({ roomId }: { roomId: string }) {
 function MessageRow({
   message,
   heading,
-  mine,
-  avatarUrl,
+  name,
+  colorClass,
   time,
-  youLabel,
   canDelete,
   deleteLabel,
   onDelete,
 }: {
   message: Message;
   heading: boolean;
-  mine: boolean;
-  avatarUrl: string | null;
+  name: string;
+  colorClass: string;
   time: string;
-  youLabel: string;
   canDelete: boolean;
   deleteLabel: string;
   onDelete: () => void;
 }) {
   const pending = message.id.startsWith("pending-");
+  const deletable = canDelete && !pending;
 
   return (
     <li
+      // Lines under a heading have no time of their own: hover shows it.
+      title={heading ? undefined : time}
       className={cn(
-        "group flex gap-3 px-4 py-0.5 transition-colors hover:bg-muted/50",
-        heading && "mt-2 pt-1",
+        "group relative px-4 py-0.5",
+        deletable && "pe-14",
+        heading && "mt-3",
         pending && "opacity-60",
       )}
     >
-      <span className="w-8 shrink-0 pt-0.5">
-        {heading ? (
-          <Avatar
-            src={avatarUrl}
-            name={message.authorUsername}
-            className="size-8"
-          />
-        ) : (
-          <span className="hidden pt-1 text-[10px] text-muted-foreground tabular-nums group-hover:block">
-            {time}
+      {heading && (
+        <p className="flex items-baseline gap-2">
+          <span
+            dir="auto"
+            className={cn("truncate text-sm font-semibold", colorClass)}
+          >
+            {name}
           </span>
-        )}
-      </span>
-
-      <div className="min-w-0 flex-1">
-        {heading && (
-          <p className="flex items-baseline gap-2">
-            <span
-              className={cn(
-                "truncate text-sm font-semibold",
-                mine && "text-primary",
-              )}
-            >
-              {mine ? youLabel : message.authorUsername}
-            </span>
-            <time
-              dateTime={message.sentAt}
-              className="shrink-0 text-[11px] text-muted-foreground"
-            >
-              {time}
-            </time>
-          </p>
-        )}
-        <p
-          dir="auto"
-          className="text-sm leading-relaxed [overflow-wrap:anywhere] whitespace-pre-wrap"
-        >
-          {linkify(message.body)}
+          <time
+            dateTime={message.sentAt}
+            className="shrink-0 text-[11px] text-muted-foreground"
+          >
+            {time}
+          </time>
         </p>
-      </div>
-      {canDelete && !pending && (
+      )}
+      <p
+        dir="auto"
+        className="text-sm leading-relaxed [overflow-wrap:anywhere] whitespace-pre-wrap"
+      >
+        {linkify(message.body)}
+      </p>
+      {deletable && (
         <Button
           type="button"
           variant="ghost"
@@ -390,9 +389,9 @@ function MessageRow({
           aria-label={deleteLabel}
           title={deleteLabel}
           onClick={onDelete}
-          className="size-8 shrink-0 text-muted-foreground hover:text-destructive"
+          className="absolute end-2 top-1/2 size-11 -translate-y-1/2 text-muted-foreground opacity-0 group-hover:opacity-100 hover:text-destructive focus-visible:opacity-100 [@media(hover:none)]:opacity-100"
         >
-          <Trash2 className="size-3.5" aria-hidden="true" />
+          <Trash2 className="size-4" aria-hidden="true" />
         </Button>
       )}
     </li>

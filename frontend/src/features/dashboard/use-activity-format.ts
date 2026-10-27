@@ -23,8 +23,8 @@ export function useActivityFormat() {
       weekday: "long",
       timeZone: "UTC",
     });
-    const narrow = new Intl.DateTimeFormat(locale, {
-      weekday: "narrow",
+    const short = new Intl.DateTimeFormat(locale, {
+      weekday: "short",
       timeZone: "UTC",
     });
     const dayOf = (weekday: number) =>
@@ -32,7 +32,7 @@ export function useActivityFormat() {
 
     return {
       weekdayLong: (weekday: number) => long.format(dayOf(weekday)),
-      weekdayNarrow: (weekday: number) => narrow.format(dayOf(weekday)),
+      weekdayShort: (weekday: number) => short.format(dayOf(weekday)),
       duration(minutes: number) {
         const hours = Math.floor(minutes / 60);
         const rest = minutes % 60;

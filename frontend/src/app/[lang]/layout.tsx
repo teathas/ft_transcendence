@@ -73,6 +73,13 @@ export default async function RootLayout({ children }: LayoutProps<"/[lang]">) {
       suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} ${notoArabic.variable} h-full antialiased`}
     >
+      <head>
+        {/* A plain blocking script on purpose: it must run before the first
+            paint so the saved sidebar and accent never flash. `next/script`
+            runs after it (see public/prefs-init.js). */}
+        {/* eslint-disable-next-line @next/next/no-sync-scripts */}
+        <script src="/prefs-init.js" />
+      </head>
       <body className="flex min-h-full flex-col">
         <I18nProvider locale={locale} dict={dict}>
           <Providers>{children}</Providers>

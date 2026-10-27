@@ -70,6 +70,7 @@ services:
       args:
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
         NEXT_PUBLIC_WS_URL: ${NEXT_PUBLIC_WS_URL}
+        NEXT_PUBLIC_TLDRAW_LICENSE_KEY: ${TLDRAW_API_KEY:-}
     restart: always
     environment:
       PORT: ${FRONTEND_PORT}

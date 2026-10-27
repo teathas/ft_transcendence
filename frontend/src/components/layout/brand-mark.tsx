@@ -34,11 +34,22 @@ export function BrandMark({ className }: { className?: string }) {
   );
 }
 
-export function BrandWordmark({ className }: { className?: string }) {
+export function BrandWordmark({
+  className,
+  labelClassName,
+}: {
+  className?: string;
+  labelClassName?: string;
+}) {
   return (
     <span className={cn("flex items-center gap-2.5", className)}>
       <BrandMark />
-      <span className="text-[0.95rem] font-semibold tracking-tight whitespace-nowrap">
+      <span
+        className={cn(
+          "text-[0.95rem] font-semibold tracking-tight whitespace-nowrap",
+          labelClassName,
+        )}
+      >
         Shared Room
       </span>
     </span>

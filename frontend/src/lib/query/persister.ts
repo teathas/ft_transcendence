@@ -9,7 +9,7 @@ export const CACHE_MAX_AGE = 24 * 60 * 60 * 1000;
  * an older version is then thrown away instead of being rendered, since cached
  * data is not re-validated against the schemas.
  */
-export const CACHE_VERSION = "1";
+export const CACHE_VERSION = "2";
 
 /** `localStorage`, or nothing where it does not exist or is blocked. */
 function storage() {

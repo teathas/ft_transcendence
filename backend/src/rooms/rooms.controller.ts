@@ -1,12 +1,13 @@
 
 import { FindRoomsQueryDto } from './dto/find-rooms-query.dto';
 
-import { Controller, Post, Patch,Body, Req, UseGuards, Param, Delete, Get, Query, ParseUUIDPipe, UploadedFile, UseInterceptors, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Body, Req, UseGuards, Param, Delete, Get, Patch, Query, ParseUUIDPipe, UploadedFile, UseInterceptors, HttpCode, HttpStatus } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { RoomsService } from './rooms.service';
 import { CreateRoomDto  } from './dto/create-room.dto';
 import { JoinRoomDto  } from './dto/join-room.dto';
+import { UpdateRoomDto } from './dto/update-room.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ListRoomsDto } from './dto/list-rooms.dto';
 import { JoinByCodeDto } from './dto/join-by-code.dto';
@@ -68,6 +69,17 @@ export class RoomsController {
     async detail(@Param('roomId', ParseUUIDPipe) roomId: string, @Req() req: any)
     {
         return this.queries.detail(req.user.sub, roomId);
+    }
+    @Patch(':roomId')
+    async update(@Param('roomId', ParseUUIDPipe) roomId: string, @Body() dto: UpdateRoomDto, @Req() req: any)
+    {
+        return this.roomsService.update(roomId, req.user.sub, dto);
+    }
+    @Delete(':roomId')
+    @HttpCode(HttpStatus.NO_CONTENT)
+    async remove(@Param('roomId', ParseUUIDPipe) roomId: string, @Req() req: any)
+    {
+        await this.roomsService.remove(roomId, req.user.sub);
     }
     @Get(':roomId/files')
     async listFiles(@Param('roomId', ParseUUIDPipe) roomId: string, @Req() req: any)

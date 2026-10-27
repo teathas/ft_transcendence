@@ -69,6 +69,7 @@ export class AuthService {
 					email: dto.email,
 					username: dto.username,
 					passwordHash,
+					termsAccepted: true,
 				},
 			});
 		} catch (error) {

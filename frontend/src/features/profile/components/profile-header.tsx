@@ -57,14 +57,14 @@ export function ProfileHeader({ user }: { user: User }) {
               className={cn(
                 "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium",
                 isOnline
-                  ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                  ? "bg-live/10 text-live"
                   : "bg-muted text-muted-foreground",
               )}
             >
               <span
                 className={cn(
                   "size-1.5 rounded-full",
-                  isOnline ? "bg-emerald-500" : "bg-muted-foreground/60",
+                  isOnline ? "bg-live" : "bg-muted-foreground/60",
                 )}
               />
               {isOnline ? d.room.online : d.room.offline}

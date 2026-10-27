@@ -4,6 +4,13 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
+ * The desktop sidebar's collapsed state. An inline script in the root layout
+ * copies the saved choice onto <html> before the first paint; only the
+ * element marked `data-rail` (the desktop aside) and its children react.
+ */
+@custom-variant rail-collapsed (&:where([data-sidebar="collapsed"] [data-rail], [data-sidebar="collapsed"] [data-rail] *));
+
+/*
  * Design tokens.
  *
  * `:root` / `.dark` hold the raw values; `@theme inline` exposes them to
@@ -22,37 +29,48 @@
     var(--font-geist-sans), var(--font-arabic), ui-sans-serif, system-ui,
     sans-serif;
 
-  --background: oklch(1 0 0);
+  --background: oklch(0.985 0.003 270);
   --foreground: oklch(0.21 0.03 264);
 
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.21 0.03 264);
 
-  --muted: oklch(0.968 0.007 248);
-  --muted-foreground: oklch(0.554 0.03 257);
+  --muted: oklch(0.955 0.008 265);
+  --muted-foreground: oklch(0.5 0.03 257);
 
-  --primary: oklch(0.585 0.2 277);
+  --primary: oklch(0.565 0.2 277);
   --primary-foreground: oklch(0.985 0 0);
 
-  --accent: oklch(0.968 0.007 248);
+  --accent: oklch(0.955 0.008 265);
   --accent-foreground: oklch(0.21 0.03 264);
 
   --destructive: oklch(0.577 0.245 27.3);
   --destructive-foreground: oklch(0.985 0 0);
 
-  --border: oklch(0.929 0.013 256);
-  --input: oklch(0.929 0.013 256);
-  --ring: oklch(0.585 0.2 277);
+  --border: oklch(0.9 0.012 265);
+  --input: oklch(0.9 0.012 265);
+  --ring: oklch(0.565 0.2 277);
 
   /* Chart hue, validated against the light surface (OKLCH L band 0.43–0.77). */
   --chart-1: oklch(0.585 0.2 277);
+
+  /* Presence green and per-user chat name colors (a user keeps one of 8). */
+  --live: oklch(0.54 0.15 152);
+  --chat-1: oklch(0.575 0.144 26.078);
+  --chat-2: oklch(0.565 0.142 82.662);
+  --chat-3: oklch(0.545 0.17 128.85);
+  --chat-4: oklch(0.53 0.153 163.223);
+  --chat-5: oklch(0.535 0.134 211.53);
+  --chat-6: oklch(0.56 0.143 254.624);
+  --chat-7: oklch(0.575 0.159 293.541);
+  --chat-8: oklch(0.58 0.17 349.761);
 }
 
 .dark {
-  --background: oklch(0.16 0.015 265);
+  --background: oklch(0.1879 0.0103 276.44);
   --foreground: oklch(0.97 0.005 255);
 
-  --card: oklch(0.21 0.02 265);
+  --card: oklch(0.2398 0.016 269);
   --card-foreground: oklch(0.97 0.005 255);
 
   --muted: oklch(0.27 0.02 265);
@@ -73,6 +91,63 @@
 
   /* Stepped down from --primary: the dark band tops out at L 0.67. */
   --chart-1: oklch(0.655 0.17 277);
+
+  --live: oklch(0.8003 0.1821 151.71);
+  --chat-1: oklch(0.7594 0.1435 26.08);
+  --chat-2: oklch(0.8615 0.1423 82.66);
+  --chat-3: oklch(0.8493 0.2073 128.85);
+  --chat-4: oklch(0.7729 0.1535 163.22);
+  --chat-5: oklch(0.7971 0.1339 211.53);
+  --chat-6: oklch(0.7137 0.1434 254.62);
+  --chat-7: oklch(0.709 0.1592 293.54);
+  --chat-8: oklch(0.7253 0.1752 349.76);
+}
+
+/*
+ * Accent palettes. Each one only moves the primary hue (buttons, links,
+ * focus rings, the chart). `data-accent` sits on <html> next to `.dark`, so
+ * the dark variants need the extra class to outrank the plain overrides.
+ * Light values keep white text above 4.5:1; keep that when adding one.
+ */
+:root[data-accent="blue"] {
+  --primary: oklch(0.55 0.15 250);
+  --ring: oklch(0.55 0.15 250);
+  --chart-1: oklch(0.56 0.15 250);
+}
+:root.dark[data-accent="blue"] {
+  --primary: oklch(0.72 0.15 250);
+  --ring: oklch(0.72 0.15 250);
+  --chart-1: oklch(0.66 0.15 250);
+}
+:root[data-accent="teal"] {
+  --primary: oklch(0.54 0.09 185);
+  --ring: oklch(0.54 0.09 185);
+  --chart-1: oklch(0.56 0.09 185);
+}
+:root.dark[data-accent="teal"] {
+  --primary: oklch(0.74 0.12 185);
+  --ring: oklch(0.74 0.12 185);
+  --chart-1: oklch(0.66 0.11 185);
+}
+:root[data-accent="rose"] {
+  --primary: oklch(0.565 0.2 10);
+  --ring: oklch(0.565 0.2 10);
+  --chart-1: oklch(0.585 0.2 10);
+}
+:root.dark[data-accent="rose"] {
+  --primary: oklch(0.72 0.15 10);
+  --ring: oklch(0.72 0.15 10);
+  --chart-1: oklch(0.66 0.15 10);
+}
+:root[data-accent="orange"] {
+  --primary: oklch(0.56 0.14 50);
+  --ring: oklch(0.56 0.14 50);
+  --chart-1: oklch(0.58 0.14 50);
+}
+:root.dark[data-accent="orange"] {
+  --primary: oklch(0.72 0.15 50);
+  --ring: oklch(0.72 0.15 50);
+  --chart-1: oklch(0.66 0.15 50);
 }
 
 /* Arabic first when the page is Arabic, so its own metrics set the rhythm. */
@@ -104,6 +179,15 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
   --color-chart-1: var(--chart-1);
+  --color-live: var(--live);
+  --color-chat-1: var(--chat-1);
+  --color-chat-2: var(--chat-2);
+  --color-chat-3: var(--chat-3);
+  --color-chat-4: var(--chat-4);
+  --color-chat-5: var(--chat-5);
+  --color-chat-6: var(--chat-6);
+  --color-chat-7: var(--chat-7);
+  --color-chat-8: var(--chat-8);
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -126,6 +210,10 @@
 
   :focus-visible {
     @apply outline-2 outline-offset-2 outline-ring;
+  }
+
+  ::selection {
+    @apply bg-primary/30;
   }
 }
 
