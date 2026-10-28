@@ -5,11 +5,10 @@
 ## Instructions
 ## Team Information
 
-| Login | Name | Role(s) | Responsibilities |
-|---|---|---|---|
-| aberkass | — | Product Owner, Backend Developer | Created and prioritized the product backlog. Built the backend for authentication, users, friendships and real-time presence. |
-| iel-fouh | — | Project Manager, Backend Developer | Organized the team meetings and tracked progress and deadlines. Built the backend for rooms, room chat and notifications. |
-| yolaoual | Yousoufou laouali | Tech Lead, Frontend Developer, Backend Developer | Guided the technical stack and reviewed Pull Requests for code quality and integration consistency. Built all frontend features and integrations, the secured public API and API-key management for external applications, plus the tldraw board synchronization server using a native WebSocket connection. |
+| Login | Role(s) | Responsibilities |
+|---|---|---|
+| aberkass | Product Owner, Backend Developer | Created and prioritized the product backlog. Built the backend for authentication, users, friendships and real-time presence. |
+
 ## Project Management
 
 - **Organization:** iel-fouh (PM) organized the team meetings and planning sessions. aberkass (PO) kept the product backlog.
@@ -289,6 +288,12 @@ erDiagram
 - **Users:** profile, avatar upload, password change, account deletion, user search.
 - **Friendships:** friend requests, friends list, notifications for friend events.
 - **Real-time:** Socket.IO gateway, presence service, user and room channels, WebSocket docs.
+
+### aben-hzz — Developer (DevOps)
+- **Docker:** Compose stack with nginx, frontend, backend and Postgres, plus two one-shot jobs (database migrations, TLS certificate). Multi-stage Dockerfiles running as non-root users. Named volumes for the database and uploads.
+- **One-command start:** Makefile (`make`, `up`, `down`, `logs`, `fclean`, `re`…) that refuses to start without a `.env` file.
+- **nginx:** single HTTPS entry point (self-signed certificate, TLS 1.2/1.3, HTTP → HTTPS redirect), routing to the frontend and backend, Socket.IO WebSocket proxying, security headers.
+- **Healthchecks:** for Postgres, backend, frontend and nginx, so services start only when their dependencies are ready. Private health endpoint for nginx.
 
 ### iel-fouh — Project Manager, Backend Developer
 - **Project management:** organized the team meetings and planning.

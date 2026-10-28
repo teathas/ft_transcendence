@@ -1,0 +1,159 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 720" width="1100" height="720" role="img" aria-label="Architecture of Shared Room: the browser reaches only nginx, through ports 80 and 443. On the private network ft_transcendence_default, nginx forwards pages to the frontend and API and WebSocket traffic to the backend; the frontend also calls the backend directly while rendering; only the backend and the one-shot migrate job reach Postgres. Named volumes hold the certificate, the uploads and the database.">
+<title>Shared Room architecture</title>
+<style>
+  svg { --raised:#FFFFFF; --surface:#F6F7F9; --ink:#141B2B; --muted:#566176; --line:#C9D0DA;
+        --edge:#C2410C; --app:#1D5AA6; --data:#6A3DAD; --job:#6A7385; --ok:#1D7C46;
+        --net-fill:#F4F7FB; --edge-fill:#F8E8E2; --app-fill:#E8EEF6; --data-fill:#F0ECF7; --vol-fill:#F2EEF8; --vol-top:#E1D8EF;
+        --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+        --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace; }
+  @media (prefers-color-scheme: dark) {
+    svg { --raised:#1A2232; --surface:#141B28; --ink:#E4E9F1; --muted:#9BA6B9; --line:#2D384B;
+          --edge:#F08046; --app:#78ACF5; --data:#B99AF3; --job:#8F99AB; --ok:#4CC488;
+          --net-fill:#1F293C; --edge-fill:#342D34; --app-fill:#233046; --data-fill:#2A2E45; --vol-fill:#282D43; --vol-top:#3A3A59; }
+  }
+  .bg { fill:var(--raised); }
+  .mk-edge { fill:var(--edge); } .mk-app { fill:var(--app); } .mk-data { fill:var(--data); } .mk-job { fill:var(--job); }
+  .z-host { fill:var(--surface); stroke:var(--line); stroke-width:1.5; }
+  .z-net { fill:var(--net-fill); stroke:var(--app); stroke-width:1.5; stroke-dasharray:7 5; }
+  .b-ext { fill:var(--raised); stroke:var(--ink); stroke-width:1.5; }
+  .b-edge { fill:var(--edge-fill); stroke:var(--edge); stroke-width:2; }
+  .b-app { fill:var(--app-fill); stroke:var(--app); stroke-width:1.6; }
+  .b-data { fill:var(--data-fill); stroke:var(--data); stroke-width:1.6; }
+  .b-job { fill:var(--raised); stroke:var(--job); stroke-width:1.5; stroke-dasharray:5 4; }
+  .b-inner { fill:var(--raised); stroke:var(--edge); stroke-width:1; }
+  .b-mount { fill:var(--raised); stroke:var(--job); stroke-width:1.3; stroke-dasharray:2 3; }
+  .b-port { fill:var(--edge); }
+  .vol-body { fill:var(--vol-fill); stroke:var(--data); stroke-width:1.5; }
+  .vol-top { fill:var(--vol-top); stroke:var(--data); stroke-width:1.5; }
+  .w-edge { stroke:var(--edge); stroke-width:2; fill:none; }
+  .w-app-d { stroke:var(--app); stroke-width:1.8; fill:none; stroke-dasharray:6 4; }
+  .w-data { stroke:var(--data); stroke-width:2; fill:none; }
+  .w-job { stroke:var(--job); stroke-width:1.5; fill:none; stroke-dasharray:5 4; }
+  .w-mount { stroke:var(--job); stroke-width:1.4; fill:none; stroke-dasharray:2 3; }
+  .d-ok { fill:var(--ok); }
+  text { fill:var(--ink); font-family:var(--sans); font-size:12.5px; }
+  .t-title { font-weight:700; font-size:15.5px; }
+  .t-sm { font-size:14px; }
+  .t-sub { fill:var(--muted); font-size:12px; }
+  .t-mono { font-family:var(--mono); font-size:11.5px; }
+  .t-zone { font-family:var(--mono); font-size:11px; font-weight:600; letter-spacing:.06em; fill:var(--muted); }
+  .t-port { font-family:var(--mono); font-size:12px; font-weight:600; fill:var(--raised); }
+  .t-lbl, .t-lbl-m { font-weight:600; font-size:12px; paint-order:stroke; stroke:var(--halo, var(--raised)); stroke-width:5px; stroke-linejoin:round; }
+  .t-lbl-m { font-family:var(--mono); font-weight:500; font-size:11.5px; }
+  .t-job { fill:var(--muted); font-size:11.5px; }
+  .t-xs { font-size:10.5px; }
+  .h-host { --halo:var(--surface); } .h-net { --halo:var(--net-fill); }
+  .t-leg { fill:var(--muted); font-size:12.5px; }
+</style>
+<defs><marker id="ah-edge" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path class="mk-edge" d="M0,0 L10,5 L0,10 z"/></marker><marker id="ah-app" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path class="mk-app" d="M0,0 L10,5 L0,10 z"/></marker><marker id="ah-data" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path class="mk-data" d="M0,0 L10,5 L0,10 z"/></marker><marker id="ah-job" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="mk-job" d="M0,0 L10,5 L0,10 z"/></marker></defs>
+<rect class="bg" x="0" y="0" width="1100" height="720"/>
+      <g class="h-host">
+        <rect class="z-host" x="8" y="8" width="1084" height="664" rx="16"/>
+        <text class="t-zone" x="28" y="36">HOST MACHINE</text>
+      </g>
+      <rect class="z-net" x="280" y="54" width="796" height="446" rx="14"/>
+      <text class="t-zone" x="300" y="80">NETWORK ft_transcendence_default · bridge · subnet from Docker's pool · DNS 127.0.0.11</text>
+      <rect class="b-ext" x="24" y="215" width="130" height="110" rx="10"/>
+      <text class="t-title" x="89" y="252" text-anchor="middle">Browser</text>
+      <text class="t-sub" x="89" y="274" text-anchor="middle">https://localhost</text>
+      <text class="t-sub" x="89" y="292" text-anchor="middle">outside Docker</text>
+      <g class="h-host">
+        <line class="w-edge" x1="154" y1="250" x2="318" y2="250" marker-end="url(#ah-edge)"/>
+        <line class="w-edge" x1="154" y1="302" x2="318" y2="302" marker-end="url(#ah-edge)"/>
+        <text class="t-lbl" x="200" y="243" text-anchor="middle">http → 301</text>
+        <text class="t-lbl" x="199" y="295" text-anchor="middle">https · TLS</text>
+      </g>
+      <rect class="b-port" x="257" y="239" width="46" height="22" rx="11"/>
+      <text class="t-port" x="280" y="254" text-anchor="middle">:80</text>
+      <rect class="b-port" x="252" y="291" width="56" height="22" rx="11"/>
+      <text class="t-port" x="280" y="306" text-anchor="middle">:443</text>
+      <rect class="b-edge" x="320" y="196" width="160" height="178" rx="10"/>
+      <circle class="d-ok" cx="464" cy="213" r="5"/>
+      <text class="t-title" x="336" y="223">nginx</text>
+      <text class="t-mono" x="336" y="243">:80 · :443</text>
+      <text class="t-sub" x="336" y="263">terminates TLS</text>
+      <text class="t-sub" x="336" y="281">routes by URL prefix</text>
+      <rect class="b-inner" x="332" y="300" width="136" height="62" rx="6"/>
+      <text class="t-mono" x="342" y="320">127.0.0.1:8080</text>
+      <text class="t-sub" x="342" y="337">/health for Docker</text>
+      <text class="t-sub" x="342" y="353">loopback only</text>
+      <rect class="b-app" x="620" y="106" width="180" height="104" rx="10"/>
+      <circle class="d-ok" cx="784" cy="123" r="5"/>
+      <text class="t-title" x="636" y="132">frontend</text>
+      <text class="t-mono" x="636" y="152">frontend:3000</text>
+      <text class="t-sub" x="636" y="172">Next.js standalone</text>
+      <text class="t-sub" x="636" y="192">runs as nextjs</text>
+      <rect class="b-app" x="620" y="286" width="180" height="118" rx="10"/>
+      <circle class="d-ok" cx="784" cy="303" r="5"/>
+      <text class="t-title" x="636" y="312">backend</text>
+      <text class="t-mono" x="636" y="332">backend:3001</text>
+      <text class="t-sub" x="636" y="352">NestJS + Prisma</text>
+      <text class="t-sub" x="636" y="372">runs as node</text>
+      <text class="t-mono" x="636" y="392">GET /health</text>
+      <rect class="b-data" x="890" y="286" width="170" height="118" rx="10"/>
+      <circle class="d-ok" cx="1044" cy="303" r="5"/>
+      <text class="t-title" x="906" y="312">pgdb</text>
+      <text class="t-mono" x="906" y="332">pgdb:5432</text>
+      <text class="t-sub" x="906" y="352">postgres:17-alpine</text>
+      <text class="t-sub" x="906" y="372">no published port</text>
+      <text class="t-mono" x="906" y="392">pg_isready</text>
+      <rect class="b-job" x="890" y="116" width="170" height="64" rx="10"/>
+      <text class="t-title" x="906" y="140">migrate</text>
+      <text class="t-job" x="1046" y="140" text-anchor="end">exit 0</text>
+      <text class="t-mono" x="906" y="164">prisma migrate deploy</text>
+      <rect class="b-job" x="320" y="414" width="120" height="56" rx="10"/>
+      <text class="t-title" x="334" y="437">certs</text>
+      <text class="t-job" x="428" y="437" text-anchor="end">exit 0</text>
+      <text class="t-sub" x="334" y="457">openssl, once</text>
+      <g class="h-net">
+        <path class="w-edge" d="M480,226 H548 V158 H618" marker-end="url(#ah-edge)"/>
+        <text class="t-lbl-m" x="556" y="198">/</text>
+        <text class="t-sub" x="568" y="198">pages</text>
+        <line class="w-edge" x1="480" y1="340" x2="618" y2="340" marker-end="url(#ah-edge)"/>
+        <text class="t-lbl-m" x="549" y="314" text-anchor="middle">/api/*</text>
+        <text class="t-lbl-m" x="549" y="331" text-anchor="middle">/socket.io/*</text>
+        <path class="w-app-d" d="M710,210 V284" marker-end="url(#ah-app)"/>
+        <text class="t-lbl" x="718" y="242">SSR fetch</text>
+        <text class="t-lbl-m" x="718" y="259">backend:3001</text>
+        <line class="w-data" x1="800" y1="345" x2="888" y2="345" marker-end="url(#ah-data)"/>
+        <text class="t-lbl" x="845" y="337" text-anchor="middle">SQL</text>
+        <path class="w-job" d="M975,180 V284" marker-end="url(#ah-job)"/>
+        <text class="t-lbl" x="983" y="228">applies</text>
+        <text class="t-lbl" x="983" y="244">schema</text>
+      </g>
+      <rect class="b-mount" x="18" y="392" width="244" height="86" rx="8"/>
+      <text class="t-zone" x="30" y="413">BIND MOUNTS · project folder</text>
+      <text class="t-mono" x="30" y="437">./nginx/conf.d → nginx</text>
+      <text class="t-mono" x="30" y="461">./nginx/cert/gen-cert.sh → certs</text>
+      <path class="w-mount" d="M262,432 H298 V352 H318" marker-end="url(#ah-job)"/>
+      <path class="w-mount" d="M262,456 H318" marker-end="url(#ah-job)"/>
+      <g class="h-host">
+        <path class="w-job" d="M360,470 V536" marker-end="url(#ah-job)"/>
+        <text class="t-lbl" x="368" y="512">writes</text>
+        <path class="w-mount" d="M464,374 V536" marker-end="url(#ah-job)"/>
+        <text class="t-lbl-m" x="472" y="512">reads :ro</text>
+        <path class="w-mount" d="M710,404 V536" marker-end="url(#ah-job)"/>
+        <path class="w-mount" d="M975,404 V536" marker-end="url(#ah-job)"/>
+      </g>
+      <text class="t-zone" x="28" y="566">NAMED VOLUMES</text>
+      <text class="t-sub" x="28" y="585">managed by Docker, on the host disk,</text>
+      <text class="t-sub" x="28" y="602">outlive every container</text>
+      <path class="vol-body" d="M320,548 V598 A80,9 0 0 0 480,598 V548"/>
+      <ellipse class="vol-top" cx="400" cy="548" rx="80" ry="9"/>
+      <text class="t-title t-sm" x="400" y="577" text-anchor="middle">certs</text>
+      <text class="t-mono" x="400" y="596" text-anchor="middle">cert.pem · key.pem</text>
+      <path class="vol-body" d="M620,548 V598 A90,9 0 0 0 800,598 V548"/>
+      <ellipse class="vol-top" cx="710" cy="548" rx="90" ry="9"/>
+      <text class="t-title t-sm" x="710" y="577" text-anchor="middle">uploads</text>
+      <text class="t-mono" x="710" y="596" text-anchor="middle">/app/uploads</text>
+      <path class="vol-body" d="M890,548 V598 A85,9 0 0 0 1060,598 V548"/>
+      <ellipse class="vol-top" cx="975" cy="548" rx="85" ry="9"/>
+      <text class="t-title t-sm" x="975" y="577" text-anchor="middle">pgdata</text>
+      <text class="t-mono t-xs" x="975" y="596" text-anchor="middle">/var/lib/postgresql/data</text>
+    
+  <rect class="b-edge" x="24" y="694" width="22" height="13" rx="3"/><text class="t-leg" x="54" y="705">entry point and its traffic</text>
+  <rect class="b-app" x="246" y="694" width="22" height="13" rx="3"/><text class="t-leg" x="276" y="705">application containers</text>
+  <rect class="b-data" x="446" y="694" width="22" height="13" rx="3"/><text class="t-leg" x="476" y="705">database and its traffic</text>
+  <rect class="b-job" x="660" y="694" width="22" height="13" rx="3"/><text class="t-leg" x="690" y="705">one-shot jobs and mounts</text>
+  <circle class="d-ok" cx="885" cy="700" r="5"/><text class="t-leg" x="898" y="705">healthcheck passing</text>
+</svg>
