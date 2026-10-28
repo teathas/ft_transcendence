@@ -12,6 +12,151 @@
 ## Project Management
 ## Technical Stack
 ## Database Schema
+
+PostgreSQL, managed with Prisma ORM. Source of truth: [backend/prisma/schema.prisma](backend/prisma/schema.prisma).
+
+```mermaid
+erDiagram
+    User ||--o{ Room : "owns"
+    User ||--o{ RoomMember : "is member"
+    Room ||--o{ RoomMember : "has members"
+    User ||--o{ Message : "writes"
+    Room ||--o{ Message : "contains"
+    Room ||--o{ RoomFile : "contains"
+    User |o--o{ RoomFile : "uploads"
+    User ||--o{ Friendship : "sends request"
+    User ||--o{ Friendship : "receives request"
+    User ||--o{ DirectMessage : "sends"
+    User ||--o{ DirectMessage : "receives"
+    User ||--o{ Notification : "receives"
+    User |o--o{ Notification : "triggers"
+    User ||--o{ ApiKey : "owns"
+    User ||--o{ RefreshSession : "has"
+
+    User {
+        String id PK "uuid"
+        String email UK
+        String username UK
+        String passwordHash "bcrypt"
+        String avatarUrl "nullable"
+        String bio "nullable"
+        String language "nullable: en, fr, ar"
+        String accentColor "nullable"
+        Boolean termsAccepted
+        UserStatus status "ONLINE | OFFLINE"
+        DateTime lastSeenAt "nullable"
+        DateTime createdAt
+        DateTime updatedAt
+    }
+    Room {
+        String id PK "uuid"
+        String name
+        String subject
+        Visibility visibility "PUBLIC | PRIVATE"
+        String inviteCode UK
+        String ownerId FK
+        DateTime createdAt
+        DateTime lastActiveAt
+        Json boardSnapshot "nullable, tldraw"
+        Int boardVersion
+        DateTime boardUpdatedAt "nullable"
+    }
+    RoomMember {
+        String userId PK, FK
+        String roomId PK, FK
+        DateTime joinedAt
+    }
+    Message {
+        String id PK "uuid"
+        String content
+        String userId FK
+        String roomId FK
+        DateTime createdAt
+    }
+    RoomFile {
+        String id PK "uuid"
+        String roomId FK
+        String uploaderId FK "nullable"
+        String name
+        String url
+        Int size
+        String mimeType
+        DateTime createdAt
+    }
+    Friendship {
+        String id PK "uuid"
+        String requesterId FK
+        String addresseeId FK
+        String lowId "unique pair with highId"
+        String highId
+        FriendshipStatus status "PENDING | ACCEPTED"
+        DateTime createdAt
+        DateTime updatedAt
+    }
+    DirectMessage {
+        String id PK "uuid"
+        String content
+        String senderId FK
+        String receiverId FK
+        DateTime createdAt
+        DateTime readAt "nullable"
+    }
+    Notification {
+        String id PK "uuid"
+        String recipientId FK
+        String actorId FK "nullable"
+        NotificationType type
+        Json data "nullable"
+        DateTime readAt "nullable"
+        DateTime createdAt
+    }
+    ApiKey {
+        String id PK "uuid"
+        String name
+        String prefix
+        String keyHash UK "SHA-256"
+        String userId FK
+        DateTime createdAt
+        DateTime lastUsedAt "nullable"
+        DateTime expiresAt "nullable"
+        DateTime revokedAt "nullable"
+    }
+    RefreshSession {
+        String id PK "uuid"
+        String tokenHash UK "SHA-256"
+        String userId FK
+        DateTime expiresAt
+        DateTime createdAt
+    }
+    RevokedToken {
+        String jti PK
+        DateTime expiresAt
+        DateTime createdAt
+    }
+```
+
+### Tables
+
+| Table | Purpose |
+|---|---|
+| `User` | Account, profile, preferences and online status. |
+| `Room` | A shared workspace. Holds the whiteboard snapshot. |
+| `RoomMember` | Join table: which users are in which rooms (many-to-many). |
+| `Message` | A chat message inside a room. |
+| `RoomFile` | A file shared in a room. Bytes are on disk; the row keeps the metadata. |
+| `Friendship` | A friend request (`PENDING`) or a friendship (`ACCEPTED`). |
+| `DirectMessage` | A private message between two friends. |
+| `Notification` | An event shown to a user (friend request, new message, file uploaded, ...). |
+| `ApiKey` | Key for the public API. Only its hash is stored. |
+| `RefreshSession` | A login session. Only the refresh token's hash is stored. |
+| `RevokedToken` | Access tokens that were logged out before they expired. |
+
+### Key design choices
+- **One friendship per pair:** `lowId` / `highId` hold the two user ids sorted. With `@@unique([lowId, highId])`, A→B and B→A can't both exist.
+- **No overwrite on the whiteboard:** `boardVersion` goes up on each save. A save based on an older version is refused.
+- **No secrets stored in plain text:** passwords use bcrypt; refresh tokens and API keys use SHA-256.
+- **Deleting a user:** their sessions, friendships, DMs and notifications are deleted (`onDelete: Cascade`). Their shared files stay in the room (`uploaderId` becomes `NULL`).
+
 ## Features List
 
 | Feature | Who | Description |
