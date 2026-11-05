@@ -340,6 +340,12 @@ erDiagram
 | API-key management frontend | yolaoual | Built the profile interface for creating, displaying once, copying, listing and revoking keys used by external applications. |
 | Public API backend | yolaoual | Built the documented external REST API with hashed API-key authentication, per-key rate limiting and five database-backed room endpoints. |
 | Board synchronization backend | yolaoual | Built the tldraw synchronization server over native `ws`, with JWT and room-membership checks, ordered updates and persistent versioned snapshots. This is separate from the Socket.IO real-time layer. |
+| Direct messages backend | yolaoual | Built the private messages between friends: sending, history, read status and message deletion. |
+| Direct message real-time events | aberkass | After a direct message is saved, `dm:message` is sent to the sender and the receiver. When messages are read, `dm:read` is sent to the sender. |
+| Room files backend | yolaoual, aberkass | yolaoual built the upload, list, download and delete endpoints and the file storage. aberkass added the file type validation and the real-time file events. |
+| Docker stack | aben-hzz | Docker Compose stack with nginx, frontend, backend and Postgres, plus one-shot jobs for database migrations and the TLS certificate. Multi-stage Dockerfiles running as non-root users. Named volumes for the database and uploads. |
+| One-command start | aben-hzz | Makefile (`make`, `up`, `down`, `logs`, `fclean`, `re`...) that refuses to start without a `.env` file. |
+| HTTPS entry point | aben-hzz | nginx with a self-signed certificate, TLS 1.2/1.3, HTTP to HTTPS redirect, routing to the frontend and backend, Socket.IO WebSocket proxying and security headers. |
 
 ## Modules
 
@@ -367,7 +373,7 @@ erDiagram
 
 **Allow users to interact (Major, 2 pts)**
 - Why: users must find each other and talk inside the app.
-- How: aberkass built the profile and friends systems (see above). iel-fouh built the room chat. yolaoual built the direct messages.
+- How: aberkass built the profile and friends systems (see above). iel-fouh built the room chat. yolaoual built the direct messages. aberkass added the real-time direct message events.
 
 **Notification system (Minor, 1 pt)**
 - Why: users need to know what happens without refreshing the page.
