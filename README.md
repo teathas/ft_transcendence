@@ -1,4 +1,4 @@
-*This project has been created as part of the 42 curriculum by aberkass, iel-fouh and yolaoual.*
+*This project has been created as part of the 42 curriculum by aberkass, iel-fouh, yolaoual, aben-hzz.*
 
 # Shared Room
 ## Description
@@ -12,9 +12,11 @@
 ## Project Management
 
 - **Organization:** iel-fouh (PM) organized the team meetings and planning sessions. aberkass (PO) kept the product backlog.
+- **Meetings:** the team met almost every day on Google Meet to share progress, blockers and next tasks.
 - **Task distribution:** the work was split by feature. Each feature was built on its own branch and merged with a pull request that another member reviewed.
-- **Tools:** GitHub (repository, branches, pull requests,Issues).
-- **Communication:** Discord .
+- **Tools:** GitHub (repository, branches, pull requests, issues, and a GitHub Project board for the backlog and task tracking).
+- **Communication:** Discord for daily discussion, meeting planning and team decisions.
+
 ## Technical Stack
 
 ### Frontend
@@ -220,19 +222,20 @@ erDiagram
 | API-key management frontend | yolaoual | Built the profile interface for creating, displaying once, copying, listing and revoking keys used by external applications. |
 | Public API backend | yolaoual | Built the documented external REST API with hashed API-key authentication, per-key rate limiting and five database-backed room endpoints. |
 | Board synchronization backend | yolaoual | Built the tldraw synchronization server over native `ws`, with JWT and room-membership checks, ordered updates and persistent versioned snapshots. This is separate from the Socket.IO real-time layer. |
+
 ## Modules
 
 | Module | Type | Points | Who |
 |---|---|---|---|
 | Standard user management and authentication | Major | 2 | aberkass |
 | Real-time features using WebSockets | Major | 2 | aberkass |
-| Allow users to interact with other users (chat, profile, friends) | Major | 2 | aberkass (profile, friends), iel-fouh (chat) |
+| Allow users to interact with other users (chat, profile, friends) | Major | 2 | aberkass (profile, friends), iel-fouh (room chat), yolaoual (direct messages) |
 | A complete notification system for all creation, update, and deletion actions | Minor | 1 | iel-fouh |
 | Advanced search functionality with filters, sorting, and pagination | Minor | 1 | iel-fouh |
 | Public API | Major | 2 | yolaoual |
 | Server-side rendering (SSR) | Minor | 1 | yolaoual |
 | Custom design system | Minor | 1 | yolaoual |
-| File upload and management | Minor | 1 | yolaoual (frontend), backend by a teammate |
+| File upload and management | Minor | 1 | yolaoual (frontend), yolaoual and aberkass (backend) |
 | Multiple languages | Minor | 1 | yolaoual |
 | Right-to-left language support | Minor | 1 | yolaoual |
 
@@ -250,11 +253,11 @@ erDiagram
 
 **Notification system (Minor, 1 pt)**
 - Why: users need to know what happens without refreshing the page.
-- How: a `NotificationsService` creates a notification for creation, update and deletion events (friend requests, direct messages, room activity, messages, mentions). Each notification is pushed to the user's private Socket.IO channel.  When the related thing is deleted, the notification is deleted too.
+- How: a `NotificationsService` creates a notification for creation, update and deletion events (friend requests, direct messages, room activity, messages, mentions). Each notification is pushed to the user's private Socket.IO channel. When the related thing is deleted, the notification is deleted too.
 
 **Advanced search (Minor, 1 pt)**
 - Why: with many rooms, users need to find the right one quickly.
-- How: `GET /rooms/public` accepts `name`, `subject`, `sort` and `page`/`limit`. The filters are case-insensitive, the response includes the total count and the number of pages. 
+- How: `GET /rooms/public` accepts `name`, `subject`, `sort` and `page`/`limit`. The filters are case-insensitive, the response includes the total count and the number of pages.
 
 **Public API (Major, 2 pts)**
 - Why: approved external applications need a secure, documented way to interact with Shared Room data without using a user's password or browser session.
@@ -270,7 +273,7 @@ erDiagram
 
 **File upload and management (Minor, 1 pt)**
 - Why: users need safe profile images and room file sharing with clear feedback throughout the upload lifecycle.
-- How: yolaoual built the frontend for avatar and room-file uploads, including type and size validation, drag and drop, image/PDF previews, image preparation, upload progress, authenticated downloads and confirmed deletion. A teammate implemented the backend validation, storage and access controls.
+- How: yolaoual built the frontend for avatar and room-file uploads, including type and size validation, drag and drop, image/PDF previews, image preparation, upload progress, authenticated downloads and confirmed deletion. yolaoual built the upload, list and delete endpoints. aberkass added the file type validation, the protected download (token and room membership check) and the real-time file events.
 
 **Multiple languages (Minor, 1 pt)**
 - Why: users should be able to use the entire application in their preferred language rather than only translating isolated pages.
@@ -302,14 +305,15 @@ erDiagram
 - **Mentions:** `@username` detection in messages and a dedicated notification.
 - **Notifications:** the notification service, its REST API and live events, categories, unread counts (global and per room), and the cleanup of notifications when requests, friendships or messages are removed.
 
-### yolaoual — Yousoufou laouali — Tech Lead, Frontend Developer, Backend Developer
+### yolaoual — Yousoufou Laouali — Tech Lead, Frontend Developer, Backend Developer
 - **Technical leadership:** guided the team’s stack and architecture choices across Next.js, React, TypeScript and Tailwind CSS on the frontend, and NestJS, Prisma and PostgreSQL on the backend.
-- **Code quality:** reviewed Pull Requests before integration, checking type safety, consistency with the shared architecture, readability, security-sensitive changes, build and lint results, and potential conflicts or regressions across frontend and backend work.
+- **Code quality:** reviewed pull requests before integration, checking type safety, consistency with the shared architecture, readability, security-sensitive changes, build and lint results, and potential conflicts or regressions across frontend and backend work.
 - **Frontend:** implemented all user-facing features and backend integrations, including authentication, rooms, the collaborative board, room and direct messages, friends, public profiles, file sharing, notifications, profile settings and API-key management.
 - **User experience:** built the responsive layouts, reusable UI components, form validation, loading and error states, themes, and English, French and Arabic localization with RTL support.
 - **Public API:** implemented the external REST API, secured it with hashed API keys and rate limiting, added Swagger documentation, and built the profile interface used to create and revoke API keys.
-- **File management:** implemented the frontend experience for avatar and room-file validation, previews, upload progress, authenticated downloads and deletion; the related backend work was completed by a teammate.
+- **File management:** implemented the frontend experience for avatar and room-file validation, previews, upload progress, authenticated downloads and deletion; the related backend work was completed by aberkass.
 - **Rendering:** implemented server-side rendering and dynamic metadata for public user profiles.
 - **Board synchronization:** implemented the tldraw sync server with the native `ws` library, JWT authentication, room-membership authorization, in-memory live rooms and persistent versioned snapshots.
 - **Scope clarification:** the board synchronization WebSocket is separate from the Socket.IO gateway; Socket.IO was not part of this contribution.
+
 ## Resources
