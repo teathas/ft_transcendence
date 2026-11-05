@@ -2,12 +2,35 @@
 
 # Shared Room
 ## Description
+
+**Shared Room** is a web application where students study together online. Users create or join *rooms*. A room is a shared virtual workspace with a whiteboard, a chat and shared files. Users can also see who is online, add friends and send them private messages.
+
+**Goal:** give a study group one place to work together in real time, without switching between many different tools.
+
+### Key features
+- **Accounts:** sign up and log in with email and password, profile page and avatar.
+- **Rooms:** public or private rooms, invite codes, search with filters, sorting and pagination.
+- **Collaborative whiteboard:** a tldraw board, synced live between room members and saved in the database.
+- **Room chat:** real-time messages with history and `@username` mentions.
+- **Files:** upload, preview, download and delete files inside a room (members only).
+- **Friends and direct messages:** friend requests, friends list and private messages with read status.
+- **Presence:** see which users are online and who is inside a room right now.
+- **Notifications:** live notifications for friend, message, room and file events.
+- **Languages:** English, French and Arabic, with full right-to-left layout for Arabic.
+- **Public API:** a documented REST API for external apps, protected by API keys and rate limiting.
+- **Security and deployment:** HTTPS through nginx, hashed passwords, and one-command start with Docker.
+
 ## Instructions
+
+
 ## Team Information
 
 | Login | Role(s) | Responsibilities |
 |---|---|---|
 | aberkass | Product Owner, Backend Developer | Created and prioritized the product backlog. Built the backend for authentication, users, friendships and real-time presence. |
+| iel-fouh | Project Manager, Backend Developer | Organized the team meetings and planning. Built rooms, room chat, mentions and the notification system. |
+| yolaoual | Tech Lead, Frontend Developer, Backend Developer | Guided the technical choices and reviewed pull requests. Built the frontend, the public API and the board synchronization server. |
+| aben-hzz | Developer (DevOps) | Built the Docker setup, nginx with HTTPS, the Makefile and the healthchecks. |
 
 ## Project Management
 
@@ -244,12 +267,12 @@ erDiagram
 - How: NestJS `users` and `friends` modules with Prisma. Profile update (`PATCH /users/me`), avatar upload (`POST /users/me/avatar`), public profile page (`GET /users/:id`), full friend request flow (`/friends/...`). Friends' online status comes from the real-time module.
 
 **Real-time features using WebSockets (Major, 2 pts)**
-- Why: whiteboard, chat, files and presence must update for every user at the same time.
-- How: a Socket.IO gateway in NestJS. The JWT is checked before a socket is accepted. Users and rooms each get their own channel, so events go only to the people who need them. Disconnects are handled gracefully: a 5-second grace period avoids "offline" flicker when a user refreshes the page, and room "left" events are sent when the last tab closes.
+- Why: chat, files and presence must update for every user at the same time.
+- How: a Socket.IO gateway in NestJS. The JWT is checked before a socket is accepted. Users and rooms each get their own channel, so events go only to the people who need them. Disconnects are handled gracefully: a 5-second grace period avoids "offline" flicker when a user refreshes the page, and room "left" events are sent when the last tab closes. The whiteboard uses a separate WebSocket server (see Board synchronization backend)
 
 **Allow users to interact (Major, 2 pts)**
 - Why: users must find each other and talk inside the app.
-- How: aberkass built the profile and friends systems (see above). iel-fouh built the chat.
+- How: aberkass built the profile and friends systems (see above). iel-fouh built the room chat. yolaoual built the direct messages.
 
 **Notification system (Minor, 1 pt)**
 - Why: users need to know what happens without refreshing the page.
