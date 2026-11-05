@@ -22,6 +22,68 @@
 
 ## Instructions
 
+### Prerequisites
+- Docker Engine with the Docker Compose plugin (the `docker compose` command)
+- `make`
+- Node.js, only to generate the `JWT_SECRET` (step 2)
+- Free ports on your machine: `80`, `443` and `5432`
+
+### Run the project
+
+1. Create your environment file:
+   ```bash
+   cp .env.example .env
+   ```
+
+2. Generate a secret and put it in `.env` as `JWT_SECRET`:
+   ```bash
+   node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+   ```
+
+3. Start everything with one command:
+   ```bash
+   make
+   ```
+   This builds the images and starts the containers. The first build takes several minutes. The database migrations run automatically.
+
+4. Check that the services are healthy:
+   ```bash
+   make ps
+   ```
+
+5. Open **https://localhost** in Google Chrome.
+   The HTTPS certificate is self-signed, so the browser shows a warning. Click "Advanced", then "Proceed to localhost". HTTP on port 80 redirects to HTTPS.
+
+### Environment variables
+The default values in `.env.example` work for a local run. Only `JWT_SECRET` must be changed.
+
+| Variable | Purpose |
+|---|---|
+| `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, `DATABASE_URL` | PostgreSQL access. |
+| `FRONTEND_PORT`, `BACKEND_PORT` | Internal ports of the frontend and backend containers. |
+| `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_WS_URL` | URLs the browser uses. They are built into the frontend image. |
+| `JWT_SECRET`, `JWT_EXPIRES_IN` | Signing key and lifetime (seconds) of the access token. |
+| `REFRESH_TOKEN_EXPIRES_IN`, `REFRESH_COOKIE_PATH` | Lifetime (seconds) and cookie path of the refresh session. |
+| `UPLOAD_DIR` | Folder where uploaded files are stored (a Docker volume). |
+| `TLDRAW_API_KEY` | Optional. Removes the "made with tldraw" watermark. |
+
+If you change a `NEXT_PUBLIC_*` variable or `TLDRAW_API_KEY`, rebuild with `make re`.
+
+### Useful commands
+
+| Command | What it does |
+|---|---|
+| `make` / `make build` | Build the images and start all containers. |
+| `make up` | Start the containers without rebuilding. |
+| `make stop` / `make start` | Stop or restart the containers. |
+| `make down` | Stop and remove the containers. Data is kept. |
+| `make logs` | Follow the logs of all services. |
+| `make ps` | Show the status of all containers. |
+| `make clean` | Remove the containers and orphans. |
+| `make fclean` | Remove containers, images **and volumes**. All data is deleted. |
+| `make re` | Full rebuild (`fclean` then build). |
+
+If `.env` is missing, every command that starts the project stops with an error message.
 
 ## Team Information
 
@@ -258,7 +320,7 @@ erDiagram
 | Public API | Major | 2 | yolaoual |
 | Server-side rendering (SSR) | Minor | 1 | yolaoual |
 | Custom design system | Minor | 1 | yolaoual |
-| File upload and management | Minor | 1 | yolaoual (frontend), yolaoual and aberkass (backend) |
+| File upload and management | Minor | 1 | yolaoual (frontend and backend), aberkass (file type validation, real-time file events) |
 | Multiple languages | Minor | 1 | yolaoual |
 | Right-to-left language support | Minor | 1 | yolaoual |
 
@@ -296,7 +358,7 @@ erDiagram
 
 **File upload and management (Minor, 1 pt)**
 - Why: users need safe profile images and room file sharing with clear feedback throughout the upload lifecycle.
-- How: yolaoual built the frontend for avatar and room-file uploads, including type and size validation, drag and drop, image/PDF previews, image preparation, upload progress, authenticated downloads and confirmed deletion. yolaoual built the upload, list and delete endpoints. aberkass added the file type validation, the protected download (token and room membership check) and the real-time file events.
+- How: yolaoual built the frontend for avatar and room-file uploads, including type and size validation, drag and drop, image/PDF previews, image preparation, upload progress, authenticated downloads and confirmed deletion. yolaoual built the upload, list, download and delete endpoints and the storage. aberkass added the file type validation, the protected download (token and room membership check) and the real-time file events.
 
 **Multiple languages (Minor, 1 pt)**
 - Why: users should be able to use the entire application in their preferred language rather than only translating isolated pages.
@@ -334,7 +396,7 @@ erDiagram
 - **Frontend:** implemented all user-facing features and backend integrations, including authentication, rooms, the collaborative board, room and direct messages, friends, public profiles, file sharing, notifications, profile settings and API-key management.
 - **User experience:** built the responsive layouts, reusable UI components, form validation, loading and error states, themes, and English, French and Arabic localization with RTL support.
 - **Public API:** implemented the external REST API, secured it with hashed API keys and rate limiting, added Swagger documentation, and built the profile interface used to create and revoke API keys.
-- **File management:** implemented the frontend experience for avatar and room-file validation, previews, upload progress, authenticated downloads and deletion; the related backend work was completed by aberkass.
+- **File management:** implemented the frontend experience for avatar and room-file validation, previews, upload progress, authenticated downloads and deletion; the related backend work (endpoints and storage) was also done by yolaoual. aberkass added the file type validation and the real-time file events.
 - **Rendering:** implemented server-side rendering and dynamic metadata for public user profiles.
 - **Board synchronization:** implemented the tldraw sync server with the native `ws` library, JWT authentication, room-membership authorization, in-memory live rooms and persistent versioned snapshots.
 - **Scope clarification:** the board synchronization WebSocket is separate from the Socket.IO gateway; Socket.IO was not part of this contribution.
