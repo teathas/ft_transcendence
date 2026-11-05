@@ -413,14 +413,8 @@ erDiagram
 - **Project:** wrote the product backlog, created the GitHub repository and the Discord server.
 - **Auth:** register, login, refresh, logout, JWT guard on every route, token revocation.
 - **Users:** profile, avatar upload, password change, account deletion, user search.
-- **Friendships:** friend requests, friends list, notifications for friend events.
+- **Friendships:** send, accept, reject, cancel and remove friend endpoints, friends list and pending request lists.
 - **Real-time:** Socket.IO gateway, presence service, user and room channels, WebSocket docs.
-
-### aben-hzz — Developer (DevOps)
-- **Docker:** Compose stack with nginx, frontend, backend and Postgres, plus two one-shot jobs (database migrations, TLS certificate). Multi-stage Dockerfiles running as non-root users. Named volumes for the database and uploads.
-- **One-command start:** Makefile (`make`, `up`, `down`, `logs`, `fclean`, `re`…) that refuses to start without a `.env` file.
-- **nginx:** single HTTPS entry point (self-signed certificate, TLS 1.2/1.3, HTTP → HTTPS redirect), routing to the frontend and backend, Socket.IO WebSocket proxying, security headers.
-- **Healthchecks:** for Postgres, backend, frontend and nginx, so services start only when their dependencies are ready. Private health endpoint for nginx.
 
 ### iel-fouh — Project Manager, Backend Developer
 - **Project management:** organized the team meetings and planning.
@@ -429,7 +423,7 @@ erDiagram
 - **Mentions:** `@username` detection in messages and a dedicated notification.
 - **Notifications:** the notification service, its REST API and live events, categories, unread counts (global and per room), and the cleanup of notifications when requests, friendships or messages are removed.
 
-### yolaoual — Yousoufou Laouali — Tech Lead, Frontend Developer, Backend Developer
+### yolaoual — Tech Lead, Frontend Developer, Backend Developer
 - **Technical leadership:** guided the team’s stack and architecture choices across Next.js, React, TypeScript and Tailwind CSS on the frontend, and NestJS, Prisma and PostgreSQL on the backend.
 - **Code quality:** reviewed pull requests before integration, checking type safety, consistency with the shared architecture, readability, security-sensitive changes, build and lint results, and potential conflicts or regressions across frontend and backend work.
 - **Frontend:** implemented all user-facing features and backend integrations, including authentication, rooms, the collaborative board, room and direct messages, friends, public profiles, file sharing, notifications, profile settings and API-key management.
@@ -439,5 +433,11 @@ erDiagram
 - **Rendering:** implemented server-side rendering and dynamic metadata for public user profiles.
 - **Board synchronization:** implemented the tldraw sync server with the native `ws` library, JWT authentication, room-membership authorization, in-memory live rooms and persistent versioned snapshots.
 - **Scope clarification:** the board synchronization WebSocket is separate from the Socket.IO gateway; Socket.IO was not part of this contribution.
+
+### aben-hzz — Developer (DevOps)
+- **Docker:** Compose stack with nginx, frontend, backend and Postgres, plus two one-shot jobs (database migrations, TLS certificate). Multi-stage Dockerfiles running as non-root users. Named volumes for the database and uploads.
+- **One-command start:** Makefile (`make`, `up`, `down`, `logs`, `fclean`, `re`…) that refuses to start without a `.env` file.
+- **nginx:** single HTTPS entry point (self-signed certificate, TLS 1.2/1.3, HTTP → HTTPS redirect), routing to the frontend and backend, Socket.IO WebSocket proxying, security headers.
+- **Healthchecks:** for Postgres, backend, frontend and nginx, so services start only when their dependencies are ready. Private health endpoint for nginx.
 
 ## Resources
