@@ -124,13 +124,46 @@ If `.env` is missing, every command that starts the project stops with an error 
 
 The frontend also includes a typed in-house internationalization layer. English is the source dictionary, while the French and Arabic dictionaries must satisfy the same TypeScript shape, making missing translations a build error.
 
-### Backend technologies used in yolaoual's features
+### Backend
 
 | Technology | Use in the project |
 |---|---|
-| **NestJS** | Public REST API modules, guards, DTO validation and Swagger/OpenAPI integration. |
-| **Prisma and PostgreSQL** | Database-backed public API operations, API-key records and versioned board snapshots. |
-| **`ws` and `@tldraw/sync-core`** | Native WebSocket upgrade handling, authenticated tldraw rooms, ordered changes and board persistence; separate from the Socket.IO gateway. |
+| **NestJS 12** | Modular REST API: controllers, services, guards, DTO validation and dependency injection. |
+| **TypeScript** | Type safety across the whole backend. |
+| **Prisma 7 and `@prisma/adapter-pg`** | ORM and migrations. Typed database access for every module. |
+| **Socket.IO (`@nestjs/websockets`, `@nestjs/platform-socket.io`)** | Real-time layer: user and room channels for messages, files, direct messages, notifications and presence. |
+| **`ws` and `@tldraw/sync-core`** | Separate native WebSocket server for the tldraw whiteboard: authenticated rooms, ordered changes and persistent snapshots. |
+| **`@nestjs/jwt`** | Short-lived JWT access tokens. |
+| **bcrypt** | Salted password hashing. |
+| **class-validator and class-transformer** | Server-side validation of every request body and query. |
+| **multer and `@nestjs/serve-static`** | File uploads (avatars and room files) and serving of avatars. |
+| **`@nestjs/throttler`** | Rate limiting. |
+| **`@nestjs/swagger`** | OpenAPI documentation of the public API. |
+| **Jest, Supertest and oxlint** | Unit and end-to-end tests, and linting. |
+
+### Database
+
+| Technology | Use in the project |
+|---|---|
+| **PostgreSQL 17** | Main database. All data lives here, except uploaded file bytes, which are stored on a Docker volume. |
+
+### Infrastructure
+
+| Technology | Use in the project |
+|---|---|
+| **Docker Compose** | The whole stack starts with one command: database, migrations, backend, frontend, certificate and nginx. Startup order is controlled with healthchecks. |
+| **nginx** | Single HTTPS entry point (TLS 1.2/1.3), HTTP to HTTPS redirect, routing to the frontend and backend, WebSocket proxying and security headers. |
+| **Makefile** | Short commands (`make`, `down`, `logs`, `re`...) around Docker Compose. |
+
+### Why these choices
+
+- **PostgreSQL:** our data is highly relational: users, rooms, memberships, friendships, messages and files. We need foreign keys, composite primary keys (`RoomMember`), unique constraints (one friendship per pair) and cascade deletes. A relational database enforces these rules itself.
+- **Prisma:** it gives a typed client and versioned migrations. The schema file is the single source of truth, and the `migrate` container applies it before the backend starts.
+- **NestJS:** it forces a clear structure (one module per feature), and gives guards, DTO validation and Swagger out of the box. This helped four developers work on one backend.
+- **Next.js:** it gives routing, layouts and server-side rendering, which we use for public profiles.
+- **Socket.IO for application events:** it has rooms and per-user channels, so an event goes only to the people who need it.
+- **`ws` for the whiteboard:** the tldraw sync library works over a native WebSocket, so the board has its own server, separate from Socket.IO.
+- **Docker and nginx:** one command to run everything, and one HTTPS entry point, so pages and API share one origin and no CORS is needed.
 
 ## Database Schema
 
