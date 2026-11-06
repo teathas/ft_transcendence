@@ -441,3 +441,35 @@ erDiagram
 - **Healthchecks:** for Postgres, backend, frontend and nginx, so services start only when their dependencies are ready. Private health endpoint for nginx.
 
 ## Resources
+
+### Documentation and references
+
+**Backend**
+- [NestJS documentation](https://docs.nestjs.com): modules, guards, pipes and validation, WebSocket gateways
+- [NestJS OpenAPI (Swagger)](https://docs.nestjs.com/openapi/introduction): documentation of the public API
+- [Prisma ORM documentation](https://www.prisma.io/docs): schema, relations, migrations and the client API
+- [Socket.IO documentation](https://socket.io/docs/v4/): rooms, events, connection and disconnection
+- [PostgreSQL documentation](https://www.postgresql.org/docs/): constraints, indexes and data types
+
+**Frontend**
+- [Next.js documentation](https://nextjs.org/docs): App Router, layouts and server-side rendering
+- [React documentation](https://react.dev): components, hooks and state
+- [Tailwind CSS documentation](https://tailwindcss.com/docs): utility classes and theming
+- [TanStack Query documentation](https://tanstack.com/query/latest/docs): caching, pagination and mutations
+- [tldraw sync documentation](https://tldraw.dev/docs/sync): the collaborative whiteboard
+- [MDN: CSS logical properties](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_logical_properties_and_values): right-to-left layout
+
+**DevOps**
+- [Docker Compose documentation](https://docs.docker.com/compose/): services, volumes, healthchecks
+- [nginx documentation](https://nginx.org/en/docs/): reverse proxy, TLS and WebSocket proxying
+
+### How AI was used
+
+We used AI assistants as a support tool. Every team member stayed responsible for their own code.
+
+- **Learning concepts:** AI explained new topics such as NestJS dependency injection, guards, Prisma relations, JWT refresh flows, Socket.IO rooms and Next.js server rendering.
+- **Debugging code:** AI helped find the cause of bugs from error messages and logs. We read, tested and changed its suggestions before merging them.
+- **Code review:** AI reviewed some of our code and pointed out possible bugs and security problems, for example missing membership checks or validation.
+- **Documentation:** AI helped fix the grammar and structure of this README. The content is based on our real code.
+
+**How we checked AI output:** we did not trust answers without testing them. We compared them with the official documentation, tested features manually (for example with two browsers for real-time events), and reviewed every pull request as a team. Every member can explain the code of their part.
