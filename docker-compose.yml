@@ -72,10 +72,18 @@ services:
     restart: always
     environment:
       PORT: ${FRONTEND_PORT}
-      INTERNAL_API_URL: http://backend:${BACKEND_PORT}
+      # Server rendering goes through nginx over HTTPS, like the browser.
+      INTERNAL_API_URL: https://nginx/api
+      # Lets Node trust the self-signed certificate nginx presents.
+      NODE_EXTRA_CA_CERTS: /certs/cert.pem
+    volumes:
+      # key.pem is root-only (0600), so the nextjs user can read only cert.pem.
+      - certs:/certs:ro
     depends_on:
       backend:
         condition: service_healthy
+      certs:
+        condition: service_completed_successfully
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:$${PORT}/ > /dev/null"]
       interval: 10s
