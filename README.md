@@ -415,6 +415,9 @@ erDiagram
 - **Users:** profile, avatar upload, password change, account deletion, user search.
 - **Friendships:** send, accept, reject, cancel and remove friend endpoints, friends list and pending request lists.
 - **Real-time:** Socket.IO gateway, presence service, user and room channels, WebSocket docs.
+- **Challenges:**
+  - *Duplicate friend requests:* if two users sent a request to each other at the same time, two rows could exist for the same pair. Checking first in the code was not safe, because both requests can pass the check before either is saved. We solved it in the database: the two user ids are stored sorted (`lowId`, `highId`) with a unique constraint on the pair. The second request fails with a Prisma `P2002` error, which we turn into a clear message ("Request already sent" or "This user already sent you a request").
+  - *Online status with many tabs:* at first, closing one tab marked the user offline even if another tab was still open, and refreshing a page showed a short "offline" flicker to friends. We now keep a set of open sockets per user, and only mark the user offline when the last socket closes. Even then, we wait 5 seconds, and a reconnect during that time cancels the offline update.
 
 ### iel-fouh — Project Manager, Backend Developer
 - **Project management:** organized the team meetings and planning.
