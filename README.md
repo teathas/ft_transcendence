@@ -26,7 +26,7 @@
 - Docker Engine with the Docker Compose plugin (the `docker compose` command)
 - `make`
 - Node.js, only to generate the `JWT_SECRET` (step 2)
-- Free ports on your machine: `80`, `443` and `5432`
+- Free ports on your machine: `80`, `443`
 
 ### Run the project
 
@@ -384,14 +384,11 @@ erDiagram
 **Notification system (Minor, 1 pt)**
 - Why: users need to know what happens without refreshing the page.
 - How: a `NotificationsService` creates a notification for creation, update and deletion events (friend requests, direct messages, room activity, messages). Each notification is pushed to the user's private Socket.IO channel. When the related thing is deleted, the notification is deleted too.
-- Challenge: a notification must stay correct when the thing it describes changes. If a friend request is cancelled, a friendship is removed, or a message is deleted, the matching notification would be wrong, so it is deleted too. Direct messages would also flood the user with one notification per message, so they are grouped into one unread notification per sender. 
-- Why Minor: it is one cross-cutting service (NotificationsService) with its own REST API and live events. It is valuable, but it builds on the Socket.IO layer already counted in the Major real-time module, so it does not add a new infrastructure layer.
 
 **Advanced search (Minor, 1 pt)**
 - Why: with many rooms, users need to find the right one quickly.
 - How: `GET /rooms/public` accepts `name`, `subject`, `sort` and `page`/`limit`. The filters are case-insensitive, the response includes the total count and the number of pages.
-- Challenge: the search must combine several optional filters (name, subject), sorting (newest, most active, most members) and pagination in one query, without loading every room. The filters are case-insensitive and are applied in the database. Because pagination hides the rest of the results, the response also returns the total count and the number of pages, so the frontend can build the page controls. Only public rooms are returned, so private rooms are never exposed through the search.
-- Why Minor: it is a single endpoint (GET /rooms/public) with filtering, sorting and pagination. It matches the module’s definition exactly, but it is limited to one resource (rooms).
+
 
 **Public API (Major, 2 pts)**
 - Why: approved external applications need a secure, documented way to interact with Shared Room data without using a user's password or browser session.
@@ -438,9 +435,6 @@ erDiagram
 - **Users:** profile, avatar upload, password change, account deletion, user search.
 - **Friendships:** send, accept, reject, cancel and remove friend endpoints, friends list and pending request lists.
 - **Real-time:** Socket.IO gateway, presence service, user and room channels, WebSocket docs.
-- **Challenges:**
-  - *Duplicate friend requests:* if two users sent a request to each other at the same time, two rows could exist for the same pair. Checking first in the code was not safe, because both requests can pass the check before either is saved. We solved it in the database: the two user ids are stored sorted (`lowId`, `highId`) with a unique constraint on the pair. The second request fails with a Prisma `P2002` error, which we turn into a clear message ("Request already sent" or "This user already sent you a request").
-  - *Online status with many tabs:* at first, closing one tab marked the user offline even if another tab was still open, and refreshing a page showed a short "offline" flicker to friends. We now keep a set of open sockets per user, and only mark the user offline when the last socket closes. Even then, we wait 5 seconds, and a reconnect during that time cancels the offline update.
 
 ### iel-fouh — Project Manager, Backend Developer
 - **Project management:** organized the team meetings and planning.
