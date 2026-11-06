@@ -464,7 +464,7 @@ erDiagram
 - **One-command start:** Makefile (`make`, `up`, `down`, `logs`, `fclean`, `re`…) that refuses to start without a `.env` file.
 - **nginx:** single HTTPS entry point (self-signed certificate, TLS 1.2/1.3, HTTP → HTTPS redirect), routing to the frontend and backend, Socket.IO WebSocket proxying, security headers.
 - **Healthchecks:** for Postgres, backend, frontend and nginx, so services start only when their dependencies are ready. Private health endpoint for nginx.
-
+![](assets/devops-architecture.svg)
 ## Resources
 
 ### Documentation and references
