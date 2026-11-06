@@ -446,7 +446,6 @@ erDiagram
 - **Project management:** organized the team meetings and planning.
 - **Rooms:** create a room, join, leave, public room list with filters, sorting and pagination.
 - **Room chat:** send and read messages with membership checks, delete by the author or the owner.
-- **Mentions:** `@username` detection in messages and a dedicated notification.
 - **Notifications:** the notification service, its REST API and live events, categories, unread counts (global and per room), and the cleanup of notifications when requests, friendships or messages are removed.
 
 ### yolaoual — Tech Lead, Frontend Developer, Backend Developer
