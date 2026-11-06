@@ -364,8 +364,9 @@ erDiagram
 | Use a framework for both the frontend and backend | Major | 2 | yolaoual (frontend: Next.js), aberkass, iel-fouh, yolaoual (backend: NestJS) |
 | Use an ORM for the database | Minor | 1 | aberkass, iel-fouh, yolaoual |
 | Real-time collaborative features | Minor | 1 | yolaoual |
+| Additional browsers | Minor | 1 | yolaoual |
 
-**Total: 19 points** (14 required + 5 bonus).
+**Total: 20 points** (14 required + 6 bonus).
 
 
 **Standard user management (Major, 2 pts)**
