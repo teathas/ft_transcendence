@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 720" width="1100" height="720" role="img" aria-label="Architecture of Shared Room: the browser reaches only nginx, through ports 80 and 443. On the private network ft_transcendence_default, nginx forwards pages to the frontend and API and WebSocket traffic to the backend; the frontend also calls the backend directly while rendering; only the backend and the one-shot migrate job reach Postgres. Named volumes hold the certificate, the uploads and the database.">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 720" width="1100" height="720" role="img" aria-label="Architecture of Shared Room: the browser reaches only nginx, through ports 80 and 443. On the private network ft_transcendence_default, nginx forwards pages to the frontend and API and WebSocket traffic to the backend; while rendering, the frontend also calls the API through nginx over HTTPS; only the backend and the one-shot migrate job reach Postgres. Named volumes hold the certificate, the uploads and the database.">
 <title>Shared Room architecture</title>
 <style>
   svg { --raised:#FFFFFF; --surface:#F6F7F9; --ink:#141B2B; --muted:#566176; --line:#C9D0DA;
@@ -112,9 +112,9 @@
         <line class="w-edge" x1="480" y1="340" x2="618" y2="340" marker-end="url(#ah-edge)"/>
         <text class="t-lbl-m" x="549" y="314" text-anchor="middle">/api/*</text>
         <text class="t-lbl-m" x="549" y="331" text-anchor="middle">/socket.io/*</text>
-        <path class="w-app-d" d="M710,210 V284" marker-end="url(#ah-app)"/>
-        <text class="t-lbl" x="718" y="242">SSR fetch</text>
-        <text class="t-lbl-m" x="718" y="259">backend:3001</text>
+        <path class="w-app-d" d="M660,210 V270 H482" marker-end="url(#ah-app)"/>
+        <text class="t-lbl" x="668" y="236">SSR fetch</text>
+        <text class="t-lbl-m" x="668" y="253">https://nginx/api</text>
         <line class="w-data" x1="800" y1="345" x2="888" y2="345" marker-end="url(#ah-data)"/>
         <text class="t-lbl" x="845" y="337" text-anchor="middle">SQL</text>
         <path class="w-job" d="M975,180 V284" marker-end="url(#ah-job)"/>

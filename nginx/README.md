@@ -1,7 +1,7 @@
 How Shared Room is containerised, wired together, exposed and health-checked: Docker Compose, the two application images,
 the nginx reverse proxy with TLS, the private network and the healthchecks.
 
-![](assets/devops-architecture.svg)
+![](../assets/devops-architecture.svg)
 
 *Containers are labelled with the name and port the configuration uses. Docker assigns the IP addresses itself and they can change
 after `make re`; nothing depends on them.*
@@ -59,14 +59,15 @@ nginx is the only entry point. Pages and API share one origin (`https://localhos
 
 ```text
 pgdb ─(healthy)─▶ migrate ─(exit 0)─▶ backend ─(healthy)─▶ frontend ─(healthy)─▶ nginx
-                                                                                   ▲
-certs ──────────────────────────────────(exit 0)───────────────────────────────────┘
+                                                              ▲                    ▲
+certs ─────────────────────────(exit 0)───────────────────────┴────────────────────┘
 ```
 
 Each arrow is a `depends_on` condition. A service isn't created until its dependency is healthy (`service_healthy`) or has exited
 with code 0 (`service_completed_successfully`). So the backend never runs against an unmigrated database, and nginx never starts
-without a certificate or before the apps can answer. If a condition is never met, `docker compose up` fails and names the
-dependency. These conditions only apply at startup.
+without a certificate or before the apps can answer. The frontend also waits for `certs`: Node loads the certificate it trusts
+for its HTTPS calls to nginx (`NODE_EXTRA_CA_CERTS`) only once, when it starts. If a condition is never met, `docker compose up`
+fails and names the dependency. These conditions only apply at startup.
 
 On `make down`, containers stop in reverse order. Both Node images use an exec-form `CMD`, so Node runs as PID 1 and receives
 `SIGTERM` directly, which lets the backend shut down cleanly.
@@ -82,12 +83,15 @@ On `make down`, containers stop in reverse order. Both Node images use an exec-f
   docker compose exec pgdb sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB"'
   ```
 
-- **Two ways to reach the backend:**
+- **Every call to the backend goes through nginx over HTTPS:**
 
   | Caller | URL | Path |
   |---|---|---|
   | browser | `https://localhost/api/…` | host :443 → nginx → `backend:3001` |
-  | Next.js server, while rendering | `http://backend:3001/…` | directly over the private network |
+  | Next.js server, while rendering | `https://nginx/api/…` | private network → nginx :443 → `backend:3001` |
+
+  The Next.js server trusts the self-signed certificate through `NODE_EXTRA_CA_CERTS=/certs/cert.pem`. It reads the
+  file from the `certs` volume, mounted read-only.
 
 Useful checks:
 
@@ -107,9 +111,11 @@ Configuration lives in `nginx/conf.d/` and is mounted read-only into the contain
 
 - Port 80 answers every request with `301` to the same URL over HTTPS.
 - Port 443 accepts **TLS 1.2 and 1.3 only**.
-- The certificate is self-signed for `localhost`: subject alternative names `DNS:localhost` and `IP:127.0.0.1`, RSA 2048, valid for
-  365 days. The `certs` service runs `nginx/cert/gen-cert.sh` at every start, writes it into the `certs` volume if it's missing
-  and skips otherwise, so the certificate stays the same across restarts.
+- The certificate is self-signed: subject alternative names `DNS:localhost` (the browser), `DNS:nginx` (the Next.js server)
+  and `IP:127.0.0.1`, RSA 2048, valid for 365 days. The `certs` service runs `nginx/cert/gen-cert.sh` at every start. It writes
+  the certificate into the `certs` volume if it's missing or lacks `DNS:nginx`, and skips otherwise, so the certificate stays
+  the same across restarts.
+- When `certs` writes a new certificate while nginx is already running, run `docker compose restart nginx` so nginx serves it.
 - To issue a new certificate: `make down`, `docker volume rm ft_transcendence_certs`, `make up`.
 
 ### Routing
@@ -171,7 +177,7 @@ restarted: `restart: always` reacts to a process exiting, not to its health.
 |---|---|---|
 | `pgdata` | `pgdb:/var/lib/postgresql/data` | the database |
 | `uploads` | `backend:/app/uploads` (`UPLOAD_DIR`) | avatars and room files |
-| `certs` | `certs:/certs`, `nginx:/etc/nginx/certs` (read-only) | `cert.pem`, `key.pem` |
+| `certs` | `certs:/certs`, `nginx:/etc/nginx/certs` (read-only), `frontend:/certs` (read-only) | `cert.pem`, `key.pem` (mode `0600`, root only, so the frontend's `nextjs` user can't read it) |
 
 The volumes survive `make down` and `make clean`. `make fclean` and `make re` delete them.
 
@@ -193,7 +199,8 @@ Copy `.env.example` to `.env`. `.env` is git-ignored.
 | `UPLOAD_DIR` | backend | build and start | also the mount point of the `uploads` volume |
 | `NODE_ENV` | backend | start | defaults to `production` (secure cookies) |
 
-`INTERNAL_API_URL` in `.env.example` documents the server-side URL. Compose sets it for the frontend from `BACKEND_PORT`.
+`INTERNAL_API_URL` in `.env.example` documents the server-side URL. Compose sets it for the frontend to `https://nginx/api`,
+together with `NODE_EXTRA_CA_CERTS`.
 
 ## Images
 
@@ -236,6 +243,7 @@ still contains the Prisma CLI and the migration files.
 | ports 80 or 443 already in use | stop the other web server on the host |
 | `502` after rebuilding a single service | nginx resolved the old container address at startup: `docker compose restart nginx` |
 | a new `NEXT_PUBLIC_*` value has no effect | it's baked in at build time: `make build` |
+| public profile pages fail with a certificate error (`ERR_TLS_CERT_ALTNAME_INVALID`, `DEPTH_ZERO_SELF_SIGNED_CERT`) in `docker compose logs frontend` | nginx still serves an old certificate: `docker compose restart nginx` |
 | backend can't log in to Postgres after changing the password | the existing volume keeps the old password: `ALTER USER` in `psql`, or `make fclean` (deletes data) |
 | `dependency failed to start` | `docker compose logs <service>` and `docker inspect --format '{{json .State.Health}}' <container>` |
 
