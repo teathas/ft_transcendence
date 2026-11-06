@@ -11,7 +11,7 @@
 - **Accounts:** sign up and log in with email and password, profile page and avatar.
 - **Rooms:** public or private rooms, invite codes, search with filters, sorting and pagination.
 - **Collaborative whiteboard:** a tldraw board, synced live between room members and saved in the database.
-- **Room chat:** real-time messages with history and `@username` mentions.
+- **Room chat:** real-time messages with history.
 - **Files:** upload, preview, download and delete files inside a room (members only).
 - **Friends and direct messages:** friend requests, friends list and private messages with read status.
 - **Presence:** see which users are online and who is inside a room right now.
@@ -90,7 +90,7 @@ If `.env` is missing, every command that starts the project stops with an error 
 | Login | Role(s) | Responsibilities |
 |---|---|---|
 | aberkass | Product Owner, Backend Developer | Created and prioritized the product backlog. Built the backend for authentication, users, friendships and real-time presence. |
-| iel-fouh | Project Manager, Backend Developer | Organized the team meetings and planning. Built rooms, room chat, mentions and the notification system. |
+| iel-fouh | Project Manager, Backend Developer | Organized the team meetings and planning. Built rooms, room chat and the notification system. |
 | yolaoual | Tech Lead, Frontend Developer, Backend Developer | Guided the technical choices and reviewed pull requests. Built the frontend, the public API and the board synchronization server. |
 | aben-hzz | Developer (DevOps) | Built the Docker setup, nginx with HTTPS, the Makefile and the healthchecks. |
 
@@ -324,9 +324,8 @@ erDiagram
 | Room presence | aberkass | Shows who is inside a room right now. Only room members can join a room channel. "Joined" / "left" events are sent once per user, even with many tabs open. |
 | Rooms: create, join and leave | iel-fouh | Create a room with a name, a subject and a visibility (public or private). The creator becomes the owner and the first member, and each room gets an invite code. Join a public room, or a private one with its invite code (also by code alone). Leaving a room passes the ownership to the oldest member if the owner leaves, and the other members are notified. |
 | Public room search | iel-fouh | List public rooms with a filter by name and subject, sorting (newest, most active, most members) and pagination with the total count. |
-| Shared rooms | iel-fouh | List the rooms that you and a friend both belong to. |
-| Room chat and mentions | iel-fouh | Real-time chat inside a room, only for members. History is saved and loaded page by page (cursor pagination). A member can delete their own message, and the room owner can delete any message. Writing `@username` in a message notifies that member: only room members can be mentioned, and a person gets one notification per message. |
-| Notifications | iel-fouh | Notification service with a REST API (list with pagination, filter by category, unread count, unread count per room, mark one or all as read, delete). Notifications are sent live over Socket.IO (new, updated, read, deleted). They are created for: friend request sent and accepted, direct message (grouped into one unread notification per sender), room created, member joined or left, new room message, mention... Cancelling a request, removing a friend or deleting a message removes the matching notification. |
+| Room chat | iel-fouh | Real-time chat inside a room, only for members. History is saved and loaded page by page (cursor pagination). A member can delete their own message, and the room owner can delete any message and a person gets one notification per message. |
+| Notifications | iel-fouh | Notification service with a REST API (list with pagination, filter by category, unread count, unread count per room, mark one or all as read, delete). Notifications are sent live over Socket.IO (new, updated, read, deleted). They are created for: friend request sent and accepted, direct message (grouped into one unread notification per sender), room created, member joined or left, new room message... Cancelling a request, removing a friend or deleting a message removes the matching notification. |
 | Frontend foundation and design system | yolaoual | Built the responsive application shell, navigation, reusable UI components, loading and error states, typed API layer, themes and shared design tokens. |
 | Authentication and account frontend | yolaoual | Built registration, login and logout screens, automatic access-token renewal, session recovery, password changes and confirmed account deletion flows. |
 | Rooms frontend | yolaoual | Built room discovery, creation, joining by code, filtering, sorting, pagination, details, membership actions and owner controls. |
@@ -383,11 +382,15 @@ erDiagram
 
 **Notification system (Minor, 1 pt)**
 - Why: users need to know what happens without refreshing the page.
-- How: a `NotificationsService` creates a notification for creation, update and deletion events (friend requests, direct messages, room activity, messages, mentions). Each notification is pushed to the user's private Socket.IO channel. When the related thing is deleted, the notification is deleted too.
+- How: a `NotificationsService` creates a notification for creation, update and deletion events (friend requests, direct messages, room activity, messages). Each notification is pushed to the user's private Socket.IO channel. When the related thing is deleted, the notification is deleted too.
+- Challenge: a notification must stay correct when the thing it describes changes. If a friend request is cancelled, a friendship is removed, or a message is deleted, the matching notification would be wrong, so it is deleted too. Direct messages would also flood the user with one notification per message, so they are grouped into one unread notification per sender. 
+- Why Minor: it is one cross-cutting service (NotificationsService) with its own REST API and live events. It is valuable, but it builds on the Socket.IO layer already counted in the Major real-time module, so it does not add a new infrastructure layer.
 
 **Advanced search (Minor, 1 pt)**
 - Why: with many rooms, users need to find the right one quickly.
 - How: `GET /rooms/public` accepts `name`, `subject`, `sort` and `page`/`limit`. The filters are case-insensitive, the response includes the total count and the number of pages.
+- Challenge: the search must combine several optional filters (name, subject), sorting (newest, most active, most members) and pagination in one query, without loading every room. The filters are case-insensitive and are applied in the database. Because pagination hides the rest of the results, the response also returns the total count and the number of pages, so the frontend can build the page controls. Only public rooms are returned, so private rooms are never exposed through the search.
+- Why Minor: it is a single endpoint (GET /rooms/public) with filtering, sorting and pagination. It matches the module’s definition exactly, but it is limited to one resource (rooms).
 
 **Public API (Major, 2 pts)**
 - Why: approved external applications need a secure, documented way to interact with Shared Room data without using a user's password or browser session.
@@ -440,7 +443,7 @@ erDiagram
 
 ### iel-fouh — Project Manager, Backend Developer
 - **Project management:** organized the team meetings and planning.
-- **Rooms:** create a room, join, leave, public room list with filters, sorting and pagination, shared rooms with a friend.
+- **Rooms:** create a room, join, leave, public room list with filters, sorting and pagination.
 - **Room chat:** send and read messages with membership checks, delete by the author or the owner.
 - **Mentions:** `@username` detection in messages and a dedicated notification.
 - **Notifications:** the notification service, its REST API and live events, categories, unread counts (global and per room), and the cleanup of notifications when requests, friendships or messages are removed.
