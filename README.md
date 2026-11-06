@@ -362,6 +362,12 @@ erDiagram
 | File upload and management | Minor | 1 | yolaoual (frontend and backend), aberkass (file type validation, real-time file events) |
 | Multiple languages | Minor | 1 | yolaoual |
 | Right-to-left language support | Minor | 1 | yolaoual |
+| Use a framework for both the frontend and backend | Major | 2 | yolaoual (frontend: Next.js), aberkass, iel-fouh, yolaoual (backend: NestJS) |
+| Use an ORM for the database | Minor | 1 | aberkass, iel-fouh, yolaoual |
+| Real-time collaborative features | Minor | 1 | yolaoual |
+
+**Total: 19 points** (14 required + 5 bonus).
+
 
 **Standard user management (Major, 2 pts)**
 - Why: Shared Room is a social workspace, so users need profiles, avatars and friends.
@@ -406,6 +412,19 @@ erDiagram
 **Right-to-left language support (Minor, 1 pt)**
 - Why: Arabic requires more than translated strings; navigation, alignment and reading direction must follow RTL conventions without damaging mixed-language content.
 - How: selecting Arabic switches the document to `dir="rtl"`, mirrors layouts through logical CSS utilities, prioritizes an Arabic font and protects mixed-direction usernames, filenames and codes with directional markup. Switching back to English or French restores the LTR layout.
+
+**Use a framework for both the frontend and backend (Major, 2 pts)**
+- Why: a project with many features and four developers needs a clear structure and shared conventions.
+- How: the frontend uses Next.js (React) with the App Router for routing, layouts and server rendering. The backend uses NestJS: each feature is its own module (`auth`, `users`, `friends`, `rooms`, `messages`, `notifications`, `realtime`, ...) with controllers, services, guards and DTO validation, connected by dependency injection.
+
+**Use an ORM for the database (Minor, 1 pt)**
+- Why: we wanted typed database access and safe, versioned changes to the schema.
+- How: Prisma ORM with PostgreSQL. The schema is defined in `backend/prisma/schema.prisma`, migrations are versioned in the repository and applied automatically by the `migrate` container at startup. All modules use the generated, typed Prisma client. Unique constraints (for example one friendship per pair) and cascade deletes are enforced by the database.
+
+**Real-time collaborative features (Minor, 1 pt)**
+- Why: the shared whiteboard is the center of Shared Room. Members must draw on the same board at the same time and see each other's changes instantly.
+- How: each room has a tldraw whiteboard. The frontend connects to a dedicated WebSocket server (native `ws`, separate from Socket.IO) on `/sync/<roomId>`. Before accepting the connection, the server checks the JWT, refuses revoked tokens, and checks that the user is a member of the room. The server keeps one live copy of each board in memory and sends every change to all connected members. The board is saved to the database at most every 3 seconds, and once more when the last member leaves, so it is restored on the next visit.
+
 
 ## Individual Contributions
 
