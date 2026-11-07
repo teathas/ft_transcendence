@@ -73,6 +73,10 @@ export function RoomMenu({
               <Trash2 className="size-4" aria-hidden="true" />
               {d.rooms.menu.delete}
             </DropdownItem>
+            <DropdownItem onClick={() => setAction("leave")}>
+            <LogOut className="size-4 rtl:rotate-180" aria-hidden="true" />
+            {d.rooms.menu.leave}
+          </DropdownItem>
           </>
         ) : (
           <DropdownItem onClick={() => setAction("leave")}>

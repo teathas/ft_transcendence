@@ -78,7 +78,7 @@ export function RoomHeader({
       >
         <ArrowLeft className="size-4 rtl:rotate-180" aria-hidden="true" />
         {/* Phones keep the arrow only; the words stay for screen readers. */}
-        <span className="max-sm:sr-only">{d.room.leave}</span>
+        <span className="max-sm:sr-only">{d.room.dashboard}</span>
       </Link>
 
       <div className="min-w-0 flex-1">

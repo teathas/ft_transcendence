@@ -19,4 +19,4 @@ openssl req -x509 -nodes -days 365 \
     -subj "/CN=localhost" \
     -addext "subjectAltName=DNS:localhost,DNS:nginx,IP:127.0.0.1"
 
-echo "certs: self-signed certificate generated for localhost and nginx"
+echo "certs: self-signed certificate generated for localhost, nginx"

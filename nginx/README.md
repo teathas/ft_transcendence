@@ -104,7 +104,8 @@ docker compose exec backend getent hosts pgdb        # <ip>  pgdb
 
 Configuration lives in `nginx/conf.d/` and is mounted read-only into the container:
 
-- `default.conf`: the public HTTP and HTTPS servers
+- `default.conf`: the public HTTP and HTTPS servers. It is mounted as a template: at startup the nginx image
+  replaces `${HTTP_PORT}` and `${HTTPS_PORT}` with the values from `.env`
 - `health.conf`: a private server used only by the healthcheck
 
 ### TLS
@@ -256,7 +257,7 @@ still contains the Prisma CLI and the migration files.
 | `.env.example` | configuration template |
 | `backend/Dockerfile`, `backend/.dockerignore` | API image, also used by `migrate` |
 | `frontend/Dockerfile`, `frontend/.dockerignore` | web image |
-| `nginx/conf.d/default.conf` | public servers: redirect, TLS, routing, headers |
+| `nginx/conf.d/default.conf` | public servers: redirect, TLS, routing, headers (ports from `.env`) |
 | `nginx/conf.d/health.conf` | private healthcheck server |
 | `nginx/cert/gen-cert.sh` | self-signed certificate |
 

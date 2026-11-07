@@ -755,6 +755,7 @@ export const fr = {
 
   room: {
     metaTitle: "Salle",
+    dashboard: "Retourner au dashboard",
     leave: "Quitter la salle",
     copyCode: "Copier le code de la salle",
     copyCodeTitle: "Copier le code de la salle",

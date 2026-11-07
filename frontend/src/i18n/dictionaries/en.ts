@@ -745,6 +745,7 @@ export const en = {
 
   room: {
     metaTitle: "Room",
+    dashboard: "Return to dashboard",
     leave: "Leave room",
     copyCode: "Copy room code",
     copyCodeTitle: "Copy the room code",

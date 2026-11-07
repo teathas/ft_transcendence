@@ -73,7 +73,7 @@ services:
     environment:
       PORT: ${FRONTEND_PORT}
       # Server rendering goes through nginx over HTTPS, like the browser.
-      INTERNAL_API_URL: https://nginx/api
+      INTERNAL_API_URL: https://nginx:${HTTPS_PORT}/api
       # Lets Node trust the self-signed certificate nginx presents.
       NODE_EXTRA_CA_CERTS: /certs/cert.pem
     volumes:
@@ -102,11 +102,16 @@ services:
 
   nginx:
     image: nginx:1.27-alpine
-    ports: 
-      - "80:80"
-      - "443:443"
+    ports:
+      - "${HTTP_PORT}:${HTTP_PORT}"
+      - "${HTTPS_PORT}:${HTTPS_PORT}"
+    environment:
+      # Substituted into nginx/conf.d/default.conf at startup.
+      HTTP_PORT: ${HTTP_PORT}
+      HTTPS_PORT: ${HTTPS_PORT}
     volumes:
-      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./nginx/conf.d/default.conf:/etc/nginx/templates/default.conf.template:ro
+      - ./nginx/conf.d/health.conf:/etc/nginx/conf.d/health.conf:ro
       - certs:/etc/nginx/certs:ro
     depends_on:
       frontend:
